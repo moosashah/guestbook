@@ -19,6 +19,11 @@ const PACKAGE_PRICE_IDS: Record<string, string> = {
   deluxe: "price_1RPrc0EQhBX7si7ZaPo9owOL",
 };
 
+const BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+    : "http://localhost:3000";
+
 export async function POST(req: NextRequest) {
   //TODO: Add authentication
   try {
@@ -44,9 +49,9 @@ export async function POST(req: NextRequest) {
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/create/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${BASE_URL}/create/success?session_id={CHECKOUT_SESSION_ID}`,
       //TODO: Create cancel url
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/create/cancel`,
+      cancel_url: `${BASE_URL}/create/cancel`,
     });
 
     return NextResponse.json({ sessionId: session.id });
