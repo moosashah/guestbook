@@ -36,9 +36,9 @@ export default function CreateEventPage() {
 
   const STRIPE_PUBLIC_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY;
   const BASE_URL =
-  process.env.NODE_ENV === "production"
-    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-    : "http://localhost:3000";
+    process.env.NODE_ENV === "production"
+      ? `https://${process.env.NEXT_PUBLIC_PROD_URL}`
+      : "http://localhost:3000";
 
   if (!STRIPE_PUBLIC_KEY) {
     throw new Error("STRIPE_PUBLIC_KEY is not set");
