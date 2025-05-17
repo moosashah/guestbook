@@ -15,16 +15,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DatePicker } from "@/components/date-picker";
 import { MediaRecorder } from "@/components/media-recorder";
 import { useForm } from "react-hook-form";
+import { loadStripe } from "@stripe/stripe-js";
 
 interface FormValues {
   name: string;
   description?: string;
   startDate?: Date;
   endDate?: Date;
+  package: string;
 }
 
 export default function CreateEventPage() {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mediaType, setMediaType] = useState<"video" | "audio">("video");
   const [welcomeMessageBlob, setWelcomeMessageBlob] = useState<Blob | null>(
@@ -32,6 +33,17 @@ export default function CreateEventPage() {
   );
   const [bannerImage, setBannerImage] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+
+  const STRIPE_PUBLIC_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY;
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
+  if (!STRIPE_PUBLIC_KEY) {
+    throw new Error("STRIPE_PUBLIC_KEY is not set");
+  }
+
+  if (!BASE_URL) {
+    throw new Error("BASE_URL is not set");
+  }
 
   const {
     register,
@@ -41,6 +53,13 @@ export default function CreateEventPage() {
     formState: { errors },
   } = useForm<FormValues>({
     mode: "onTouched",
+    defaultValues: {
+      package: "premium",
+      name: "my name",
+      description: "",
+      startDate: new Date(),
+      endDate: new Date(),
+    },
   });
 
   const startDate = watch("startDate");
@@ -55,22 +74,73 @@ export default function CreateEventPage() {
   };
 
   const onSubmit = async (data: FormValues) => {
+    console.log("[onSubmit] Starting form submission");
     setIsSubmitting(true);
     try {
       // In a real app, we would submit the form data to the server
       // and handle file uploads to S3
-      console.log("Form data to submit:", {
+      console.log("[onSubmit] Form data to submit:", {
         ...data,
-        welcomeMessageBlob,
-        mediaType,
-        bannerImage,
+        // welcomeMessageBlob,
+        // mediaType,
+        // bannerImage,
       });
-      // Simulate a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      // Redirect to the payment page
-      router.push("/create/payment");
+
+      console.log("[onSubmit] Creating event...");
+      const createEvent = await fetch(`${BASE_URL}/api/event`, {
+        method: "POST",
+        body: JSON.stringify({
+          ...data,
+        }),
+      });
+
+      if (!createEvent.ok) {
+        console.error(
+          "[onSubmit] Failed to create event:",
+          await createEvent.text()
+        );
+        throw new Error("Failed to create event");
+      }
+      console.log("[onSubmit] Event created successfully");
+
+      // Create Stripe Checkout session
+      console.log("[onSubmit] Creating Stripe checkout session...");
+      const checkoutSession = await fetch(`${BASE_URL}/api/checkout-session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          package: data.package,
+        }),
+      });
+
+      if (!checkoutSession.ok) {
+        console.error(
+          "[onSubmit] Failed to create checkout session:",
+          await checkoutSession.text()
+        );
+        throw new Error("Failed to create checkout session");
+      }
+
+      const { sessionId } = await checkoutSession.json();
+      console.log("[onSubmit] Got session ID:", sessionId);
+
+      if (!sessionId) {
+        console.error("[onSubmit] No session ID returned");
+        throw new Error("No session ID returned");
+      }
+
+      console.log("[onSubmit] Loading Stripe...");
+      const stripe = await loadStripe(STRIPE_PUBLIC_KEY);
+      if (!stripe) {
+        console.error("[onSubmit] Failed to load Stripe");
+        throw new Error("Failed to load Stripe");
+      }
+      console.log("[onSubmit] Redirecting to Stripe checkout...");
+      stripe.redirectToCheckout({ sessionId });
     } catch (error) {
-      console.error("Error creating event:", error);
+      console.error("[onSubmit] Error creating event:", error);
       setIsSubmitting(false);
     }
   };
@@ -257,7 +327,7 @@ export default function CreateEventPage() {
           <CardContent className="pt-6">
             <h2 className="text-xl font-semibold mb-4">Choose a Package</h2>
 
-            <RadioGroup defaultValue="basic" className="space-y-4">
+            <RadioGroup defaultValue="premium" className="space-y-4">
               <div className="flex items-center space-x-2 border rounded-lg p-4">
                 <RadioGroupItem value="basic" id="basic" />
                 <Label htmlFor="basic" className="flex-1 cursor-pointer">
@@ -266,10 +336,10 @@ export default function CreateEventPage() {
                     Up to 50 messages, 30 days active
                   </div>
                 </Label>
-                <div className="font-semibold">$29</div>
+                <div className="font-semibold">$100</div>
               </div>
 
-              <div className="flex items-center space-x-2 border rounded-lg p-4 border-primary bg-primary/5">
+              <div className="flex items-center space-x-2 border rounded-lg p-4">
                 <RadioGroupItem value="premium" id="premium" />
                 <Label htmlFor="premium" className="flex-1 cursor-pointer">
                   <div className="font-medium">Premium</div>
@@ -277,7 +347,7 @@ export default function CreateEventPage() {
                     Up to 200 messages, 90 days active
                   </div>
                 </Label>
-                <div className="font-semibold">$49</div>
+                <div className="font-semibold">$200</div>
               </div>
 
               <div className="flex items-center space-x-2 border rounded-lg p-4">
@@ -288,7 +358,7 @@ export default function CreateEventPage() {
                     Unlimited messages, 1 year active
                   </div>
                 </Label>
-                <div className="font-semibold">$99</div>
+                <div className="font-semibold">$500</div>
               </div>
             </RadioGroup>
           </CardContent>
