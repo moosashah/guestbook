@@ -9,8 +9,9 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
   padding-left:   env(safe-area-inset-left);
 }
+
 html, body {
-  background: #fff;               /* your page background */
+  background: #fff !important;
 }
 
 @layer base {

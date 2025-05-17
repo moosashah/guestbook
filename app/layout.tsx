@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,13 +32,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="bg-white">
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <meta
+          name="viewport"
+          content="width=device-width,initial-scale=1,viewport-fit=cover"
+        />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="white-translucent"
+        />
       </head>
-      <body className={inter.className}>
+      <body className={cn(inter.className, "bg-white")}>
         {children}
         <Toaster />
       </body>
