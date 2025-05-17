@@ -1,0 +1,166 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@theme inline {
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+
+  --radius: 0.5rem;
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-lg: calc(var(--radius) + 2px);
+
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+
+  --dark-background: 222.2 84% 4.9%;
+  --dark-foreground: 210 40% 98%;
+  --dark-card: 222.2 84% 4.9%;
+  --dark-card-foreground: 210 40% 98%;
+  --dark-popover: 222.2 84% 4.9%;
+  --dark-popover-foreground: 210 40% 98%;
+  --dark-primary: 210 40% 98%;
+  --dark-primary-foreground: 222.2 47.4% 11.2%;
+  --dark-secondary: 217.2 32.6% 17.5%;
+  --dark-secondary-foreground: 210 40% 98%;
+  --dark-muted: 217.2 32.6% 17.5%;
+  --dark-muted-foreground: 215 20.2% 65.1%;
+  --dark-accent: 217.2 32.6% 17.5%;
+  --dark-accent-foreground: 210 40% 98%;
+  --dark-destructive: 0 62.8% 30.6%;
+  --dark-destructive-foreground: 210 40% 98%;
+  --dark-border: 217.2 32.6% 17.5%;
+  --dark-input: 217.2 32.6% 17.5%;
+  --dark-ring: 212.7 26.8% 83.9%;
+
+  --color-scheme: light;
+
+  --border-color: hsl(var(--border));
+  --input-color: hsl(var(--input));
+  --ring-color: hsl(var(--ring));
+  --background-color: hsl(var(--background));
+  --foreground-color: hsl(var(--foreground));
+  --primary-color: hsl(var(--primary));
+  --primary-foreground-color: hsl(var(--primary-foreground));
+  --secondary-color: hsl(var(--secondary));
+  --secondary-foreground-color: hsl(var(--secondary-foreground));
+  --destructive-color: hsl(var(--destructive));
+  --destructive-foreground-color: hsl(var(--destructive-foreground));
+  --muted-color: hsl(var(--muted));
+  --muted-foreground-color: hsl(var(--muted-foreground));
+  --accent-color: hsl(var(--accent));
+  --accent-foreground-color: hsl(var(--accent-foreground));
+  --popover-color: hsl(var(--popover));
+  --popover-foreground-color: hsl(var(--popover-foreground));
+  --card-color: hsl(var(--card));
+  --card-foreground-color: hsl(var(--card-foreground));
+
+  --keyframes-accordion-down: {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  ;
+
+  --keyframes-accordion-up: {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+  ;
+
+  --animation-accordion-down: accordion-down 0.2s ease-out;
+  --animation-accordion-up: accordion-up 0.2s ease-out;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-scheme: dark;
+
+    --background: var(--dark-background);
+    --foreground: var(--dark-foreground);
+    --card: var(--dark-card);
+    --card-foreground: var(--dark-card-foreground);
+    --popover: var(--dark-popover);
+    --popover-foreground: var(--dark-popover-foreground);
+    --primary: var(--dark-primary);
+    --primary-foreground: var(--dark-primary-foreground);
+    --secondary: var(--dark-secondary);
+    --secondary-foreground: var(--dark-secondary-foreground);
+    --muted: var(--dark-muted);
+    --muted-foreground: var(--dark-muted-foreground);
+    --accent: var(--dark-accent);
+    --accent-foreground: var(--dark-accent-foreground);
+    --destructive: var(--dark-destructive);
+    --destructive-foreground: var(--dark-destructive-foreground);
+    --border: var(--dark-border);
+    --input: var(--dark-input);
+    --ring: var(--dark-ring);
+  }
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Custom badge styles for better readability */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  white-space: nowrap;
+}
+
+.badge-default {
+  background-color: rgb(209 250 229);
+  color: rgb(6 95 70);
+}
+
+.badge-secondary {
+  background-color: rgb(241 245 249);
+  color: rgb(51 65 85);
+}
