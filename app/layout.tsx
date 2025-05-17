@@ -1,12 +1,10 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { Toaster } from "@/components/ui/toaster"
-import ServiceWorkerRegistration from "./sw-register"
-import { InstallPrompt } from "@/components/install-prompt"
+import type React from "react";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Wedding Memories",
@@ -24,13 +22,13 @@ export const metadata: Metadata = {
     maximumScale: 1,
     userScalable: false,
   },
-    generator: 'v0.dev'
-}
+  generator: "v0.dev",
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="en">
@@ -38,11 +36,9 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body className={inter.className}>
-        <ServiceWorkerRegistration />
         {children}
-        <InstallPrompt />
         <Toaster />
       </body>
     </html>
-  )
+  );
 }

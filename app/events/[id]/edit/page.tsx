@@ -1,76 +1,77 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { ArrowLeft, Upload, Video, Mic } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DatePicker } from "@/components/date-picker"
-import { MediaRecorder } from "@/components/media-recorder"
-import { mockEvents } from "@/lib/mock-data"
-import { useToast } from "@/hooks/use-toast"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft, Upload, Video, Mic } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DatePicker } from "@/components/date-picker";
+import { MediaRecorder } from "@/components/media-recorder";
+import { mockEvents } from "@/lib/mock-data";
+import { toast } from "sonner";
 
 interface EditEventPageProps {
   params: {
-    id: string
-  }
+    id: string;
+  };
 }
 
 export default function EditEventPage({ params }: EditEventPageProps) {
-  const router = useRouter()
-  const { toast } = useToast()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [mediaType, setMediaType] = useState<"video" | "audio">("video")
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined)
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined)
-  const [welcomeMessageBlob, setWelcomeMessageBlob] = useState<Blob | null>(null)
-  const [bannerImage, setBannerImage] = useState<File | null>(null)
-  const [bannerPreview, setBannerPreview] = useState<string | null>(null)
-  const [name, setName] = useState("")
-  const [description, setDescription] = useState("")
-  const [packageType, setPackageType] = useState("basic")
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [mediaType, setMediaType] = useState<"video" | "audio">("video");
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [welcomeMessageBlob, setWelcomeMessageBlob] = useState<Blob | null>(
+    null
+  );
+  const [bannerImage, setBannerImage] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [packageType, setPackageType] = useState("basic");
 
   // Find the event by ID
-  const event = mockEvents.find((e) => e.id === params.id)
+  const event = mockEvents.find((e) => e.id === params.id);
 
   // Load event data
   useEffect(() => {
     if (event) {
-      setName(event.name)
-      setDescription(event.description || "")
-      setStartDate(new Date(event.submissionStartDate))
-      setEndDate(new Date(event.submissionEndDate))
-      setPackageType(event.package || "basic")
+      setName(event.name);
+      setDescription(event.description || "");
+      setStartDate(new Date(event.submissionStartDate));
+      setEndDate(new Date(event.submissionEndDate));
+      setPackageType(event.package || "basic");
 
       if (event.bannerImage) {
-        setBannerPreview(event.bannerImage)
+        setBannerPreview(event.bannerImage);
       }
 
       if (event.welcomeMessage) {
-        setMediaType(event.welcomeMessage.type)
+        setMediaType(event.welcomeMessage.type);
       }
     }
-  }, [event])
+  }, [event]);
 
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      setBannerImage(file)
-      setBannerPreview(URL.createObjectURL(file))
+      const file = e.target.files[0];
+      setBannerImage(file);
+      setBannerPreview(URL.createObjectURL(file));
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       // In a real app, we would submit the form data to the server
@@ -85,29 +86,22 @@ export default function EditEventPage({ params }: EditEventPageProps) {
         startDate,
         endDate,
         packageType,
-      })
+      });
 
       // Simulate a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      toast({
-        title: "Event updated",
-        description: "Your event has been updated successfully.",
-      })
+      toast.success("Event updated");
 
       // Redirect to the event details page
-      router.push(`/events/${params.id}`)
+      router.push(`/events/${params.id}`);
     } catch (error) {
-      console.error("Error updating event:", error)
-      setIsSubmitting(false)
+      console.error("Error updating event:", error);
+      setIsSubmitting(false);
 
-      toast({
-        title: "Error",
-        description: "Failed to update the event. Please try again.",
-        variant: "destructive",
-      })
+      toast.error("Failed to update the event. Please try again.");
     }
-  }
+  };
 
   if (!event) {
     return (
@@ -120,7 +114,7 @@ export default function EditEventPage({ params }: EditEventPageProps) {
           </Button>
         </Link>
       </div>
-    )
+    );
   }
 
   return (
@@ -177,8 +171,8 @@ export default function EditEventPage({ params }: EditEventPageProps) {
                       size="sm"
                       className="absolute bottom-2 right-2 bg-white/80"
                       onClick={() => {
-                        setBannerPreview(null)
-                        setBannerImage(null)
+                        setBannerPreview(null);
+                        setBannerImage(null);
                       }}
                     >
                       Change Image
@@ -187,8 +181,16 @@ export default function EditEventPage({ params }: EditEventPageProps) {
                 ) : (
                   <div className="border-2 border-dashed rounded-lg p-6 text-center">
                     <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground mb-2">Drag and drop an image, or click to browse</p>
-                    <Input id="banner" type="file" accept="image/*" className="hidden" onChange={handleBannerChange} />
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Drag and drop an image, or click to browse
+                    </p>
+                    <Input
+                      id="banner"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleBannerChange}
+                    />
                     <Button
                       type="button"
                       variant="outline"
@@ -208,10 +210,16 @@ export default function EditEventPage({ params }: EditEventPageProps) {
           <CardContent className="pt-6">
             <h2 className="text-xl font-semibold mb-4">Welcome Message</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Record a welcome message for your guests. This will be shown when they scan the QR code.
+              Record a welcome message for your guests. This will be shown when
+              they scan the QR code.
             </p>
 
-            <Tabs defaultValue={mediaType} onValueChange={(value) => setMediaType(value as "video" | "audio")}>
+            <Tabs
+              defaultValue={mediaType}
+              onValueChange={(value) =>
+                setMediaType(value as "video" | "audio")
+              }
+            >
               <TabsList className="mb-4 border">
                 <TabsTrigger value="video">
                   <Video className="mr-2 h-4 w-4" />
@@ -224,21 +232,35 @@ export default function EditEventPage({ params }: EditEventPageProps) {
               </TabsList>
 
               <TabsContent value="video">
-                <MediaRecorder type="video" onRecordingComplete={(blob) => setWelcomeMessageBlob(blob)} />
-                {event.welcomeMessage?.type === "video" && !welcomeMessageBlob && (
-                  <div className="mt-4 p-3 bg-muted rounded-md text-sm">
-                    <p>Current welcome video is already uploaded. Record a new one to replace it.</p>
-                  </div>
-                )}
+                <MediaRecorder
+                  type="video"
+                  onRecordingComplete={(blob) => setWelcomeMessageBlob(blob)}
+                />
+                {event.welcomeMessage?.type === "video" &&
+                  !welcomeMessageBlob && (
+                    <div className="mt-4 p-3 bg-muted rounded-md text-sm">
+                      <p>
+                        Current welcome video is already uploaded. Record a new
+                        one to replace it.
+                      </p>
+                    </div>
+                  )}
               </TabsContent>
 
               <TabsContent value="audio">
-                <MediaRecorder type="audio" onRecordingComplete={(blob) => setWelcomeMessageBlob(blob)} />
-                {event.welcomeMessage?.type === "audio" && !welcomeMessageBlob && (
-                  <div className="mt-4 p-3 bg-muted rounded-md text-sm">
-                    <p>Current welcome audio is already uploaded. Record a new one to replace it.</p>
-                  </div>
-                )}
+                <MediaRecorder
+                  type="audio"
+                  onRecordingComplete={(blob) => setWelcomeMessageBlob(blob)}
+                />
+                {event.welcomeMessage?.type === "audio" &&
+                  !welcomeMessageBlob && (
+                    <div className="mt-4 p-3 bg-muted rounded-md text-sm">
+                      <p>
+                        Current welcome audio is already uploaded. Record a new
+                        one to replace it.
+                      </p>
+                    </div>
+                  )}
               </TabsContent>
             </Tabs>
           </CardContent>
@@ -246,7 +268,9 @@ export default function EditEventPage({ params }: EditEventPageProps) {
 
         <Card>
           <CardContent className="pt-6">
-            <h2 className="text-xl font-semibold mb-4">Message Submission Period</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              Message Submission Period
+            </h2>
             <p className="text-sm text-muted-foreground mb-4">
               Set the time period during which guests can submit messages
             </p>
@@ -254,12 +278,20 @@ export default function EditEventPage({ params }: EditEventPageProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label>Start Date</Label>
-                <DatePicker date={startDate} setDate={setStartDate} className="w-full" />
+                <DatePicker
+                  date={startDate}
+                  setDate={setStartDate}
+                  className="w-full"
+                />
               </div>
 
               <div className="space-y-2">
                 <Label>End Date</Label>
-                <DatePicker date={endDate} setDate={setEndDate} className="w-full" />
+                <DatePicker
+                  date={endDate}
+                  setDate={setEndDate}
+                  className="w-full"
+                />
               </div>
             </div>
           </CardContent>
@@ -269,12 +301,18 @@ export default function EditEventPage({ params }: EditEventPageProps) {
           <CardContent className="pt-6">
             <h2 className="text-xl font-semibold mb-4">Package</h2>
 
-            <RadioGroup value={packageType} onValueChange={setPackageType} className="space-y-4">
+            <RadioGroup
+              value={packageType}
+              onValueChange={setPackageType}
+              className="space-y-4"
+            >
               <div className="flex items-center space-x-2 border rounded-lg p-4">
                 <RadioGroupItem value="basic" id="basic" />
                 <Label htmlFor="basic" className="flex-1 cursor-pointer">
                   <div className="font-medium">Basic</div>
-                  <div className="text-sm text-muted-foreground">Up to 50 messages, 30 days active</div>
+                  <div className="text-sm text-muted-foreground">
+                    Up to 50 messages, 30 days active
+                  </div>
                 </Label>
                 <div className="font-semibold">$29</div>
               </div>
@@ -283,7 +321,9 @@ export default function EditEventPage({ params }: EditEventPageProps) {
                 <RadioGroupItem value="premium" id="premium" />
                 <Label htmlFor="premium" className="flex-1 cursor-pointer">
                   <div className="font-medium">Premium</div>
-                  <div className="text-sm text-muted-foreground">Up to 200 messages, 90 days active</div>
+                  <div className="text-sm text-muted-foreground">
+                    Up to 200 messages, 90 days active
+                  </div>
                 </Label>
                 <div className="font-semibold">$49</div>
               </div>
@@ -292,7 +332,9 @@ export default function EditEventPage({ params }: EditEventPageProps) {
                 <RadioGroupItem value="deluxe" id="deluxe" />
                 <Label htmlFor="deluxe" className="flex-1 cursor-pointer">
                   <div className="font-medium">Deluxe</div>
-                  <div className="text-sm text-muted-foreground">Unlimited messages, 1 year active</div>
+                  <div className="text-sm text-muted-foreground">
+                    Unlimited messages, 1 year active
+                  </div>
                 </Label>
                 <div className="font-semibold">$99</div>
               </div>
@@ -304,11 +346,14 @@ export default function EditEventPage({ params }: EditEventPageProps) {
           <Link href={`/events/${params.id}`}>
             <Button variant="outline">Cancel</Button>
           </Link>
-          <Button type="submit" disabled={isSubmitting || !startDate || !endDate}>
+          <Button
+            type="submit"
+            disabled={isSubmitting || !startDate || !endDate}
+          >
             {isSubmitting ? "Saving Changes..." : "Save Changes"}
           </Button>
         </div>
       </form>
     </div>
-  )
+  );
 }

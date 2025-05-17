@@ -1,42 +1,33 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { Check, Download, Share2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Check, Download, Share2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
 
 export default function SuccessPage() {
-  const { toast } = useToast()
-  const [isCopied, setIsCopied] = useState(false)
+  const [isCopied, setIsCopied] = useState(false);
 
   const handleCopyLink = async () => {
     // In a real app, we would generate a unique link for the event
-    const eventLink = "https://wedding-memories.app/guest/abc123"
+    const eventLink = "https://wedding-memories.app/guest/abc123";
 
     try {
-      await navigator.clipboard.writeText(eventLink)
-      setIsCopied(true)
-      setTimeout(() => setIsCopied(false), 2000)
+      await navigator.clipboard.writeText(eventLink);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
     } catch (error) {
-      console.error("Failed to copy:", error)
-      toast({
-        title: "Failed to copy",
-        description: "Could not copy the link to your clipboard.",
-        variant: "destructive",
-      })
+      console.error("Failed to copy:", error);
+      toast.error("Failed to copy link to clipboard");
     }
-  }
+  };
 
   const handleDownloadQR = () => {
-    toast({
-      title: "Feature not implemented",
-      description: "QR code download functionality needs to be implemented.",
-      variant: "default",
-    })
-  }
+    toast.info("QR code download functionality needs to be implemented.");
+  };
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-3xl">
@@ -46,15 +37,23 @@ export default function SuccessPage() {
             <Check className="h-10 w-10" />
           </div>
 
-          <h1 className="text-3xl font-bold mb-4">Event Created Successfully!</h1>
+          <h1 className="text-3xl font-bold mb-4">
+            Event Created Successfully!
+          </h1>
           <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-            Your event has been created and is ready to collect memories from your guests. Share the QR code with your
-            guests to get started.
+            Your event has been created and is ready to collect memories from
+            your guests. Share the QR code with your guests to get started.
           </p>
 
           <div className="mb-8">
             <div className="bg-muted p-6 rounded-lg inline-block mb-4">
-              <Image src="/qr-code.png" alt="Event QR Code" width={200} height={200} className="mx-auto" />
+              <Image
+                src="/qr-code.png"
+                alt="Event QR Code"
+                width={200}
+                height={200}
+                className="mx-auto"
+              />
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -80,5 +79,5 @@ export default function SuccessPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
