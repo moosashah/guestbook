@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Calendar, Download, Share2, Edit } from "lucide-react";
+import { ArrowLeft, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDate } from "@/lib/utils";
 import { mockEvents, mockMessages } from "@/lib/mock-data";
 import MessageCard from "@/components/message-card";
-import { toast } from "sonner";
+import { EventButtons } from "@/components/event-buttons";
 
 interface EventPageProps {
   params: Promise<{ id: string }>;
@@ -131,35 +131,6 @@ export default async function EventPage({ params }: EventPageProps) {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
-  );
-}
-
-function EventButtons({ eventId }: { eventId: string }) {
-  "use client";
-  const handleDownloadQR = () => {
-    toast.info("QR code download functionality needs to be implemented.");
-  };
-
-  const handleShare = () => {
-    toast.info("Sharing functionality needs to be implemented.");
-  };
-  return (
-    <div className="flex gap-2">
-      <Link href={`/events/${eventId}/edit`}>
-        <Button variant="outline" size="sm">
-          <Edit className="mr-2 h-4 w-4" />
-          Edit Event
-        </Button>
-      </Link>
-      <Button variant="outline" size="sm" onClick={handleDownloadQR}>
-        <Download className="mr-2 h-4 w-4" />
-        Download QR
-      </Button>
-      <Button variant="outline" size="sm" onClick={handleShare}>
-        <Share2 className="mr-2 h-4 w-4" />
-        Share
-      </Button>
     </div>
   );
 }
