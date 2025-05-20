@@ -106,8 +106,9 @@ export default async function EventPage({
         <div className="relative rounded-lg overflow-hidden h-64 w-full mb-6">
           <Image
             src={
-              event.bannerImage ||
-              "/placeholder.svg?height=600&width=1200&query=wedding event"
+              event.bannerImage || event.paymentStatus === "pending"
+                ? "/placeholder.svg?height=600&width=1200&query=wedding event"
+                : "/wedding-ceremony.png"
             }
             alt={event.name}
             fill

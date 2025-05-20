@@ -22,8 +22,9 @@ export default function EventCard({ event }: EventCardProps) {
         <div className="relative h-48 w-full">
           <Image
             src={
-              event.bannerImage ||
-              "/placeholder.svg?height=400&width=600&query=wedding event"
+              event.bannerImage || event.paymentStatus === "pending"
+                ? "/placeholder.svg?height=400&width=600&query=wedding event"
+                : "/wedding-ceremony.png"
             }
             alt={event.name}
             fill
