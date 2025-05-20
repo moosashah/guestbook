@@ -9,6 +9,9 @@ import { formatDate } from "@/lib/utils";
 import MessageCard from "@/components/message-card";
 import { EventButtons } from "@/components/event-buttons";
 import { EventEntity, MessageEntity } from "@/lib/models";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 interface EventPageProps {
   params: Promise<{ id: string }>;
@@ -25,14 +28,49 @@ export default async function EventPage({
 }: EventPageProps) {
   const { id } = await params;
   const sp = await searchParams;
+  let { data: event } = await loadEvent(id);
 
-  if (sp.session_id) {
-    //TODO: Check if the payment was actually successful
-    console.log("[EventPage] Session:", sp.session_id);
-    await EventEntity.patch({ id }).set({ paymentStatus: "success" }).go();
+  if (!event) {
+    return (
+      <div className="container mx-auto py-8 px-4 text-center">
+        <h1 className="text-2xl font-bold mb-4">Event not found</h1>
+        <Link href="/">
+          <Button>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </Link>
+      </div>
+    );
   }
 
-  const { data: event } = await loadEvent(id);
+  if (sp.session_id && event.paymentStatus === "pending") {
+    //TODO: Check if the payment was actually successful
+    console.log("[EventPage] Session:", sp.session_id);
+    try {
+      const checkoutSession = await stripe.checkout.sessions.retrieve(
+        sp.session_id
+      );
+      console.log("[EventPage] Checkout session:", checkoutSession);
+      if (
+        checkoutSession.payment_status === "paid" &&
+        checkoutSession.metadata?.eventId === id
+      ) {
+        await EventEntity.patch({ id }).set({ paymentStatus: "success" }).go();
+        event = (await loadEvent(id)).data;
+      } else {
+        console.log(
+          "[EventPage] Payment status is not paid or event id does not match",
+          checkoutSession.payment_status,
+          checkoutSession.metadata?.eventId,
+          id
+        );
+      }
+    } catch (error) {
+      console.error("[EventPage] Error checking payment status:", error);
+    }
+  }
+
   const { data: messages } = await loadMessages(id);
   if (!event) {
     return (

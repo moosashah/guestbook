@@ -65,6 +65,9 @@ export async function POST(req: NextRequest) {
       mode: "payment",
       success_url: `${BASE_URL}/events/${eventId}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${BASE_URL}/events/${eventId}`,
+      metadata: {
+        eventId,
+      },
     });
 
     return NextResponse.json({ sessionId: session.id });
