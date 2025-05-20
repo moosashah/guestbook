@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { z } from "zod";
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 
@@ -29,15 +30,28 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     console.log("[checkout-session] Incoming body:", body);
-    const { package: packageType } = body;
-    console.log("[checkout-session] Resolved packageType:", packageType);
-    if (!packageType || !PACKAGE_PRICE_IDS[packageType]) {
-      console.log("[checkout-session] Invalid package type:", packageType);
+    const checkoutSessionSchema = z.object({
+      package: z.enum(["basic", "premium", "deluxe"], {
+        errorMap: () => ({ message: "Invalid package type" }),
+      }),
+      eventId: z.string().uuid(),
+    });
+
+    const validatedData = checkoutSessionSchema.safeParse(body);
+
+    if (!validatedData.success) {
+      console.log(
+        "[checkout-session] Invalid request data:",
+        validatedData.error
+      );
       return NextResponse.json(
-        { error: "Invalid package type" },
-        { status: 400 },
+        { error: "Invalid request data", details: validatedData.error },
+        { status: 400 }
       );
     }
+
+    const { package: packageType, eventId } = validatedData.data;
+    console.log("[checkout-session] Resolved packageType:", packageType);
 
     // Create the Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
@@ -49,9 +63,8 @@ export async function POST(req: NextRequest) {
         },
       ],
       mode: "payment",
-      success_url: `${BASE_URL}/create/success?session_id={CHECKOUT_SESSION_ID}`,
-      //TODO: Create cancel url
-      cancel_url: `${BASE_URL}/create/cancel`,
+      success_url: `${BASE_URL}/events/${eventId}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${BASE_URL}/events/${eventId}`,
     });
 
     return NextResponse.json({ sessionId: session.id });

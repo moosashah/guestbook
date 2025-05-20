@@ -6,19 +6,34 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDate } from "@/lib/utils";
-import { mockEvents, mockMessages } from "@/lib/mock-data";
 import MessageCard from "@/components/message-card";
 import { EventButtons } from "@/components/event-buttons";
+import { EventEntity, MessageEntity } from "@/lib/models";
 
 interface EventPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ session_id?: string }>;
 }
 
-export default async function EventPage({ params }: EventPageProps) {
+const loadEvent = async (id: string) => await EventEntity.get({ id }).go();
+const loadMessages = async (id: string) =>
+  await MessageEntity.query.event({ eventId: id }).go();
+
+export default async function EventPage({
+  params,
+  searchParams,
+}: EventPageProps) {
   const { id } = await params;
+  const sp = await searchParams;
 
-  const event = mockEvents.find((e) => e.id === id);
+  if (sp.session_id) {
+    //TODO: Check if the payment was actually successful
+    console.log("[EventPage] Session:", sp.session_id);
+    await EventEntity.patch({ id }).set({ paymentStatus: "success" }).go();
+  }
 
+  const { data: event } = await loadEvent(id);
+  const { data: messages } = await loadMessages(id);
   if (!event) {
     return (
       <div className="container mx-auto py-8 px-4 text-center">
@@ -36,6 +51,8 @@ export default async function EventPage({ params }: EventPageProps) {
   const isActive =
     new Date() >= new Date(event.submissionStartDate) &&
     new Date() <= new Date(event.submissionEndDate);
+
+  const eventPaid = event.paymentStatus === "success";
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -73,64 +90,71 @@ export default async function EventPage({ params }: EventPageProps) {
             <Badge variant={isActive ? "default" : "secondary"}>
               {isActive ? "Active" : "Inactive"}
             </Badge>
+            <Badge variant={eventPaid ? "default" : "secondary"}>
+              {eventPaid ? "Paid" : "Unpaid"}
+            </Badge>
           </div>
 
           <EventButtons eventId={id} />
         </div>
       </div>
 
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="mb-6 border">
-          <TabsTrigger value="all">
-            All Messages ({mockMessages.length})
-          </TabsTrigger>
-          <TabsTrigger value="video">
-            Video ({mockMessages.filter((m) => m.mediaType === "video").length})
-          </TabsTrigger>
-          <TabsTrigger value="audio">
-            Audio ({mockMessages.filter((m) => m.mediaType === "audio").length})
-          </TabsTrigger>
-        </TabsList>
+      {eventPaid ? (
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="mb-6 border">
+            <TabsTrigger value="all">
+              All Messages ({messages.length})
+            </TabsTrigger>
+            <TabsTrigger value="video">
+              Video ({messages.filter((m) => m.mediaType === "video").length})
+            </TabsTrigger>
+            <TabsTrigger value="audio">
+              Audio ({messages.filter((m) => m.mediaType === "audio").length})
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="all">
-          {mockMessages.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-12">
-                <h3 className="text-xl font-medium mb-2">No messages yet</h3>
-                <p className="text-muted-foreground mb-4">
-                  Share your QR code with guests to start collecting messages
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
+          <TabsContent value="all">
+            {messages.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <h3 className="text-xl font-medium mb-2">No messages yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Share your QR code with guests to start collecting messages
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {messages.map((message) => (
+                  <MessageCard key={message.id} message={message} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="video">
             <div className="space-y-4">
-              {mockMessages.map((message) => (
-                <MessageCard key={message.id} message={message} />
-              ))}
+              {messages
+                .filter((m) => m.mediaType === "video")
+                .map((message) => (
+                  <MessageCard key={message.id} message={message} />
+                ))}
             </div>
-          )}
-        </TabsContent>
+          </TabsContent>
 
-        <TabsContent value="video">
-          <div className="space-y-4">
-            {mockMessages
-              .filter((m) => m.mediaType === "video")
-              .map((message) => (
-                <MessageCard key={message.id} message={message} />
-              ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="audio">
-          <div className="space-y-4">
-            {mockMessages
-              .filter((m) => m.mediaType === "audio")
-              .map((message) => (
-                <MessageCard key={message.id} message={message} />
-              ))}
-          </div>
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="audio">
+            <div className="space-y-4">
+              {messages
+                .filter((m) => m.mediaType === "audio")
+                .map((message) => (
+                  <MessageCard key={message.id} message={message} />
+                ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+      ) : (
+        <h3>complete payment to share qr code and start collecting messages</h3>
+      )}
     </div>
   );
 }

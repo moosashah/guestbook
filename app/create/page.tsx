@@ -20,8 +20,8 @@ import { loadStripe } from "@stripe/stripe-js";
 interface FormValues {
   name: string;
   description?: string;
-  startDate?: Date;
-  endDate?: Date;
+  submissionStartDate?: Date;
+  submissionEndDate?: Date;
   package: string;
 }
 
@@ -33,6 +33,11 @@ export default function CreateEventPage() {
   );
   const [bannerImage, setBannerImage] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+
+  const getLoggedinUserId = () => {
+    console.log("hardcoded for now");
+    return "moosa123";
+  };
 
   const STRIPE_PUBLIC_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY;
   const BASE_URL =
@@ -60,13 +65,13 @@ export default function CreateEventPage() {
       package: "premium",
       name: "my name",
       description: "",
-      startDate: new Date(),
-      endDate: new Date(),
+      submissionStartDate: new Date(),
+      submissionEndDate: new Date(),
     },
   });
 
-  const startDate = watch("startDate");
-  const endDate = watch("endDate");
+  const submissionStartDate = watch("submissionStartDate");
+  const submissionEndDate = watch("submissionEndDate");
 
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -82,25 +87,26 @@ export default function CreateEventPage() {
     try {
       // In a real app, we would submit the form data to the server
       // and handle file uploads to S3
-      console.log("[onSubmit] Form data to submit:", {
+
+      const body = {
         ...data,
+        creatorId: getLoggedinUserId(),
         // welcomeMessageBlob,
         // mediaType,
         // bannerImage,
-      });
+      };
+      console.log("[onSubmit] Form data to submit:", body);
 
       console.log("[onSubmit] Creating event...");
-      const createEvent = await fetch(`${BASE_URL}/api/event`, {
+      const createdEvent = await fetch(`${BASE_URL}/api/event`, {
         method: "POST",
-        body: JSON.stringify({
-          ...data,
-        }),
+        body: JSON.stringify(body),
       });
 
-      if (!createEvent.ok) {
+      if (!createdEvent.ok) {
         console.error(
           "[onSubmit] Failed to create event:",
-          await createEvent.text()
+          await createdEvent.text()
         );
         throw new Error("Failed to create event");
       }
@@ -115,6 +121,7 @@ export default function CreateEventPage() {
         },
         body: JSON.stringify({
           package: data.package,
+          eventId: (await createdEvent.json()).data.id,
         }),
       });
 
@@ -294,13 +301,15 @@ export default function CreateEventPage() {
               <div className="space-y-2">
                 <Label>Start Date</Label>
                 <DatePicker
-                  date={startDate}
+                  date={submissionStartDate}
                   setDate={(date) =>
-                    setValue("startDate", date, { shouldValidate: true })
+                    setValue("submissionStartDate", date, {
+                      shouldValidate: true,
+                    })
                   }
                   className="w-full"
                 />
-                {errors.startDate && (
+                {errors.submissionStartDate && (
                   <p className="text-red-500 text-xs mt-1">
                     Start date is required
                   </p>
@@ -310,13 +319,15 @@ export default function CreateEventPage() {
               <div className="space-y-2">
                 <Label>End Date</Label>
                 <DatePicker
-                  date={endDate}
+                  date={submissionEndDate}
                   setDate={(date) =>
-                    setValue("endDate", date, { shouldValidate: true })
+                    setValue("submissionEndDate", date, {
+                      shouldValidate: true,
+                    })
                   }
                   className="w-full"
                 />
-                {errors.endDate && (
+                {errors.submissionEndDate && (
                   <p className="text-red-500 text-xs mt-1">
                     End date is required
                   </p>

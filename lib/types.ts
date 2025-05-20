@@ -1,26 +1,7 @@
-export interface Event {
-  id: string
-  name: string
-  description?: string
-  bannerImage?: string
-  welcomeMessage?: {
-    type: "audio" | "video"
-    url: string
-  }
-  submissionStartDate: string
-  submissionEndDate: string
-  messageCount?: number
-  createdAt: string
-  qrCodeUrl?: string
-  package?: "basic" | "premium" | "deluxe"
-  paymentStatus?: "pending" | "completed"
-}
+import { EntityItem } from "electrodb";
+import { EventEntity, MessageEntity } from "./models";
 
-export interface Message {
-  id: string
-  eventId: string
-  guestName: string
-  mediaType: "audio" | "video"
-  mediaUrl: string
-  createdAt: string
-}
+export type Event = EntityItem<typeof EventEntity>;
+
+export type Message = EntityItem<typeof MessageEntity>;
+

@@ -2,13 +2,14 @@ import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EventCard from "@/components/event-card";
-import { mockEvents } from "@/lib/mock-data";
 import { GitSHA } from "@/components/git-sha";
+import { EventEntity } from "@/lib/models";
 
-const loadEvents = async () => mockEvents;
+const loadEvents = async () =>
+  await EventEntity.query.byCreator({ creatorId: "moosa123" }).go();
 
 export default async function Dashboard() {
-  const events = await loadEvents();
+  const { data: events } = await loadEvents();
 
   return (
     <div className="container mx-auto py-8 px-4 min-h-screen">
