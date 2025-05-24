@@ -2,16 +2,14 @@
 
 import type React from "react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Upload, Video, Mic } from "lucide-react";
+import { ArrowLeft, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DatePicker } from "@/components/date-picker";
 import { MediaRecorder } from "@/components/media-recorder";
 import { useForm } from "react-hook-form";
@@ -254,37 +252,10 @@ export default function CreateEventPage() {
               they scan the QR code.
             </p>
 
-            <Tabs
-              defaultValue="video"
-              onValueChange={(value) =>
-                setMediaType(value as "video" | "audio")
-              }
-            >
-              <TabsList className="mb-4 border">
-                <TabsTrigger value="video">
-                  <Video className="mr-2 h-4 w-4" />
-                  Video
-                </TabsTrigger>
-                <TabsTrigger value="audio">
-                  <Mic className="mr-2 h-4 w-4" />
-                  Audio
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="video">
-                <MediaRecorder
-                  type="video"
-                  onRecordingComplete={(blob) => setWelcomeMessageBlob(blob)}
-                />
-              </TabsContent>
-
-              <TabsContent value="audio">
-                <MediaRecorder
-                  type="audio"
-                  onRecordingComplete={(blob) => setWelcomeMessageBlob(blob)}
-                />
-              </TabsContent>
-            </Tabs>
+            <MediaRecorder
+              type="audio"
+              onRecordingComplete={(blob) => setWelcomeMessageBlob(blob)}
+            />
           </CardContent>
         </Card>
 

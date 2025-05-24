@@ -37,6 +37,9 @@ export const eventCreateSchema = z.object({
 
 export async function POST(req: NextRequest) {
     console.log("[event] Incoming request");
+    //TODO: This will need to be a form submission since we're also sending the voice message blob
+    //TODO: We need to store the voice message blob to S3 and store the uri to dynamodb
+    //TODO: We need to generate a qr code for the event and store the uri to dynamodb
     try {
         const body = await req.json();
         console.log("[event] Incoming body:", body);
