@@ -8,10 +8,11 @@ import { cn } from "@/lib/utils"
 interface MediaRecorderProps {
   type: "audio" | "video"
   onRecordingComplete: (blob: Blob) => void
+  description: string
   className?: string
 }
 
-export function MediaRecorder({ type, onRecordingComplete, className }: MediaRecorderProps) {
+export function MediaRecorder({ type, onRecordingComplete, className, description }: MediaRecorderProps) {
   const [permission, setPermission] = useState<boolean>(false)
   const [recordingStatus, setRecordingStatus] = useState<"inactive" | "recording" | "paused" | "preview">("inactive")
   const [stream, setStream] = useState<MediaStream | null>(null)
@@ -103,7 +104,7 @@ export function MediaRecorder({ type, onRecordingComplete, className }: MediaRec
           <Mic className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
         )}
         <p className="text-sm text-muted-foreground mb-4">
-          {type === "video" ? "Record a video message for your guests" : "Record an audio message for your guests"}
+          {description}
         </p>
         <Button type="button" variant="outline" onClick={getMicrophonePermission}>
           Allow {type === "video" ? "Camera" : "Microphone"} Access
