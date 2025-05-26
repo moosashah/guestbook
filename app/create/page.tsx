@@ -253,8 +253,9 @@ export default function CreateEventPage() {
             </p>
 
             <MediaRecorder
-              type="audio"
-              onRecordingComplete={(blob) => setWelcomeMessageBlob(blob)}
+              type="video"
+              onRecordingComplete={setWelcomeMessageBlob}
+              description="Record a welcome message for your guests"
             />
           </CardContent>
         </Card>
