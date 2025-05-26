@@ -72,7 +72,6 @@
 
 ### Partially Complete / In Progress
 - [ ] Infrastructure: S3 upload logic is stubbed, not fully implemented; Dynamo/EventBridge/ECS not confirmed
-- [ ] CI/CD: No GitHub Actions config found in root (may be managed elsewhere)
 - [ ] Audio/video recording (`components/media-recorder.tsx`)
 - [ ] Message playback (`components/media-player.tsx`)
 - [ ] Authentication/SSO: No openauth/clerk or SSO logic found
@@ -106,14 +105,41 @@
 
 ---
 
-## Next steps
-
-Setup selectroDB + S3 to persist created events 
-Fix media recording
-Check event package and hide video message submission option
-Fix asking for permissions bug
-Add warning if message recorded and switched mediums
-Generate QR code
-Test + fix guest flow
-
 If full flow works then add auth
+
+## Proof of Concept Priorities
+
+### 1. QR Code System
+- [ ] Generate QR code using event UUID
+- [ ] Store QR code URI in event record
+- [x] Validate event exists and is active in `/guest/[code]` route
+- [x] Add submission period validation (start/end dates)
+- [x] Add message limit validation (if implemented)
+
+### 2. Media Recording & Processing
+- [ ] Fix permission handling bug
+- [ ] Add warning when switching mediums
+- [ ] Implement basic S3 upload
+- [ ] Basic media validation
+
+### 3. Event Management
+- [ ] Event validation for dates
+- [ ] Basic package validation
+- [x] Message limits per event
+- [ ] Basic event sharing
+
+### 4. Infrastructure
+- [ ] S3 upload implementation
+
+### 5. Design & UX
+- [ ] Basic loading states
+- [ ] Basic error states
+- [ ] Basic success states
+- [ ] Basic form validation
+
+### 6. Authentication (Post-PoC)
+- [ ] Set up Clerk provider and middleware
+- [ ] Protect event creation route (`/create`)
+- [ ] Protect event management routes (`/events/[id]/*`)
+- [ ] Add user ID to event creation payload
+- [ ] Add authorization check for event access (creator only)

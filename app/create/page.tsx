@@ -255,6 +255,7 @@ export default function CreateEventPage() {
             <MediaRecorder
               type="audio"
               onRecordingComplete={(blob) => setWelcomeMessageBlob(blob)}
+              description="Record a welcome message for your guests. This will be played for them when they scan the QR code."
             />
           </CardContent>
         </Card>
