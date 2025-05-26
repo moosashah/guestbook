@@ -1,0 +1,1 @@
+export const BUCKET_NAME = "guestbook-assets-2024-dev";

@@ -18,9 +18,9 @@ import { loadStripe } from "@stripe/stripe-js";
 interface FormValues {
   name: string;
   description?: string;
-  submissionStartDate?: Date;
-  submissionEndDate?: Date;
-  package: string;
+  submission_start_date?: Date;
+  submission_end_date?: Date;
+  package: "basic" | "premium" | "deluxe";
 }
 
 export default function CreateEventPage() {
@@ -63,13 +63,21 @@ export default function CreateEventPage() {
       package: "premium",
       name: "my name",
       description: "",
-      submissionStartDate: new Date(),
-      submissionEndDate: new Date(),
+      submission_start_date: (() => {
+        const d = new Date();
+        d.setDate(d.getDate() + 1);
+        return d;
+      })(),
+      submission_end_date: (() => {
+        const d = new Date();
+        d.setDate(d.getDate() + 2);
+        return d;
+      })(),
     },
   });
 
-  const submissionStartDate = watch("submissionStartDate");
-  const submissionEndDate = watch("submissionEndDate");
+  const submission_start_date = watch("submission_start_date");
+  const submission_end_date = watch("submission_end_date");
 
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -86,19 +94,22 @@ export default function CreateEventPage() {
       // In a real app, we would submit the form data to the server
       // and handle file uploads to S3
 
-      const body = {
-        ...data,
-        creatorId: getLoggedinUserId(),
+      const eventData = {
+        creator_id: getLoggedinUserId(),
         // welcomeMessageBlob,
-        // mediaType,
+        name: data.name,
         // bannerImage,
+        description: data.description,
+        submission_start_date: data.submission_start_date?.toISOString(),
+        submission_end_date: data.submission_end_date?.toISOString(),
+        package: data.package,
       };
-      console.log("[onSubmit] Form data to submit:", body);
+      console.log("[onSubmit] Form data to submit:", eventData);
 
       console.log("[onSubmit] Creating event...");
       const createdEvent = await fetch(`${BASE_URL}/api/event`, {
         method: "POST",
-        body: JSON.stringify(body),
+        body: JSON.stringify(eventData),
       });
 
       if (!createdEvent.ok) {
@@ -273,17 +284,16 @@ export default function CreateEventPage() {
               <div className="space-y-2">
                 <Label>Start Date</Label>
                 <DatePicker
-                  date={submissionStartDate}
+                  date={submission_start_date}
                   setDate={(date) =>
-                    setValue("submissionStartDate", date, {
+                    setValue("submission_start_date", date, {
                       shouldValidate: true,
                     })
                   }
-                  className="w-full"
                 />
-                {errors.submissionStartDate && (
-                  <p className="text-red-500 text-xs mt-1">
-                    Start date is required
+                {errors.submission_start_date && (
+                  <p className="text-sm text-red-500">
+                    {errors.submission_start_date.message}
                   </p>
                 )}
               </div>
@@ -291,17 +301,16 @@ export default function CreateEventPage() {
               <div className="space-y-2">
                 <Label>End Date</Label>
                 <DatePicker
-                  date={submissionEndDate}
+                  date={submission_end_date}
                   setDate={(date) =>
-                    setValue("submissionEndDate", date, {
+                    setValue("submission_end_date", date, {
                       shouldValidate: true,
                     })
                   }
-                  className="w-full"
                 />
-                {errors.submissionEndDate && (
-                  <p className="text-red-500 text-xs mt-1">
-                    End date is required
+                {errors.submission_end_date && (
+                  <p className="text-sm text-red-500">
+                    {errors.submission_end_date.message}
                   </p>
                 )}
               </div>

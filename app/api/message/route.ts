@@ -11,10 +11,10 @@ const packageLimits = {
 } as const;
 
 const messageCreateSchema = z.object({
-    eventId: z.string().uuid(),
-    guestName: z.string().min(1, "Guest name is required"),
-    mediaType: z.enum(["audio", "video"]),
-    mediaUrl: z.string().url(),
+    event_id: z.string().uuid(),
+    guest_name: z.string().min(1, "Guest name is required"),
+    media_type: z.enum(["audio", "video"]),
+    media_url: z.string().url(),
 });
 
 export async function POST(req: NextRequest) {
@@ -32,10 +32,10 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const { eventId, guestName, mediaType, mediaUrl } = validatedData.data;
+        const { event_id, guest_name, media_type, media_url } = validatedData.data;
 
         // Get event to check package limits
-        const { data: event } = await EventEntity.get({ id: eventId }).go();
+        const { data: event } = await EventEntity.get({ id: event_id }).go();
         if (!event) {
             return NextResponse.json(
                 { error: "Event not found" },
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
 
         // Check if event is within submission period
         const now = new Date();
-        if (now < new Date(event.submissionStartDate) || now > new Date(event.submissionEndDate)) {
+        if (now < new Date(event.submission_start_date) || now > new Date(event.submission_end_date)) {
             return NextResponse.json(
                 { error: "Event is not accepting messages at this time" },
                 { status: 400 }
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Check if message limit is reached
-        if (event.messageCount >= packageLimits[event.package]) {
+        if (event.message_count >= packageLimits[event.package]) {
             return NextResponse.json(
                 { error: "Message limit reached for this event" },
                 { status: 400 }
@@ -63,13 +63,14 @@ export async function POST(req: NextRequest) {
         // Create message
         const message = await MessageEntity.create({
             id: crypto.randomUUID(),
-            eventId,
-            guestName,
-            mediaType,
-            mediaUrl,
+            event_id,
+            guest_name,
+            media_type,
+            media_url,
         }).go();
 
-        await EventEntity.patch({ id: eventId }).add({ messageCount: 1 }).go();
+        // Increment message count
+        await EventEntity.patch({ id: event_id }).add({ message_count: 1 }).go();
 
         console.log("[message] Message created:", message);
         return NextResponse.json(message);

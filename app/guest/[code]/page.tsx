@@ -5,8 +5,13 @@ interface GuestPageProps {
   params: Promise<{ code: string }>;
 }
 
-const loadEvent = async (code: string) =>
-  await EventEntity.get({ id: code }).go();
+const loadEvent = async (id: string) => {
+  const e = await EventEntity.get({ id }).go();
+  if (e.data && e.data.deleted_at !== 0) {
+    return { data: null };
+  }
+  return e;
+};
 
 export default async function GuestPage({ params }: GuestPageProps) {
   const { code } = await params;
@@ -17,14 +22,14 @@ export default async function GuestPage({ params }: GuestPageProps) {
   }
 
   const isActive =
-    new Date() >= new Date(eventData.submissionStartDate) &&
-    new Date() <= new Date(eventData.submissionEndDate);
+    new Date() >= new Date(eventData.submission_start_date) &&
+    new Date() <= new Date(eventData.submission_end_date);
 
   if (!isActive) {
     return <div>Event is not active</div>;
   }
   //TODO: reference package limits from config file
-  if (eventData.messageCount >= 50) {
+  if (eventData.message_count >= 50) {
     return <div>Event is full</div>;
   }
 

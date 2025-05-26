@@ -18,9 +18,15 @@ interface EventPageProps {
   searchParams: Promise<{ session_id?: string }>;
 }
 
-const loadEvent = async (id: string) => await EventEntity.get({ id }).go();
+const loadEvent = async (id: string) => {
+  const e = await EventEntity.get({ id }).go();
+  if (e.data && e.data.deleted_at !== 0) {
+    return { data: null };
+  }
+  return { data: e.data };
+};
 const loadMessages = async (id: string) =>
-  await MessageEntity.query.event({ eventId: id }).go();
+  await MessageEntity.query.event({ event_id: id }).go();
 
 export default async function EventPage({
   params,
@@ -44,7 +50,7 @@ export default async function EventPage({
     );
   }
 
-  if (sp.session_id && event.paymentStatus === "pending") {
+  if (sp.session_id && event.payment_status === "pending") {
     //TODO: Check if the payment was actually successful
     console.log("[EventPage] Session:", sp.session_id);
     try {
@@ -56,7 +62,7 @@ export default async function EventPage({
         checkoutSession.payment_status === "paid" &&
         checkoutSession.metadata?.eventId === id
       ) {
-        await EventEntity.patch({ id }).set({ paymentStatus: "success" }).go();
+        await EventEntity.patch({ id }).set({ payment_status: "success" }).go();
         event = (await loadEvent(id)).data;
       } else {
         console.log(
@@ -87,10 +93,10 @@ export default async function EventPage({
   }
 
   const isActive =
-    new Date() >= new Date(event.submissionStartDate) &&
-    new Date() <= new Date(event.submissionEndDate);
+    new Date() >= new Date(event.submission_start_date) &&
+    new Date() <= new Date(event.submission_end_date);
 
-  const eventPaid = event.paymentStatus === "success";
+  const eventPaid = event.payment_status === "success";
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -106,7 +112,7 @@ export default async function EventPage({
         <div className="relative rounded-lg overflow-hidden h-64 w-full mb-6">
           <Image
             src={
-              event.bannerImage || event.paymentStatus === "pending"
+              event.banner_image || event.payment_status === "pending"
                 ? "/placeholder.svg?height=600&width=1200&query=wedding event"
                 : "/wedding-ceremony.png"
             }
@@ -122,8 +128,8 @@ export default async function EventPage({
             <div className="flex items-center text-muted-foreground mb-2">
               <Calendar className="mr-2 h-4 w-4" />
               <span>
-                Accepting messages: {formatDate(event.submissionStartDate)} -{" "}
-                {formatDate(event.submissionEndDate)}
+                Accepting messages: {formatDate(event.submission_start_date)} -{" "}
+                {formatDate(event.submission_end_date)}
               </span>
             </div>
             <Badge variant={isActive ? "default" : "secondary"}>
@@ -134,7 +140,7 @@ export default async function EventPage({
             </Badge>
           </div>
 
-          <EventButtons eventId={id} />
+          <EventButtons eventId={id} qrCodeUrl={event.qr_code_url} />
         </div>
       </div>
 
@@ -145,10 +151,10 @@ export default async function EventPage({
               All Messages ({messages.length})
             </TabsTrigger>
             <TabsTrigger value="video">
-              Video ({messages.filter((m) => m.mediaType === "video").length})
+              Video ({messages.filter((m) => m.media_type === "video").length})
             </TabsTrigger>
             <TabsTrigger value="audio">
-              Audio ({messages.filter((m) => m.mediaType === "audio").length})
+              Audio ({messages.filter((m) => m.media_type === "audio").length})
             </TabsTrigger>
           </TabsList>
 
@@ -174,7 +180,7 @@ export default async function EventPage({
           <TabsContent value="video">
             <div className="space-y-4">
               {messages
-                .filter((m) => m.mediaType === "video")
+                .filter((m) => m.media_type === "video")
                 .map((message) => (
                   <MessageCard key={message.id} message={message} />
                 ))}
@@ -184,7 +190,7 @@ export default async function EventPage({
           <TabsContent value="audio">
             <div className="space-y-4">
               {messages
-                .filter((m) => m.mediaType === "audio")
+                .filter((m) => m.media_type === "audio")
                 .map((message) => (
                   <MessageCard key={message.id} message={message} />
                 ))}

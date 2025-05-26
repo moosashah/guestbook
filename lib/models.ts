@@ -19,22 +19,19 @@ export const EventEntity = new Entity({
     },
     attributes: {
         id: { type: "string", required: true },
-        creatorId: { type: "string", required: true },
+        creator_id: { type: "string", required: true },
         name: { type: "string", required: true },
         description: { type: "string", required: true },
-        bannerImage: { type: "string" },
-        welcomeMessage: {
-            type: "map",
-            properties: {
-                type: { type: ["audio", "video"] as const },
-                url: { type: "string" }
-            }
+        banner_image: { type: "string" },
+        welcome_message: {
+            type: "string",
+            required: false,
         },
-        submissionStartDate: { type: "string", required: true },
-        submissionEndDate: { type: "string", required: true },
-        messageCount: { type: "number", required: true },
-        createdAt: { type: "number", required: true, default: () => Date.now(), readOnly: true },
-        updatedAt: {
+        submission_start_date: { type: "string", required: true },
+        submission_end_date: { type: "string", required: true },
+        message_count: { type: "number", required: true },
+        created_at: { type: "number", required: true, default: () => Date.now(), readOnly: true },
+        updated_at: {
             type: "number",
             default: () => Date.now(),
             // watch for changes to any attribute
@@ -43,9 +40,10 @@ export const EventEntity = new Entity({
             set: () => Date.now(),
             readOnly: true
         },
-        qrCodeUrl: { type: "string", required: true },
+        deleted_at: { type: "number", required: true, default: () => 0 },
+        qr_code_url: { type: "string", required: true },
         package: { type: ["basic", "deluxe", "premium"] as const, required: true },
-        paymentStatus: { type: ["pending", "success"] as const, required: true }
+        payment_status: { type: ["pending", "success"] as const, required: true }
     },
     indexes: {
         event: {
@@ -54,7 +52,7 @@ export const EventEntity = new Entity({
         },
         byCreator: {
             index: "gsi1pk-gsi1sk-index",
-            pk: { field: "gsi1pk", composite: ["creatorId"] },
+            pk: { field: "gsi1pk", composite: ["creator_id"] },
             sk: { field: "gsi1sk", composite: ["id"] }
         }
     }
@@ -72,12 +70,12 @@ export const MessageEntity = new Entity({
     },
     attributes: {
         id: { type: "string", required: true },
-        eventId: { type: "string", required: true },
-        guestName: { type: "string", required: true },
-        mediaType: { type: ["audio", "video"] as const, required: true },
-        mediaUrl: { type: "string", required: true },
-        createdAt: { type: "number", required: true, default: () => Date.now(), readOnly: true },
-        updatedAt: {
+        event_id: { type: "string", required: true },
+        guest_name: { type: "string", required: true },
+        media_type: { type: ["audio", "video"] as const, required: true },
+        media_url: { type: "string", required: true },
+        created_at: { type: "number", required: true, default: () => Date.now(), readOnly: true },
+        updated_at: {
             type: "number",
             default: () => Date.now(),
             // watch for changes to any attribute
@@ -89,8 +87,8 @@ export const MessageEntity = new Entity({
     },
     indexes: {
         event: {
-            pk: { field: "pk", composite: ["eventId"] },
-            sk: { field: "sk", composite: ["createdAt", "id"] }
+            pk: { field: "pk", composite: ["event_id"] },
+            sk: { field: "sk", composite: ["created_at", "id"] }
         }
     }
 }, {
