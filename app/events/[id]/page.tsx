@@ -140,7 +140,11 @@ export default async function EventPage({
             </Badge>
           </div>
 
-          <EventButtons eventId={id} qrCodeUrl={event.qr_code_url} />
+          <EventButtons
+            eventId={id}
+            qrCodeUrl={event.qr_code_url}
+            eventName={event.name}
+          />
         </div>
       </div>
 

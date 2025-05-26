@@ -2,7 +2,7 @@ import { EventEntity } from "@/lib/models";
 import { GuestForm } from "@/components/guest-form";
 
 interface GuestPageProps {
-  params: Promise<{ code: string }>;
+  params: Promise<{ id: string }>;
 }
 
 const loadEvent = async (id: string) => {
@@ -14,9 +14,9 @@ const loadEvent = async (id: string) => {
 };
 
 export default async function GuestPage({ params }: GuestPageProps) {
-  const { code } = await params;
+  const { id } = await params;
 
-  const { data: eventData } = await loadEvent(code);
+  const { data: eventData } = await loadEvent(id);
   if (!eventData) {
     return <div>Event not found</div>;
   }
