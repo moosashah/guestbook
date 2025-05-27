@@ -129,7 +129,7 @@ If full flow works then add auth
 - [x] Basic event sharing
 
 ### 4. Infrastructure
-- [ ] S3 upload implementation
+- [x] S3 upload implementation
 
 ### 5. Design & UX
 - [ ] Basic loading states

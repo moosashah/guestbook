@@ -3,8 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 import { generateAndUploadQRCode } from "@/lib/qr-code";
+import { VIABLE_PACKAGES } from "@/lib/consts";
 
-const viablePackages = ["basic", "premium", "deluxe"] as const;
+
 
 export const eventCreateSchema = z.object({
     creator_id: z.string(),
@@ -22,7 +23,7 @@ export const eventCreateSchema = z.object({
     ),
     message_count: z.number().default(0),
     qr_code_url: z.string().optional(), // this neeeds to be generated and stored to the database
-    package: z.enum(viablePackages, {
+    package: z.enum(VIABLE_PACKAGES, {
         errorMap: () => ({ message: "Invalid package type" }),
     }),
     payment_status: z.enum(["pending", "success"]).default("pending"),
