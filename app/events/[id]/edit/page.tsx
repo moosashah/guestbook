@@ -24,9 +24,6 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
 
   // Find the event by ID
   const { data: event } = await loadEvent(id);
-  if (!event) {
-    return <div>Event not found</div>;
-  }
 
   if (!event) {
     return (
