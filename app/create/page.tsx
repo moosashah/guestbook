@@ -10,16 +10,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { DatePicker } from "@/components/date-picker";
+import { DateRangePicker } from "@/components/date-picker";
 import { MediaRecorder } from "@/components/media-recorder";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { loadStripe } from "@stripe/stripe-js";
+import { DateRange } from "react-day-picker";
 
 interface FormValues {
   name: string;
   description?: string;
-  submission_start_date?: Date;
-  submission_end_date?: Date;
+  dateRange: DateRange;
   package: "basic" | "premium" | "deluxe";
 }
 
@@ -51,11 +51,39 @@ export default function CreateEventPage() {
     throw new Error("BASE_URL is not set");
   }
 
+  const validateDateRange = (dateRange: DateRange) => {
+    if (!dateRange?.from || !dateRange?.to) {
+      return "Please select both start and end dates";
+    }
+
+    const now = new Date();
+    const startDate = new Date(dateRange.from);
+    const endDate = new Date(dateRange.to);
+
+    // Reset time for accurate comparison
+    now.setHours(0, 0, 0, 0);
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(0, 0, 0, 0);
+
+    if (startDate <= now) {
+      return "Start date must be in the future";
+    }
+
+    if (endDate <= now) {
+      return "End date must be in the future";
+    }
+
+    if (endDate <= startDate) {
+      return "End date must be after start date";
+    }
+
+    return true;
+  };
+
   const {
     register,
     handleSubmit,
-    setValue,
-    watch,
+    control,
     formState: { errors },
   } = useForm<FormValues>({
     mode: "onTouched",
@@ -63,21 +91,20 @@ export default function CreateEventPage() {
       package: "premium",
       name: "my name",
       description: "",
-      submission_start_date: (() => {
-        const d = new Date();
-        d.setDate(d.getDate() + 1);
-        return d;
-      })(),
-      submission_end_date: (() => {
-        const d = new Date();
-        d.setDate(d.getDate() + 2);
-        return d;
-      })(),
+      dateRange: {
+        from: (() => {
+          const d = new Date();
+          d.setDate(d.getDate() + 1);
+          return d;
+        })(),
+        to: (() => {
+          const d = new Date();
+          d.setDate(d.getDate() + 2);
+          return d;
+        })(),
+      },
     },
   });
-
-  const submission_start_date = watch("submission_start_date");
-  const submission_end_date = watch("submission_end_date");
 
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -100,8 +127,8 @@ export default function CreateEventPage() {
         name: data.name,
         // bannerImage,
         description: data.description,
-        submission_start_date: data.submission_start_date?.toISOString(),
-        submission_end_date: data.submission_end_date?.toISOString(),
+        submission_start_date: data.dateRange.from?.toISOString(),
+        submission_end_date: data.dateRange.to?.toISOString(),
         package: data.package,
       };
       console.log("[onSubmit] Form data to submit:", eventData);
@@ -280,40 +307,27 @@ export default function CreateEventPage() {
               Set the time period during which guests can submit messages
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label>Start Date</Label>
-                <DatePicker
-                  date={submission_start_date}
-                  setDate={(date) =>
-                    setValue("submission_start_date", date, {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-                {errors.submission_start_date && (
-                  <p className="text-sm text-red-500">
-                    {errors.submission_start_date.message}
-                  </p>
+            <div className="space-y-2">
+              <Label>Submission Date Range</Label>
+              <Controller
+                name="dateRange"
+                control={control}
+                rules={{
+                  validate: validateDateRange,
+                }}
+                render={({ field, fieldState: { error } }) => (
+                  <>
+                    <DateRangePicker
+                      dateRange={field.value}
+                      setDateRange={field.onChange}
+                      className="w-full"
+                    />
+                    {error && (
+                      <p className="text-sm text-red-500">{error.message}</p>
+                    )}
+                  </>
                 )}
-              </div>
-
-              <div className="space-y-2">
-                <Label>End Date</Label>
-                <DatePicker
-                  date={submission_end_date}
-                  setDate={(date) =>
-                    setValue("submission_end_date", date, {
-                      shouldValidate: true,
-                    })
-                  }
-                />
-                {errors.submission_end_date && (
-                  <p className="text-sm text-red-500">
-                    {errors.submission_end_date.message}
-                  </p>
-                )}
-              </div>
+              />
             </div>
           </CardContent>
         </Card>

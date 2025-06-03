@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { EventEntity } from "@/lib/models";
 import { z } from "zod";
-import { VIABLE_PACKAGES } from "@/lib/consts";
+
 
 async function isAuthenticated(req: NextRequest, eventId: string): Promise<boolean> {
     console.log("Authenticating user for event: " + eventId); // Placeholder
@@ -18,9 +18,9 @@ const eventIdSchema = z.string().uuid({ message: "Invalid event ID format" });
 
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
-    const eventId = params.id;
+    const { id: eventId } = await params
 
     // Validate eventId format
     const validationResult = eventIdSchema.safeParse(eventId);
@@ -67,10 +67,6 @@ export async function DELETE(
 }
 
 const editEventSchema = z.object({
-    name: z.string().min(1, "Event name is required"),
-    description: z.string().optional(),
-    banner_image: z.string().optional(),
-    welcome_message: z.string().optional(),
     submission_start_date: z.string().datetime().refine(
         (date) => new Date(date) > new Date(),
         "Start date must be in the future"
@@ -79,16 +75,13 @@ const editEventSchema = z.object({
         (date) => new Date(date) > new Date(),
         "End date must be in the future"
     ),
-    package: z.enum(VIABLE_PACKAGES, {
-        errorMap: () => ({ message: "Invalid package type" }),
-    }),
 }).refine(
     (data) => new Date(data.submission_end_date) > new Date(data.submission_start_date),
     "End date must be after start date"
 );
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-    const eventId = params.id;
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id: eventId } = await params
 
     // Check if event exists
     const existingEvent = await EventEntity.get({ id: eventId }).go();
@@ -109,7 +102,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
     // Validate payload with zod
-    const validatedEditEventBody = editEventSchema.safeParse(req.body);
+    let body;
+    try {
+        body = await req.json();
+    } catch (err) {
+        return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    const validatedEditEventBody = editEventSchema.safeParse(body);
     if (!validatedEditEventBody.success) {
         return NextResponse.json(
             { error: validatedEditEventBody.error.errors[0].message },
@@ -117,6 +117,13 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         );
     }
 
-    const updatedEvent = await EventEntity.update({ id: eventId }).set(validatedEditEventBody.data).go();
-    return NextResponse.json(updatedEvent);
+    try {
+        const updatedEvent = await EventEntity.update({ id: eventId }).set({
+            submission_start_date: validatedEditEventBody.data.submission_start_date,
+            submission_end_date: validatedEditEventBody.data.submission_end_date
+        }).go();
+        return NextResponse.json(updatedEvent);
+    } catch (error) {
+        return NextResponse.json({ error: "Failed to update event" }, { status: 500 });
+    }
 }

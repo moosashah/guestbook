@@ -1,24 +1,9 @@
-
-
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Upload, Video, Mic } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DatePicker } from "@/components/date-picker";
-import { MediaRecorder } from "@/components/media-recorder";
 
-import { toast } from "sonner";
 import { EventEntity } from "@/lib/models";
-import { EditEventForm } from "@/components/edit-event";
-
-export { EditEventForm } from "@/components/edit-event";
-
+import { EditEventDatesForm } from "@/components/edit-event";
 
 interface EditEventPageProps {
   params: Promise<{
@@ -37,15 +22,11 @@ const loadEvent = async (id: string) => {
 export default async function EditEventPage({ params }: EditEventPageProps) {
   const { id } = await params;
 
- 
-
   // Find the event by ID
-  const {data:event} = await loadEvent(id);
+  const { data: event } = await loadEvent(id);
   if (!event) {
     return <div>Event not found</div>;
   }
-
-
 
   if (!event) {
     return (
@@ -71,10 +52,9 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
         Back to Event Details
       </Link>
 
-      <h1 className="text-3xl font-bold mb-6">Edit Event</h1>
+      <h1 className="text-3xl font-bold mb-6">Edit Event Dates</h1>
 
- <EditEventForm event={event} />
+      <EditEventDatesForm event={event} />
     </div>
   );
 }
-
