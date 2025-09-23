@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --experimental-https",
     "build": "NEXT_PUBLIC_GIT_SHA=$(node scripts/get-git-sha.js) next build",
     "start": "next start",
     "lint": "next lint"

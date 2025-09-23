@@ -20,6 +20,7 @@ export const MediaRecorder = ({ type, onRecordingComplete, className, descriptio
     recordedMedia,
     recordingStatus,
     resetRecording,
+    stats,
     startRecording,
     stopRecording,
     stream,
@@ -56,6 +57,8 @@ export const MediaRecorder = ({ type, onRecordingComplete, className, descriptio
           audioRef={audioRef}
           recordedMedia={recordedMedia}
           resetRecording={resetRecording}
+          stats={stats}
+          stream={stream}
         />
       )
     default:

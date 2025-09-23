@@ -1,3 +1,4 @@
+import { Card } from "@/components/ui/card"
 import { UseRecorderProps } from "@/lib/types"
 import { useState, useEffect, useRef } from "react"
 
@@ -12,6 +13,7 @@ export const useRecorder = ({ type }: UseRecorderProps) => {
   const [chunks, setChunks] = useState<Blob[]>([])
   const [recordedMedia, setRecordedMedia] = useState<string>("")
   const [blob, setBlob] = useState<Blob | null>(null)
+  const [stats, setStats] = useState<any>({})
 
   const mediaRecorder = useRef<MediaRecorder | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -24,7 +26,10 @@ export const useRecorder = ({ type }: UseRecorderProps) => {
     try {
       const userMedia = await navigator.mediaDevices.getUserMedia({
         audio: true,
-        video: type === "video",
+        video: type === "video" ? {
+          frameRate: { ideal: 30 },
+          facingMode: { ideal: "user" }
+        } : false
       })
       setStream(userMedia)
     } catch (err) {
@@ -40,8 +45,38 @@ export const useRecorder = ({ type }: UseRecorderProps) => {
 
     mediaRecorder.current.onstop = () => {
       const recordedBlob = new Blob(chunks, { type: mimeType })
-      setRecordedMedia(URL.createObjectURL(recordedBlob))
+      const url = URL.createObjectURL(recordedBlob)
+      setRecordedMedia(url)
       setBlob(recordedBlob)
+
+      const ref = type === "video" ? videoRef : audioRef
+
+      // Handle duration bug in Chrome
+      if (ref.current) {
+        const media = ref.current
+        media.src = url
+        media.addEventListener("loadedmetadata", () => {
+          if (media.duration === Infinity) {
+            media.currentTime = 1e101
+            media.addEventListener("timeupdate", () => {
+              media.currentTime = 0
+            }, { once: true })
+          }
+        })
+      }
+
+      console.log({
+        recordedBlob,
+        chunks,
+        mimeType,
+        size: recordedBlob.size.toString(),
+      })
+
+      setStats({
+        blobSize: recordedBlob.size.toString(),
+        videoWidth: stream?.getVideoTracks()[0],
+        videoHeight: videoRef.current?.videoHeight,
+      })
       stream?.getTracks().forEach(track => track.stop())
     }
   }
@@ -81,6 +116,7 @@ export const useRecorder = ({ type }: UseRecorderProps) => {
     recordedMedia,
     recordingStatus,
     resetRecording,
+    stats,
     startRecording,
     stopRecording,
     stream,

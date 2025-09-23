@@ -23,7 +23,7 @@ const AudioRecording = () => (
 )
 
 const VideoRecording = ({ liveVideoRef }: { liveVideoRef: React.RefObject<HTMLVideoElement | null> }) => (
-  <div className="aspect-video bg-black rounded-md mb-4 overflow-hidden">
+  <div className="aspect-square bg-black rounded-md mb-4 overflow-hidden">
     <video ref={liveVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
   </div>
 )
