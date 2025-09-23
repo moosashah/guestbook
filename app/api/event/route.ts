@@ -2,36 +2,33 @@ import { EventEntity } from "@/lib/models";
 import { NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
+import { generateAndUploadQRCode } from "@/lib/qr-code";
+import { VIABLE_PACKAGES } from "@/lib/consts";
 
-const viablePackages = ["basic", "premium", "deluxe"] as const;
+
 
 export const eventCreateSchema = z.object({
-    creatorId: z.string(),
+    creator_id: z.string(),
     name: z.string().min(1, "Event name is required"),
     description: z.string().optional(),
-    bannerImage: z.string().optional(),
-    welcomeMessage: z
-        .object({
-            type: z.enum(["audio", "video"]),
-            url: z.string(),
-        })
-        .optional(),
-    submissionStartDate: z.string().datetime().refine(
+    banner_image: z.string().optional(),
+    welcome_message: z.string().optional(),
+    submission_start_date: z.string().datetime().refine(
         (date) => new Date(date) > new Date(),
         "Start date must be in the future"
     ),
-    submissionEndDate: z.string().datetime().refine(
+    submission_end_date: z.string().datetime().refine(
         (date) => new Date(date) > new Date(),
         "End date must be in the future"
     ),
-    messageCount: z.number().default(0),
-    qrCodeUrl: z.string().optional(), // this neeeds to be generated and stored to the database
-    package: z.enum(viablePackages, {
+    message_count: z.number().default(0),
+    qr_code_url: z.string().optional(), // this neeeds to be generated and stored to the database
+    package: z.enum(VIABLE_PACKAGES, {
         errorMap: () => ({ message: "Invalid package type" }),
     }),
-    paymentStatus: z.enum(["pending", "success"]).default("pending"),
+    payment_status: z.enum(["pending", "success"]).default("pending"),
 }).refine(
-    (data) => new Date(data.submissionEndDate) > new Date(data.submissionStartDate),
+    (data) => new Date(data.submission_end_date) > new Date(data.submission_start_date),
     "End date must be after start date"
 );
 
@@ -39,7 +36,11 @@ export async function POST(req: NextRequest) {
     console.log("[event] Incoming request");
     //TODO: This will need to be a form submission since we're also sending the voice message blob
     //TODO: We need to store the voice message blob to S3 and store the uri to dynamodb
-    //TODO: We need to generate a qr code for the event and store the uri to dynamodb
+
+
+    const eventId = crypto.randomUUID();
+    console.log("[event] Generated event ID:", eventId);
+
     try {
         const body = await req.json();
         console.log("[event] Incoming body:", body);
@@ -54,36 +55,32 @@ export async function POST(req: NextRequest) {
             );
         }
         const { data } = validatedData;
+        console.log("[event] Data validated successfully");
 
+        // Generate QR code and get S3 URL
+        console.log("[event] Starting QR code generation process...");
+        const qrCodeUrl = await generateAndUploadQRCode(eventId);
+        console.log("[event] QR code generated and uploaded successfully:", qrCodeUrl);
+
+        console.log("[event] Creating event in DynamoDB...");
         const event = await EventEntity.create({
             ...data,
-            id: crypto.randomUUID(),
+            id: eventId,
             description: data.description || "my description",
-            qrCodeUrl: data.qrCodeUrl || "url.com",
+            qr_code_url: qrCodeUrl,
         }).go();
 
         console.log("[event] Event created:", JSON.stringify(event, null, 4));
 
-
         return NextResponse.json(event);
     } catch (error: any) {
-        console.error("Error creating event:", error);
+        console.error("[event] Error in event creation process:", error);
         return NextResponse.json(
-            { error: "Failed to create event" },
+            { error: "Failed to create event", details: error.message },
             { status: 500 },
         );
     }
 }
 
-export async function GET(req: NextRequest) {
-    try {
-        // TODO: Implement event fetching logic
-        return NextResponse.json({ message: "Event fetch not implemented" });
-    } catch (error: any) {
-        console.error("Error fetching events:", error);
-        return NextResponse.json(
-            { error: "Failed to fetch events" },
-            { status: 500 },
-        );
-    }
-}
+
+

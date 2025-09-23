@@ -110,8 +110,8 @@ If full flow works then add auth
 ## Proof of Concept Priorities
 
 ### 1. QR Code System
-- [ ] Generate QR code using event UUID
-- [ ] Store QR code URI in event record
+- [x] Generate QR code using event UUID
+- [x] Store QR code URI in event record
 - [x] Validate event exists and is active in `/guest/[code]` route
 - [x] Add submission period validation (start/end dates)
 - [x] Add message limit validation (if implemented)
@@ -123,13 +123,13 @@ If full flow works then add auth
 - [ ] Basic media validation
 
 ### 3. Event Management
-- [ ] Event validation for dates
+- [x] Event validation for dates
 - [ ] Basic package validation
 - [x] Message limits per event
-- [ ] Basic event sharing
+- [x] Basic event sharing
 
 ### 4. Infrastructure
-- [ ] S3 upload implementation
+- [x] S3 upload implementation
 
 ### 5. Design & UX
 - [ ] Basic loading states

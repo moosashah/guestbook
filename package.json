@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.817.0",
+    "@aws-sdk/s3-request-presigner": "^3.817.0",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
@@ -52,6 +54,7 @@
     "next": "15.3.2",
     "next-pwa": "^5.6.0",
     "next-themes": "^0.4.4",
+    "qrcode": "^1.5.4",
     "react": "^19",
     "react-day-picker": "9.7.0",
     "react-dom": "^19",
@@ -67,6 +70,7 @@
   },
   "devDependencies": {
     "@types/node": "^22",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "postcss": "^8",

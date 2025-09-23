@@ -13,8 +13,8 @@ interface EventCardProps {
 
 export default function EventCard({ event }: EventCardProps) {
   const isActive =
-    new Date() >= new Date(event.submissionStartDate) &&
-    new Date() <= new Date(event.submissionEndDate);
+    new Date() >= new Date(event.submission_start_date) &&
+    new Date() <= new Date(event.submission_end_date);
 
   return (
     <Link href={`/events/${event.id}`}>
@@ -22,7 +22,7 @@ export default function EventCard({ event }: EventCardProps) {
         <div className="relative h-48 w-full">
           <Image
             src={
-              event.bannerImage || event.paymentStatus === "pending"
+              event.banner_image || event.payment_status === "pending"
                 ? "/placeholder.svg?height=400&width=600&query=wedding event"
                 : "/wedding-ceremony.png"
             }
@@ -48,13 +48,13 @@ export default function EventCard({ event }: EventCardProps) {
           <div className="flex items-center text-sm text-muted-foreground mb-1">
             <Calendar className="mr-2 h-4 w-4" />
             <span>
-              {formatDate(event.submissionStartDate)} -{" "}
-              {formatDate(event.submissionEndDate)}
+              {formatDate(event.submission_start_date)} -{" "}
+              {formatDate(event.submission_end_date)}
             </span>
           </div>
           <div className="flex items-center text-sm text-muted-foreground">
             <MessageSquare className="mr-2 h-4 w-4" />
-            <span>{event.messageCount || 0} messages</span>
+            <span>{event.message_count || 0} messages</span>
           </div>
         </CardContent>
       </Card>
