@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Package manager lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Generated files
+.next/
+.vercel/
+.turbo/
+
+# Public assets
+public/
+
+# Certificates
+certificates/
+
+# Config files that shouldn't be formatted
+*.config.js
+*.config.mjs
+*.config.ts
+tailwind.config.ts
+next.config.mjs
+postcss.config.mjs
+
+# TypeScript declaration files
+*.d.ts
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

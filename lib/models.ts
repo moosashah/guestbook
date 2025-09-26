@@ -41,7 +41,7 @@ export const EventEntity = new Entity({
             readOnly: true
         },
         deleted_at: { type: "number", required: true, default: () => 0 },
-        qr_code_url: { type: "string", required: true },
+        qr_code_key: { type: "string", required: true },
         package: { type: ["basic", "deluxe", "premium"] as const, required: true },
         payment_status: { type: ["pending", "success"] as const, required: true }
     },
@@ -73,7 +73,7 @@ export const MessageEntity = new Entity({
         event_id: { type: "string", required: true },
         guest_name: { type: "string", required: true },
         media_type: { type: ["audio", "video"] as const, required: true },
-        media_url: { type: "string", required: true },
+        media_key: { type: "string", required: true },
         created_at: { type: "number", required: true, default: () => Date.now(), readOnly: true },
         updated_at: {
             type: "number",

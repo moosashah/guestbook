@@ -4,28 +4,27 @@ import { useRecorder } from "@/hooks/use-recorder"
 import { Inactive } from "./recorder/inactive"
 import { Recording } from "./recorder/recording"
 import { Preview } from "./recorder/preview"
+import { Dispatch, SetStateAction } from "react"
 
 interface MediaRecorderProps {
   type: "audio" | "video"
-  onRecordingComplete: (blob: Blob) => void
+  setBlob: Dispatch<SetStateAction<Blob | null>>
   description: string
   className?: string
 }
 
-export const MediaRecorder = ({ type, onRecordingComplete, className, description }: MediaRecorderProps) => {
+export const MediaRecorder = ({ type, setBlob, className, description }: MediaRecorderProps) => {
   const {
-    blob,
     audioRef,
     liveVideoRef,
     recordedMedia,
     recordingStatus,
     resetRecording,
-    stats,
     startRecording,
     stopRecording,
     stream,
     videoRef
-  } = useRecorder({ type })
+  } = useRecorder({ type, setBlob })
 
   switch (recordingStatus) {
     case "inactive":
@@ -57,7 +56,6 @@ export const MediaRecorder = ({ type, onRecordingComplete, className, descriptio
           audioRef={audioRef}
           recordedMedia={recordedMedia}
           resetRecording={resetRecording}
-          stats={stats}
           stream={stream}
         />
       )

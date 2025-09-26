@@ -4,13 +4,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { generateAndUploadQRCode } from "@/lib/qr-code";
 import { VIABLE_PACKAGES } from "@/lib/consts";
+import { nanoid } from "nanoid";
 
 
 
 export const eventCreateSchema = z.object({
     creator_id: z.string(),
     name: z.string().min(1, "Event name is required"),
-    description: z.string().optional(),
+    description: z.string().optional().default("my description"),
     banner_image: z.string().optional(),
     welcome_message: z.string().optional(),
     submission_start_date: z.string().datetime().refine(
@@ -22,7 +23,6 @@ export const eventCreateSchema = z.object({
         "End date must be in the future"
     ),
     message_count: z.number().default(0),
-    qr_code_url: z.string().optional(), // this neeeds to be generated and stored to the database
     package: z.enum(VIABLE_PACKAGES, {
         errorMap: () => ({ message: "Invalid package type" }),
     }),
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     //TODO: We need to store the voice message blob to S3 and store the uri to dynamodb
 
 
-    const eventId = crypto.randomUUID();
+    const eventId = nanoid(10);
     console.log("[event] Generated event ID:", eventId);
 
     try {
@@ -59,15 +59,15 @@ export async function POST(req: NextRequest) {
 
         // Generate QR code and get S3 URL
         console.log("[event] Starting QR code generation process...");
-        const qrCodeUrl = await generateAndUploadQRCode(eventId);
-        console.log("[event] QR code generated and uploaded successfully:", qrCodeUrl);
+        const qrCodeKey = await generateAndUploadQRCode(eventId);
+        console.log("[event] QR code generated and uploaded successfully:", qrCodeKey);
 
         console.log("[event] Creating event in DynamoDB...");
         const event = await EventEntity.create({
             ...data,
             id: eventId,
-            description: data.description || "my description",
-            qr_code_url: qrCodeUrl,
+            description: data.description,
+            qr_code_key: qrCodeKey,
         }).go();
 
         console.log("[event] Event created:", JSON.stringify(event, null, 4));

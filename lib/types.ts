@@ -5,6 +5,3 @@ export type Event = EntityItem<typeof EventEntity>;
 
 export type Message = EntityItem<typeof MessageEntity>;
 
-export interface UseRecorderProps {
-  type: "audio" | "video"
-}

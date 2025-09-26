@@ -142,8 +142,6 @@ export default async function EventPage({
 
           <EventButtons
             eventId={id}
-            qrCodeUrl={event.qr_code_url}
-            eventName={event.name}
           />
         </div>
       </div>

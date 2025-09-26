@@ -1,18 +1,22 @@
-import { Card } from "@/components/ui/card"
-import { UseRecorderProps } from "@/lib/types"
-import { useState, useEffect, useRef } from "react"
+"use client"
+
+import { useState, useEffect, useRef, SetStateAction, Dispatch } from "react"
+
+interface UseRecorderProps {
+  type: "audio" | "video"
+  setBlob: Dispatch<SetStateAction<Blob | null>>
+}
 
 const mimeTypes = {
   audio: ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"],
   video: ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm", "video/mp4"]
 } as const
 
-export const useRecorder = ({ type }: UseRecorderProps) => {
+export const useRecorder = ({ type, setBlob }: UseRecorderProps) => {
   const [recordingStatus, setRecordingStatus] = useState<"inactive" | "recording" | "preview">("inactive")
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [chunks, setChunks] = useState<Blob[]>([])
-  const [recordedMedia, setRecordedMedia] = useState<string>("")
-  const [blob, setBlob] = useState<Blob | null>(null)
+  const [recordedMedia, setRecordedMedia] = useState<string | undefined>(undefined)
   const [stats, setStats] = useState<any>({})
 
   const mediaRecorder = useRef<MediaRecorder | null>(null)
@@ -20,9 +24,16 @@ export const useRecorder = ({ type }: UseRecorderProps) => {
   const audioRef = useRef<HTMLAudioElement>(null)
   const liveVideoRef = useRef<HTMLVideoElement>(null)
 
-  const mimeType = mimeTypes[type].find(type => MediaRecorder.isTypeSupported(type)) || ""
+  const mimeType = typeof window !== 'undefined'
+    ? mimeTypes[type].find(type => MediaRecorder && MediaRecorder.isTypeSupported(type)) || ""
+    : ""
 
   const startRecording = async () => {
+    if (typeof window === 'undefined' || !navigator?.mediaDevices) {
+      console.error("Media devices not available")
+      return
+    }
+
     try {
       const userMedia = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -91,7 +102,7 @@ export const useRecorder = ({ type }: UseRecorderProps) => {
   }
 
   useEffect(() => {
-    if (!stream) return
+    if (!stream || typeof window === 'undefined' || !MediaRecorder) return
 
     setRecordingStatus("recording")
     const media = new MediaRecorder(stream, { mimeType })
@@ -110,7 +121,6 @@ export const useRecorder = ({ type }: UseRecorderProps) => {
   }, [stream, mimeType])
 
   return {
-    blob,
     audioRef,
     liveVideoRef,
     recordedMedia,

@@ -14,7 +14,7 @@ async function isAuthorized(req: NextRequest, eventId: string): Promise<boolean>
     return true; // Assume authorized for now
 }
 
-const eventIdSchema = z.string().uuid({ message: "Invalid event ID format" });
+const eventIdSchema = z.string();
 
 export async function DELETE(
     req: NextRequest,
