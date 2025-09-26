@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MediaRecorder } from "@/components/media-recorder";
+import { UploadProgressComponent } from "@/components/upload-progress";
 import { useState } from "react";
-import { Event } from "@/lib/types";
+import type { Event } from "@/lib/types";
+import { uploadMessage, UploadProgress } from "@/lib/upload-client";
 
 export function GuestForm({ event }: { event: Event }) {
   const [mediaType, setMediaType] = useState<"video" | "audio">("video");
@@ -16,28 +18,67 @@ export function GuestForm({ event }: { event: Event }) {
   const [isSuccess, setIsSuccess] = useState(false);
   const [guestName, setGuestName] = useState("");
   const [messageBlob, setMessageBlob] = useState<Blob | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
+  const [uploadError, setUploadError] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!messageBlob) {
+      setUploadError("Please record a message first");
+      setUploadStatus("error");
+      return;
+    }
+
     setIsSubmitting(true);
+    setUploadStatus("uploading");
+    setUploadProgress(null);
+    setUploadError("");
 
     try {
-      // In a real app, we would submit the form data to the server
-      // and handle file uploads to S3
-      console.log("Guest message to submit:", {
-        guestName,
-        mediaType,
-        messageBlob,
-      });
-
-      // Simulate a delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      setIsSuccess(true);
+      await uploadMessage(
+        {
+          event_id: event.id,
+          guest_name: guestName,
+          media_type: mediaType,
+          message_blob: messageBlob,
+        },
+        {
+          onProgress: (progress) => {
+            setUploadProgress(progress);
+          },
+          onSuccess: (response) => {
+            console.log("Upload successful:", response);
+            setUploadStatus("success");
+            setIsSuccess(true);
+            setIsSubmitting(false);
+          },
+          onError: (error) => {
+            console.error("Upload failed:", error);
+            setUploadStatus("error");
+            setUploadError(error.message);
+            setIsSubmitting(false);
+          },
+        }
+      );
     } catch (error) {
       console.error("Error submitting message:", error);
+      setUploadStatus("error");
+      setUploadError(error instanceof Error ? error.message : "Upload failed");
       setIsSubmitting(false);
     }
+  };
+
+  const handleRetryUpload = () => {
+    handleSubmit(new Event("submit") as any);
+  };
+
+  const handleCancelUpload = () => {
+    setUploadStatus("idle");
+    setUploadProgress(null);
+    setUploadError("");
+    setIsSubmitting(false);
   };
 
   if (isSuccess) {
@@ -70,7 +111,7 @@ export function GuestForm({ event }: { event: Event }) {
             </p>
           </div>
 
-          {event.welcomeMessage && (
+          {event.welcome_message && (
             <div className="mb-6 bg-muted rounded-lg p-4 text-center">
               <p className="text-sm text-muted-foreground mb-2">
                 Welcome message from the couple:
@@ -115,7 +156,7 @@ export function GuestForm({ event }: { event: Event }) {
                 <TabsContent value="video">
                   <MediaRecorder
                     type="video"
-                    onRecordingComplete={(blob) => setMessageBlob(blob)}
+                    setBlob={setMessageBlob}
                     description="Record a video message for the happy couple"
                   />
                 </TabsContent>
@@ -123,19 +164,30 @@ export function GuestForm({ event }: { event: Event }) {
                 <TabsContent value="audio">
                   <MediaRecorder
                     type="audio"
-                    onRecordingComplete={(blob) => setMessageBlob(blob)}
+                    setBlob={setMessageBlob}
                     description="Record an audio message for the happy couple"
                   />
                 </TabsContent>
               </Tabs>
             </div>
 
+            {/* Upload Progress */}
+            {uploadStatus !== "idle" && (
+              <UploadProgressComponent
+                progress={uploadProgress}
+                status={uploadStatus}
+                error={uploadError}
+                onRetry={handleRetryUpload}
+                onCancel={handleCancelUpload}
+              />
+            )}
+
             <Button
               type="submit"
               className="w-full"
               disabled={isSubmitting || !messageBlob || !guestName}
             >
-              {isSubmitting ? "Submitting..." : "Submit Message"}
+              {isSubmitting ? "Uploading..." : "Submit Message"}
             </Button>
           </form>
         </CardContent>

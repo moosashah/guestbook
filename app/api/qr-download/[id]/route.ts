@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { BUCKET_NAME } from "@/lib/consts";
+
 import { z } from "zod";
 import { EventEntity } from "@/lib/models";
+import { qrCodeDownloadUrl } from "@/lib/s3.server";
 
 async function isAuthenticated(req: NextRequest, eventId: string): Promise<boolean> {
     console.log(`Authenticating user for event: ${eventId}`); // Placeholder
@@ -18,9 +17,9 @@ async function eventExists(eventId: string): Promise<boolean> {
     return true
 }
 
-const s3Client = new S3Client({ region: "eu-west-2" });
 
-const eventIdSchema = z.string().uuid({ message: "Invalid event ID format" });
+
+const eventIdSchema = z.string()
 
 export async function GET(
     req: NextRequest,
@@ -48,14 +47,10 @@ export async function GET(
 
     const key = `events/${eventId}/qr.png`;
 
-    const command = new GetObjectCommand({
-        Bucket: BUCKET_NAME,
-        Key: key,
-        ResponseContentDisposition: 'attachment; filename="event-qr.png"',
-    });
+
 
     try {
-        const url = await getSignedUrl(s3Client, command, { expiresIn: 60 }); // 1 minute expiry
+        const url = await qrCodeDownloadUrl(key);
         return NextResponse.json({ url });
     } catch (err) {
         return NextResponse.json({ error: "Failed to generate presigned URL" }, { status: 500 });

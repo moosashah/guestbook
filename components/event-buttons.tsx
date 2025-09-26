@@ -5,16 +5,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Download, Edit, Trash2 } from "lucide-react";
-import Image from "next/image";
 
 export function EventButtons({
   eventId,
-  qrCodeUrl,
-  eventName,
 }: {
   eventId: string;
-  qrCodeUrl: string;
-  eventName: string;
 }) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -73,15 +68,6 @@ export function EventButtons({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex justify-center">
-        <Image
-          width={200}
-          height={200}
-          src={qrCodeUrl}
-          alt={`QR code for event ${eventName} - scan to access guest page`}
-          onError={() => console.error("Failed to load QR code image")}
-        />
-      </div>
       <div className="flex gap-2 flex-wrap">
         <Link href={`/events/${eventId}/edit`}>
           <Button variant="outline" size="sm">

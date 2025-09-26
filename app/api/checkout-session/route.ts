@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       package: z.enum(["basic", "premium", "deluxe"], {
         errorMap: () => ({ message: "Invalid package type" }),
       }),
-      eventId: z.string().uuid(),
+      eventId: z.string(),
     });
 
     const validatedData = checkoutSessionSchema.safeParse(body);
