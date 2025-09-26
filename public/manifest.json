@@ -1,9 +1,0 @@
-{
-  "name": "Guestbook",
-  "short_name": "Guestbook",
-  "description": "Collect and cherish wedding memories from your guests",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000"
-}

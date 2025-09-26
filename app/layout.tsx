@@ -13,20 +13,11 @@ export const viewport: Viewport = {
   themeColor: "white",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export const metadata: Metadata = {
   title: "Wedding Memories",
   description: "Collect and cherish wedding memories from your guests",
-  manifest: "/manifest.json",
-
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Wedding Memories",
-  },
 };
 
 export default function RootLayout({
@@ -36,9 +27,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="bg-white">
-      <head>
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
-      </head>
       <body className={cn(inter.className, "bg-white")}>
         {children}
         <Toaster />
