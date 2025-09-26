@@ -2,6 +2,14 @@
 
 A wedding guestbook application with video message compilation, built with Turborepo.
 
+
+
+## testing scripts
+
+run `node bin/download-messages.js <eventId>` to download messages for that event
+
+run `./bin/proven-concat-method` to compile into a single video
+
 ## Architecture
 
 This monorepo contains:
