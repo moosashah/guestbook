@@ -181,8 +181,18 @@ export class CompilerService {
 
     private async downloadMediaFiles(messages: any[]): Promise<string[]> {
         const downloadPromises = messages.map(async (message, index) => {
-            const localPath = `/tmp/${nanoid()}.${message.media_type === 'video' ? 'webm' : 'wav'}`;
+            // Use the correct file extension based on media_type
+            const extension = message.media_type === 'video' ? 'webm' : 'wav';
+            const localPath = `/tmp/${nanoid()}.${extension}`;
             await this.s3Service.downloadFile(message.media_key, localPath);
+
+            console.log(JSON.stringify({
+                message: 'Downloaded media file',
+                messageId: message.id,
+                mediaType: message.media_type,
+                localPath: localPath
+            }, null, 4));
+
             return localPath;
         });
 
