@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Calendar } from "lucide-react";
+import { ArrowLeft, Calendar, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDate } from "@/lib/utils";
 import MessageCard from "@/components/message-card";
 import { EventButtons } from "@/components/event-buttons";
+import { EventVideoControls } from "@/components/event-video-controls";
 import { EventEntity, MessageEntity } from "@/lib/models";
 import Stripe from "stripe";
 
@@ -140,9 +141,15 @@ export default async function EventPage({
             </Badge>
           </div>
 
-          <EventButtons
-            eventId={id}
-          />
+          <div className="flex flex-col sm:flex-row gap-4">
+            <EventButtons
+              eventId={id}
+            />
+            <EventVideoControls
+              eventId={id}
+              initialHasFinalVideo={!!event.final_video_key}
+            />
+          </div>
         </div>
       </div>
 

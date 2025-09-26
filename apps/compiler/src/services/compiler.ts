@@ -1,0 +1,215 @@
+import { createMessageEntity, createEventEntity, EventEntityType, MessageEntityType } from '@guestbook/shared';
+import DynamoDB from 'aws-sdk/clients/dynamodb';
+import { S3Service } from './s3';
+import { VideoProcessor } from './video-processor';
+import { nanoid } from 'nanoid';
+
+export interface CompilationStatus {
+    eventId: string;
+    status: 'pending' | 'processing' | 'completed' | 'failed';
+    progress?: number;
+    outputUrl?: string;
+    error?: string;
+}
+
+export class CompilerService {
+    private s3Service: S3Service;
+    private videoProcessor: VideoProcessor;
+    private compilationStatuses: Map<string, CompilationStatus> = new Map();
+    private dynamoClient: DynamoDB.DocumentClient;
+    private EventEntity: EventEntityType;
+    private MessageEntity: MessageEntityType;
+
+    constructor() {
+        this.s3Service = new S3Service();
+        this.videoProcessor = new VideoProcessor();
+
+        // Validate required environment variables
+        if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+            console.error(JSON.stringify({
+                error: 'Missing AWS credentials',
+                message: 'AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables are required',
+                note: 'Copy env.example to .env and fill in your AWS credentials'
+            }, null, 4));
+            throw new Error('Missing AWS credentials');
+        }
+
+        // Create DynamoDB client
+        this.dynamoClient = new DynamoDB.DocumentClient({
+            region: process.env.AWS_REGION || "eu-west-2",
+            credentials: {
+                accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+            }
+        });
+
+        // Create entity instances with the client
+        this.EventEntity = createEventEntity(this.dynamoClient);
+        this.MessageEntity = createMessageEntity(this.dynamoClient);
+
+        console.log(JSON.stringify({
+            message: 'CompilerService initialized successfully',
+            region: process.env.AWS_REGION || "eu-west-2",
+            bucket: process.env.S3_BUCKET_NAME || "guestbook-assets-2024-dev"
+        }, null, 4));
+    }
+
+    async compileEvent(eventId: string, webhookUrl?: string): Promise<void> {
+        try {
+            // Set initial status
+            this.compilationStatuses.set(eventId, {
+                eventId,
+                status: 'processing',
+                progress: 0
+            });
+
+            console.log(JSON.stringify({ message: 'Fetching event and messages', eventId }, null, 4));
+
+            // Fetch event details
+            const event = await this.EventEntity.get({ id: eventId }).go();
+            if (!event.data) {
+                throw new Error(`Event not found: ${eventId}`);
+            }
+
+            // Check if final video already exists
+            if (event.data.final_video_key) {
+                throw new Error(`Final video already exists for event: ${eventId}. Use the existing video or delete it first.`);
+            }
+
+            // Fetch all messages for the event
+            const messages = await this.MessageEntity.query.event({ event_id: eventId }).go();
+
+            if (!messages.data || messages.data.length === 0) {
+                throw new Error(`No messages found for event: ${eventId}`);
+            }
+
+            console.log(JSON.stringify({
+                message: 'Found messages',
+                eventId,
+                messageCount: messages.data.length
+            }, null, 4));
+
+            // Update progress
+            this.updateProgress(eventId, 20);
+
+            // Download media files from S3
+            const mediaFiles = await this.downloadMediaFiles(messages.data);
+            this.updateProgress(eventId, 40);
+
+            // Process and stitch videos
+            const outputPath = await this.videoProcessor.stitchVideos(
+                mediaFiles,
+                event.data,
+                (progress) => this.updateProgress(eventId, 40 + (progress * 0.4))
+            );
+            this.updateProgress(eventId, 80);
+
+            // Upload final video to S3
+            const { s3Key, s3Url } = await this.s3Service.uploadFinalVideo(outputPath, eventId);
+            this.updateProgress(eventId, 90);
+
+            // Update the event with the final video key
+            await this.EventEntity.patch({ id: eventId }).set({ final_video_key: s3Key }).go();
+            this.updateProgress(eventId, 100);
+
+            // Update status to completed
+            this.compilationStatuses.set(eventId, {
+                eventId,
+                status: 'completed',
+                progress: 100,
+                outputUrl: s3Url
+            });
+
+            console.log(JSON.stringify({
+                message: 'Compilation completed',
+                eventId,
+                finalVideoKey: s3Key,
+                outputUrl: s3Url
+            }, null, 4));
+
+            // Call webhook if provided
+            if (webhookUrl) {
+                await this.notifyWebhook(webhookUrl, {
+                    eventId,
+                    status: 'completed',
+                    outputUrl: s3Url
+                });
+            }
+
+            // Cleanup temporary files
+            await this.videoProcessor.cleanup(mediaFiles, outputPath);
+
+        } catch (error) {
+            console.error(JSON.stringify({
+                error: 'Compilation failed',
+                eventId,
+                message: (error as Error).message
+            }, null, 4));
+
+            this.compilationStatuses.set(eventId, {
+                eventId,
+                status: 'failed',
+                error: (error as Error).message
+            });
+
+            if (webhookUrl) {
+                await this.notifyWebhook(webhookUrl, {
+                    eventId,
+                    status: 'failed',
+                    error: (error as Error).message
+                });
+            }
+        }
+    }
+
+    async getCompilationStatus(eventId: string): Promise<CompilationStatus> {
+        return this.compilationStatuses.get(eventId) || {
+            eventId,
+            status: 'pending'
+        };
+    }
+
+    private updateProgress(eventId: string, progress: number): void {
+        const current = this.compilationStatuses.get(eventId);
+        if (current) {
+            this.compilationStatuses.set(eventId, {
+                ...current,
+                progress
+            });
+        }
+    }
+
+    private async downloadMediaFiles(messages: any[]): Promise<string[]> {
+        const downloadPromises = messages.map(async (message, index) => {
+            const localPath = `/tmp/${nanoid()}.${message.media_type === 'video' ? 'webm' : 'wav'}`;
+            await this.s3Service.downloadFile(message.media_key, localPath);
+            return localPath;
+        });
+
+        return Promise.all(downloadPromises);
+    }
+
+    private async notifyWebhook(webhookUrl: string, data: any): Promise<void> {
+        try {
+            const response = await fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                console.error(JSON.stringify({
+                    error: 'Webhook notification failed',
+                    status: response.status
+                }, null, 4));
+            }
+        } catch (error) {
+            console.error(JSON.stringify({
+                error: 'Failed to call webhook',
+                message: (error as Error).message
+            }, null, 4));
+        }
+    }
+}

@@ -1,17 +1,10 @@
 import { Entity } from "electrodb";
 import DynamoDB from "aws-sdk/clients/dynamodb";
 
-const client = new DynamoDB.DocumentClient({
-    region: "eu-west-2",
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
-    }
-});
-
 const table = "guestbook-dev"
-// Event entity definition
-export const EventEntity = new Entity({
+
+// Factory function to create Event entity with provided client
+export const createEventEntity = (client: DynamoDB.DocumentClient) => new Entity({
     model: {
         entity: "Event",
         version: "1",
@@ -42,6 +35,7 @@ export const EventEntity = new Entity({
         },
         deleted_at: { type: "number", required: true, default: () => 0 },
         qr_code_key: { type: "string", required: true },
+        final_video_key: { type: "string", required: false },
         package: { type: ["basic", "deluxe", "premium"] as const, required: true },
         payment_status: { type: ["pending", "success"] as const, required: true }
     },
@@ -61,8 +55,8 @@ export const EventEntity = new Entity({
     client
 });
 
-// Message entity definition
-export const MessageEntity = new Entity({
+// Factory function to create Message entity with provided client
+export const createMessageEntity = (client: DynamoDB.DocumentClient) => new Entity({
     model: {
         entity: "Message",
         version: "1",
@@ -94,4 +88,7 @@ export const MessageEntity = new Entity({
 }, {
     table,
     client
-}); 
+});
+
+// Export factory functions and types only
+// Apps must create their own DynamoDB clients and use the factory functions 

@@ -1,145 +1,114 @@
-# Guestbook PRD & Project Status
+# Guestbook Monorepo
 
----
+A wedding guestbook application with video message compilation, built with Turborepo.
 
-## Product Requirements Document (PRD)
+## Architecture
 
-### NFRs
+This monorepo contains:
 
-| NFRs                | Delivery phase | Implementation                                                                                  | Notes/Links                                                                                      |
-|---------------------|---------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
-| Repo set up         | Demo          | Monorepo/turborepo                                                                            |                                                                                                  |
-| Infrastructure      | Demo          | S3, EventBridge, ECS/Fargate, Dynamo (?)                                                      |                                                                                                  |
-| CI/CD               | Demo          | GitHub Actions                                                                                |                                                                                                  |
-| App Clip/Instant Apps | MVP         | If S3 version, then consider WebView at end                                                   |                                                                                                  |
-| UI/UX               | Demo          | Next                                                                                          |                                                                                                  |
-| QR code CDN         | Demo          | Cloudinary? s3??                                                                              |                                                                                                  |
+- **`apps/guestbook`**: Next.js web application for collecting guest messages
+- **`apps/compiler`**: Node.js microservice for stitching videos and uploading to S3
+- **`packages/shared`**: Shared types, models, and utilities
 
----
+## Quick Start
 
-### Backend services
+```bash
+# Install dependencies
+npm install
 
-| Feature                        | Delivery phase | Implementation/Notes                                                                                  |
-|--------------------------------|---------------|-------------------------------------------------------------------------------------------------------|
-| QR code generate -> Event      | Demo          | Library - if invalidation and regeneration is a lot of work, push to V2                               |
-| Create a message               | Demo          | S3 upload API > Limit 2 audio and 2 video                                                             |
-| Create an event                | Demo          | Next/Dynamo                                                                                           |
-| Edit an event                  | Demo          | Next/Dynamo                                                                                           |
-| List events                    | Demo          | Next/Dynamo                                                                                           |
-| Get Event (guests, package, dates) | MVP      | Next/Dynamo                                                                                           |
-| Payment integration            | Demo          | Stripe or wrapper                                                                                     |
-| Audio batch processing         | Demo          | Event driven job                                                                                      |
-| Video batch processing         | Demo          | Event driven job                                                                                      |
+# Start all apps in development mode
+npm run dev
 
----
+# Build all apps
+npm run build
 
-### Guest Portal (Browser/PWA)
+# Run linting
+npm run lint
+```
 
-| Feature                        | Delivery phase | Implementation/Notes                                                                                  |
-|--------------------------------|---------------|-------------------------------------------------------------------------------------------------------|
-| QR code display                | Demo          | qrcode library                                                                                        |
-| Event has not started/ended page | Demo        |                                                                                                       |
-| Event reached recording limit  | Demo          | 50% buffer on the cookies                                                                            |
-| Audio recording                | Demo          | Client side blob, no need for playback in browser                                                     |
-| Paywalled video recording      | Demo          | Client side blob                                                                                      |
-| Cancel recording               | Demo          | Client side blob                                                                                      |
-| Compression                    | Demo          |                                                                                                       |
-| Submit message                 | Demo          | S3 file storage solution + save url or "path" to database                                             |
-| Limit recordings per person    | Demo          |                                                                                                       |
+## Apps
 
----
+### Guestbook App (Port 3000)
+- Next.js 15 with React 19
+- Tailwind CSS + shadcn/ui components
+- Stripe payment integration
+- S3 media upload
+- DynamoDB for data storage
 
-### Event Portal (Desktop/mobile)
+### Compiler Service (Port 3001)
+- Express.js microservice
+- FFmpeg video processing
+- S3 integration for media download/upload
+- Webhook notifications
+- Docker support
 
-| Feature                        | Delivery phase | Implementation/Notes                                                                                  |
-|--------------------------------|---------------|-------------------------------------------------------------------------------------------------------|
-| Authentication                 | Demo          | openauth/clerk                                                                                        |
-| SSO                            | MVP           | ^                                                                                                     |
-| Create new event               | Demo          |                                                                                                       |
-| Audio recording                | Demo          |                                                                                                       |
-| Images upload                  | Demo          |                                                                                                       |
-| Text entry                     | Demo          | Title and description                                                                                 |
-| Pay for event                  | Demo          | Payment after create account                                                                          |
-| QR code display                | Demo          |                                                                                                       |
-| List events                    | Demo          |                                                                                                       |
-| Message list                   | Demo          |                                                                                                       |
-| Message playback               | Demo          | Both individual and stitched                                                                          |
-| Event sharing                  | Demo          | Sharing?                                                                                              |
+## Development
 
----
+Each app can be developed independently:
 
-## Project Status Checklist
+```bash
+# Work on guestbook only
+cd apps/guestbook
+npm run dev
 
-### Partially Complete / In Progress
-- [ ] Infrastructure: S3 upload logic is stubbed, not fully implemented; Dynamo/EventBridge/ECS not confirmed
-- [ ] Audio/video recording (`components/media-recorder.tsx`)
-- [ ] Message playback (`components/media-player.tsx`)
-- [ ] Authentication/SSO: No openauth/clerk or SSO logic found
-- [ ] Batch processing (audio/video): No event-driven job logic found
-- [ ] Recording limits: No explicit logic for per-person or per-event limits
-- [ ] Compression: Not found
-- [ ] Cancel recording: UI may allow, but not confirmed in code
-- [ ] Event has not started/ended page: Not confirmed
-- [ ] Event reached recording limit: Not confirmed
-- [ ] Get Event (guests, package, dates): Event model supports it, but not all endpoints confirmed
-- [ ] QR code CDN: No Cloudinary or CDN logic found, only static asset
+# Work on compiler only
+cd apps/compiler
+npm run dev
+```
 
-### Completed Features
-- [x] Repo set up (Monorepo/turborepo, Next.js, pnpm, etc.)
-- [x] UI/UX (Next.js, Tailwind, custom components)
-- [x] QR code display (static asset, likely used in UI)
-- [x] PWA support (`next-pwa`, `public/manifest.json`)
-- [x] Create an event frontend `app/create/page.tsx`
-- [x] Edit an event frontend `app/events/[id]/edit/page.tsx`
-- [x] List events frontend (Event listing logic in types and pages)
-- [x] Create a message frontend (Guest page allows message recording/upload)
+## Deployment
 
-- [x] Submit message frontend (Guest page, S3 upload logic in `lib/upload-media.ts`)
-- [x] Text entry (Event creation form includes title/description)
-- [x] Payment integration (Stripe, `/api/checkout-session`)
-- [x] Event sharing frontend (event codes/QR imply sharing)
-- [x] Pay for event (Stripe integration in event creation flow)
-- [x] Images upload frontend (Banner image upload in event creation)
-- [x] Event portal (desktop/mobile) (Responsive Next.js app)
-- [x] Guest portal (browser/PWA) (Guest message submission, QR, etc.)
+### Guestbook App
+Deploy to Vercel, Netlify, or any Next.js hosting platform.
 
----
+### Compiler Service
+Deploy as a Docker container to AWS ECS, Google Cloud Run, or similar container platforms.
 
-If full flow works then add auth
+```bash
+cd apps/compiler
+docker build -t compiler-service .
+docker run -p 3001:3001 --env-file .env compiler-service
+```
 
-## Proof of Concept Priorities
+## Environment Setup
 
-### 1. QR Code System
-- [x] Generate QR code using event UUID
-- [x] Store QR code URI in event record
-- [x] Validate event exists and is active in `/guest/[code]` route
-- [x] Add submission period validation (start/end dates)
-- [x] Add message limit validation (if implemented)
+### Guestbook App
+Copy environment variables from your existing setup.
 
-### 2. Media Recording & Processing
-- [ ] Fix permission handling bug
-- [ ] Add warning when switching mediums
-- [ ] Implement basic S3 upload
-- [ ] Basic media validation
+### Compiler Service
+```bash
+cd apps/compiler
+cp env.example .env
+# Edit .env with your AWS credentials and configuration
+```
 
-### 3. Event Management
-- [x] Event validation for dates
-- [ ] Basic package validation
-- [x] Message limits per event
-- [x] Basic event sharing
+## Workflow
 
-### 4. Infrastructure
-- [x] S3 upload implementation
+1. **Guest Interaction**: Guests use the guestbook app to record video/audio messages
+2. **Message Storage**: Messages are stored in S3, metadata in DynamoDB
+3. **Compilation Trigger**: Wedding host triggers video compilation via guestbook app
+4. **Processing**: Compiler service stitches messages together
+5. **Delivery**: Final video is uploaded to S3 and host is notified
 
-### 5. Design & UX
-- [ ] Basic loading states
-- [ ] Basic error states
-- [ ] Basic success states
-- [ ] Basic form validation
+## Technology Stack
 
-### 6. Authentication (Post-PoC)
-- [ ] Set up Clerk provider and middleware
-- [ ] Protect event creation route (`/create`)
-- [ ] Protect event management routes (`/events/[id]/*`)
-- [ ] Add user ID to event creation payload
-- [ ] Add authorization check for event access (creator only)
+- **Frontend**: Next.js, React, Tailwind CSS, TypeScript
+- **Backend**: Node.js, Express.js, TypeScript
+- **Database**: DynamoDB with ElectroDB
+- **Storage**: AWS S3
+- **Video Processing**: FFmpeg
+- **Payments**: Stripe
+- **Monorepo**: Turborepo
+- **Deployment**: Docker, Vercel
+
+## Contributing
+
+1. Install dependencies: `npm install`
+2. Make your changes
+3. Test locally: `npm run dev`
+4. Build to verify: `npm run build`
+5. Submit a pull request
+
+## License
+
+Private project - All rights reserved.

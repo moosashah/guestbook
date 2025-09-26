@@ -1,0 +1,27 @@
+FROM node:18-alpine
+
+# Install ffmpeg and pnpm
+RUN apk add --no-cache ffmpeg
+RUN npm install -g pnpm
+
+WORKDIR /app
+
+# Copy package files and shared package
+COPY apps/compiler/package.json ./
+COPY packages/shared ./packages/shared
+
+# Copy the workspace configuration
+COPY pnpm-workspace.yaml ./
+
+# Install dependencies with pnpm (workspace aware)
+RUN pnpm install
+
+# Build the shared package
+RUN cd packages/shared && pnpm build
+
+# For development, we'll mount the source code as a volume
+# Expose port
+EXPOSE 3001
+
+# Start in development mode with hot reload (local dev script)
+CMD ["pnpm", "run", "dev:local"]
