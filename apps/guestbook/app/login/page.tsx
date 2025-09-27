@@ -1,13 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Logo, LogoText } from '@/components/svgs/logo';
 import { login } from '../actions';
 import { toast } from 'sonner';
@@ -18,7 +12,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className='  flex flex-col lg:flex-row relative overflow-hidden'>
+    <div className='flex flex-col lg:flex-row relative overflow-hidden h-screen'>
       {/* Mobile top image */}
       <div className='lg:hidden relative h-80 z-10'>
         <div

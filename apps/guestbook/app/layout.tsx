@@ -58,12 +58,12 @@ export default async function RootLayout({
 
 function Header({ subject }: { subject: any }) {
   return (
-    <header className='sticky top-0 z-50 w-full shadow-xs bg-cream'>
+    <header className='sticky top-0 z-50 w-full shadow-xs bg-cream container mx-auto'>
       {/* Main Header */}
       <div className='flex items-center justify-between px-4 py-3'>
         {/* Logo and Brand */}
         <div className='flex items-center gap-3'>
-          <Logo />
+          <Logo size={32} />
           <LogoText color='#2B1105' />
         </div>
 

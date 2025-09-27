@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { PlusCircle } from 'lucide-react';
+import Image from 'next/image';
+import { CalendarFold, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import EventCard from '@/components/event-card';
-import { GitSHA } from '@/components/git-sha';
 import { EventEntity } from '@/lib/models';
 import { getBannerImageUrl } from '@/lib/s3.server';
 import { auth } from './actions';
@@ -44,13 +45,16 @@ export default async function Dashboard() {
   );
 
   return (
-    <div className='container mx-auto py-8 px-4'>
+    <div className='py-8 px-4 container mx-auto'>
       <div className='flex justify-between items-center mb-8'>
-        <h1 className='text-3xl font-bold'>Your Events</h1>
+        <div className='flex items-center gap-2'>
+          <CalendarFold className='size-6 text-primary' />
+          <h1 className='text-xl font-semibold'>My Events</h1>
+        </div>
         <Link href='/create'>
           <Button>
-            <PlusCircle className='mr-2 h-4 w-4' />
-            Create Event
+            <Plus className='size-4' />
+            Create New Event
           </Button>
         </Link>
       </div>
@@ -61,12 +65,47 @@ export default async function Dashboard() {
             <EventCard key={event.id} event={event} />
           ))
         ) : (
-          <div className='col-span-full text-center'>
-            <p className='text-muted-foreground'>No events found</p>
-          </div>
+          <EmptyEventCard />
         )}
       </div>
-      <GitSHA />
+    </div>
+  );
+}
+
+function EmptyEventCard() {
+  return (
+    <div className='col-span-full flex justify-center'>
+      <Card className='w-full max-w-md overflow-hidden border-[#f0f0f0] border'>
+        <div className='relative h-48 w-full bg-gradient-to-br from-pink-50 to-purple-50'>
+          <div className='absolute inset-0 flex items-center justify-center'>
+            <Image
+              src='/empty-event.png'
+              alt='No events illustration'
+              width={200}
+              height={120}
+              className='object-contain'
+            />
+          </div>
+        </div>
+        <CardContent className='pt-6 pb-6 text-center'>
+          <h3 className='text-xl font-semibold mb-2 text-gray-800'>
+            Create New Event!
+          </h3>
+          <p className='text-muted-foreground mb-4 text-sm leading-relaxed'>
+            Click "Create new Event" to add new
+            <br />
+            Event in your Wedvi account.
+          </p>
+        </CardContent>
+        <CardFooter className='w-full'>
+          <Link href='/create' className='w-full'>
+            <Button className='bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg w-full'>
+              <Plus className='size-4 mr-2' />
+              Create new Event
+            </Button>
+          </Link>
+        </CardFooter>
+      </Card>
     </div>
   );
 }
