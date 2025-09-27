@@ -1,10 +1,10 @@
 import { Entity } from "electrodb";
-import DynamoDB from "aws-sdk/clients/dynamodb";
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 
 const table = "guestbook-dev"
 
 // Factory function to create Event entity with provided client
-export const createEventEntity = (client: DynamoDB.DocumentClient) => new Entity({
+export const createEventEntity = (client: DynamoDBClient) => new Entity({
     model: {
         entity: "Event",
         version: "1",
@@ -56,7 +56,7 @@ export const createEventEntity = (client: DynamoDB.DocumentClient) => new Entity
 });
 
 // Factory function to create Message entity with provided client
-export const createMessageEntity = (client: DynamoDB.DocumentClient) => new Entity({
+export const createMessageEntity = (client: DynamoDBClient) => new Entity({
     model: {
         entity: "Message",
         version: "1",

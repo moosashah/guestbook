@@ -1,5 +1,5 @@
 import { createMessageEntity, createEventEntity, EventEntityType, MessageEntityType } from '../shared';
-import DynamoDB from 'aws-sdk/clients/dynamodb';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { S3Service } from './s3';
 import { VideoProcessor, MediaFile } from './video-processor';
 import { nanoid } from 'nanoid';
@@ -16,7 +16,7 @@ export class CompilerService {
     private s3Service: S3Service;
     private videoProcessor: VideoProcessor;
     private compilationStatuses: Map<string, CompilationStatus> = new Map();
-    private dynamoClient: DynamoDB.DocumentClient;
+    private dynamoClient: DynamoDBClient;
     private EventEntity: EventEntityType;
     private MessageEntity: MessageEntityType;
 
@@ -35,7 +35,7 @@ export class CompilerService {
         }
 
         // Create DynamoDB client
-        this.dynamoClient = new DynamoDB.DocumentClient({
+        this.dynamoClient = new DynamoDBClient({
             region: process.env.AWS_REGION || "eu-west-2",
             credentials: {
                 accessKeyId: process.env.AWS_ACCESS_KEY_ID,

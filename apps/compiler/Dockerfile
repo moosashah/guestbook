@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:24-alpine
 
 # Install ffmpeg and font packages
 RUN apk add --no-cache ffmpeg fontconfig ttf-liberation
