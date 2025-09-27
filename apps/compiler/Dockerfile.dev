@@ -1,34 +1,26 @@
 FROM node:18-alpine
 
-# Install ffmpeg, fonts, and pnpm
+# Install ffmpeg and fonts
 RUN apk add --no-cache ffmpeg fontconfig ttf-liberation
-RUN npm install -g pnpm
 
 # Create fonts directory and copy custom fonts
 RUN mkdir -p /usr/share/fonts/custom
-COPY apps/compiler/fonts/ /usr/share/fonts/custom/
+COPY fonts/ /usr/share/fonts/custom/
 
 # Update font cache
 RUN fc-cache -f -v
 
 WORKDIR /app
 
-# Copy package files and shared package
-COPY apps/compiler/package.json ./
-COPY packages/shared ./packages/shared
+# Copy package files
+COPY package.json ./
 
-# Copy the workspace configuration
-COPY pnpm-workspace.yaml ./
-
-# Install dependencies with pnpm (workspace aware)
-RUN pnpm install
-
-# Build the shared package
-RUN cd packages/shared && pnpm build
+# Install dependencies
+RUN npm install
 
 # For development, we'll mount the source code as a volume
 # Expose port
 EXPOSE 3001
 
 # Start in development mode with hot reload (local dev script)
-CMD ["pnpm", "run", "dev:local"]
+CMD ["npm", "run", "dev:local"]
