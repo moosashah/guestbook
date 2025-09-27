@@ -3,7 +3,7 @@ import { cookies as getCookies } from "next/headers"
 
 export const client = createClient({
     clientID: "nextjs",
-    issuer: "http://localhost:3002",
+    issuer: process.env.NODE_ENV === "development" ? "http://localhost:3002" : "https://guestbook-auth.vercel.app",
 })
 
 export async function setTokens(access: string, refresh: string) {
