@@ -1,3 +1,4 @@
+import { Hono } from "hono"
 import { issuer } from "@openauthjs/openauth"
 import { object, string, safeParse } from "valibot"
 import { GoogleProvider } from "@openauthjs/openauth/provider/google"
@@ -11,7 +12,7 @@ const userInfoSchema = object({
     picture: string(),
 })
 
-const app = issuer({
+const authIssuer = issuer({
     subjects: {
         user: object({
             id: string(),
@@ -54,5 +55,10 @@ const app = issuer({
         throw new Error("Invalid provider")
     },
 })
+
+const app = new Hono()
+
+// Mount the auth issuer on all routes
+app.all("*", (c) => authIssuer.fetch(c.req.raw))
 
 export default app
