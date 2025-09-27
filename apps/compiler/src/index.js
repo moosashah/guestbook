@@ -78,14 +78,27 @@ app.use((_req, _res, next) => {
   next();
 });
 
+
+
+
+
+// Auth middleware - check for API key
+app.use((req, res, next) => {
+  const apiKey = req.headers['x-api-key'];
+
+  if (!apiKey || apiKey !== process.env.COMPILER_API_KEY) {
+    return res.status(401).json({
+      error: 'Unauthorized',
+      message: 'Valid API key required'
+    });
+  }
+
+  next();
+});
+
 app.use(express.json());
 
 const compilerService = new CompilerService(activeCompilations);
-
-// Health check endpoint
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'compiler' });
-});
 
 // Compile messages for an event
 app.post('/compile/:eventId', async (req, res) => {
