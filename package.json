@@ -12,7 +12,8 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "type-check": "turbo type-check",
-    "start": "turbo start"
+    "start": "turbo start",
+    "compiler:deploy": "pnpm --filter=compiler run deploy"
   },
   "devDependencies": {
     "turbo": "^2.0.0"

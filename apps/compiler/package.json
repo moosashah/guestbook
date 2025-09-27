@@ -6,7 +6,8 @@
     "scripts": {
         "dev": "docker-compose -f docker-compose.dev.yml up --build",
         "dev:local": "node --watch src/index.js",
-        "start": "node src/index.js"
+        "start": "node src/index.js",
+        "deploy": "bunx fly deploy"
     },
     "dependencies": {
         "@aws-sdk/client-dynamodb": "^3.896.0",

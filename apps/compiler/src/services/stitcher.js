@@ -12,8 +12,10 @@ export class CompilerService {
     dynamoClient
     EventEntity
     MessageEntity
+    activeCompilations
 
-    constructor() {
+    constructor(activeCompilations) {
+        this.activeCompilations = activeCompilations;
         this.s3Service = new S3Service();
         this.videoProcessor = new VideoProcessor();
 
@@ -49,6 +51,9 @@ export class CompilerService {
 
     async compileEvent(eventId, webhookUrl) {
         try {
+            // Add to active compilations
+            this.activeCompilations.add(eventId);
+
             // Set initial status
             this.compilationStatuses.set(eventId, {
                 eventId,
@@ -132,6 +137,14 @@ export class CompilerService {
             // Cleanup temporary files
             await this.videoProcessor.cleanup(mediaFiles, outputPath);
 
+            // Remove from active compilations
+            this.activeCompilations.delete(eventId);
+            console.log(JSON.stringify({
+                message: 'Compilation completed, removed from active list',
+                eventId,
+                remainingActiveCompilations: this.activeCompilations.size
+            }, null, 4));
+
         } catch (error) {
             console.error(JSON.stringify({
                 error: 'Compilation failed',
@@ -152,6 +165,15 @@ export class CompilerService {
                     error: error.message
                 });
             }
+
+            // Remove from active compilations even on failure
+            this.activeCompilations.delete(eventId);
+            console.error(JSON.stringify({
+                error: 'Compilation failed, removed from active list',
+                eventId,
+                message: error.message,
+                remainingActiveCompilations: this.activeCompilations.size
+            }, null, 4));
         }
     }
 

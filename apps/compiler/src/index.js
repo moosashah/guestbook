@@ -8,15 +8,27 @@ import { CompilerService } from './services/stitcher.js';
 const app = express();
 const port = process.env.PORT || 3001;
 
-// Inactivity timer - exit after 10 seconds of no requests
+// Inactivity timer - exit after 10 seconds of no requests AND no active compilations
 let inactivityTimer;
 const INACTIVITY_TIMEOUT = 10 * 1000; // 10 seconds
+const activeCompilations = new Set();
 
-function resetInactivityTimer() {
+function resetInactivityTimer(activeCompilations) {
     if (inactivityTimer) {
         clearTimeout(inactivityTimer);
     }
     inactivityTimer = setTimeout(() => {
+        // Check if there are any active compilations before shutting down
+        if (activeCompilations.size > 0) {
+            console.log(JSON.stringify({
+                message: 'No requests received for 10 seconds, but compilations are active. Resetting timer.',
+                activeCompilations: Array.from(activeCompilations),
+                timestamp: new Date().toISOString()
+            }, null, 4));
+            resetInactivityTimer(activeCompilations); // Reset timer and check again later
+            return;
+        }
+
         console.log(JSON.stringify({
             message: 'No requests received for 10 seconds, shutting down compiler service',
             timestamp: new Date().toISOString()
@@ -26,17 +38,17 @@ function resetInactivityTimer() {
 }
 
 // Initialize the timer
-resetInactivityTimer();
+resetInactivityTimer(activeCompilations);
 
 // Middleware to reset timer on every request
 app.use((req, res, next) => {
-    resetInactivityTimer();
+    resetInactivityTimer(activeCompilations);
     next();
 });
 
 app.use(express.json());
 
-const compilerService = new CompilerService();
+const compilerService = new CompilerService(activeCompilations);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -51,7 +63,7 @@ app.post('/compile/:eventId', async (req, res) => {
 
         console.log(JSON.stringify({ message: 'Starting compilation', eventId }, null, 4));
 
-        // Start compilation in background
+        // Start compilation in background (CompilerService manages activeCompilations internally)
         compilerService.compileEvent(eventId, webhookUrl).catch(error => {
             console.error(JSON.stringify({ error: 'Compilation failed', eventId, message: error.message }, null, 4));
         });
