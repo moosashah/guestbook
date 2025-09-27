@@ -3,14 +3,7 @@ import { s3UploadCommand, multipartUpload, shouldUseMultipartUpload } from "@/li
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { nanoid } from "nanoid";
-
-
-//TODO: Move to a config file
-const packageLimits = {
-    basic: 50,
-    premium: 100,
-    deluxe: 200,
-} as const;
+import { PACKAGE_LIMITS } from "@/lib/consts";
 
 const messageCreateSchema = z.object({
     event_id: z.string(),
@@ -71,7 +64,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Check if message limit is reached
-        if (event.message_count >= packageLimits[event.package]) {
+        if (event.message_count >= PACKAGE_LIMITS[event.package]) {
             return NextResponse.json(
                 { error: "Message limit reached for this event" },
                 { status: 400 }

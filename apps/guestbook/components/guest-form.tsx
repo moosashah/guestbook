@@ -13,6 +13,7 @@ import { useState } from "react";
 import type { Event } from "@/lib/types";
 import { uploadMessage, UploadProgress } from "@/lib/upload-client";
 import { WelcomeMessagePlayer } from "./welcome-message-player";
+import { PACKAGE_LIMITS } from "@/lib/consts";
 
 export function GuestForm({ event }: { event: Event }) {
   const [mediaType, setMediaType] = useState<"video" | "audio">("video");
@@ -113,6 +114,9 @@ export function GuestForm({ event }: { event: Event }) {
             <p className="text-muted-foreground">
               Leave a message for the happy couple
             </p>
+            <div className="mt-2 text-sm text-muted-foreground">
+              Messages: {event.message_count}/{PACKAGE_LIMITS[event.package]}
+            </div>
           </div>
 
           {event.welcome_message && <WelcomeMessagePlayer eventId={event.id} />}
