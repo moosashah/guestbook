@@ -11,6 +11,9 @@ import { EventButtons } from "@/components/event-buttons";
 import { EventVideoControls } from "@/components/event-video-controls";
 import { EventEntity, MessageEntity } from "@/lib/models";
 import { getBannerImageUrl } from "@/lib/s3.server";
+import { auth } from "../../actions";
+import { redirect } from "next/navigation";
+import { isAuthorizedForEvent } from "@/lib/auth.server";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -36,6 +39,32 @@ export default async function EventPage({
 }: EventPageProps) {
   const { id } = await params;
   const sp = await searchParams;
+
+  // Check authentication
+  const subject = await auth();
+  if (!subject) {
+    redirect("/login");
+  }
+
+  // Check authorization
+  const authorized = await isAuthorizedForEvent(subject.properties, id);
+  if (!authorized) {
+    return (
+      <div className="container mx-auto py-8 px-4 text-center">
+        <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+        <p className="text-muted-foreground mb-4">
+          You don't have permission to access this event.
+        </p>
+        <Link href="/">
+          <Button>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
   let { data: event } = await loadEvent(id);
 
   if (!event) {

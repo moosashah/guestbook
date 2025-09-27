@@ -69,5 +69,5 @@ export async function logout() {
     cookies.delete("access_token")
     cookies.delete("refresh_token")
 
-    redirect("/")
+    redirect("/login")
 }

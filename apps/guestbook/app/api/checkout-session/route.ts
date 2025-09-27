@@ -1,3 +1,4 @@
+import { auth } from "@/app/actions";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { z } from "zod";
@@ -35,6 +36,12 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
+    const subject = await auth();
+    if (!subject) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+
 
     const body = await req.json();
     console.log("[checkout-session] Incoming body:", body);

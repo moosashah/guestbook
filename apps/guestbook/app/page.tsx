@@ -10,20 +10,20 @@ import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-const loadEvents = async () =>
+const loadEvents = async (userId: string) =>
   await EventEntity.query
-    .byCreator({ creator_id: "moosa123" })
+    .byCreator({ creator_id: userId })
     .where((attr, op) => `${op.eq(attr.deleted_at, 0)}`)
     .go();
 
 export default async function Dashboard() {
-  const { data: events } = await loadEvents();
   const subject = await auth();
-
 
   if (!subject) {
     redirect("/login");
   }
+
+  const { data: events } = await loadEvents(subject.properties.id);
 
 
   // Fetch banner URLs for all events server-side

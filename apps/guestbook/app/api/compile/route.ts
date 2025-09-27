@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'x-api-key': process.env.COMPILER_API_KEY || '',
             },
             body: JSON.stringify({ webhookUrl }),
         });
@@ -67,7 +68,11 @@ export async function GET(request: NextRequest) {
         }
 
         // Get compilation status from compiler service
-        const response = await fetch(`${COMPILER_SERVICE_URL}/status/${eventId}`);
+        const response = await fetch(`${COMPILER_SERVICE_URL}/status/${eventId}`, {
+            headers: {
+                'x-api-key': process.env.COMPILER_API_KEY || '',
+            },
+        });
 
         if (!response.ok) {
             throw new Error(`Compiler service responded with status: ${response.status}`);

@@ -2,18 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { EventEntity } from "@/lib/models";
 import { z } from "zod";
 import { multipartUpload } from "@/lib/s3.server";
-
-
-async function isAuthenticated(req: NextRequest, eventId: string): Promise<boolean> {
-    console.log("Authenticating user for event: " + eventId); // Placeholder
-    return true; // Assume authenticated for now
-}
-
-
-async function isAuthorized(req: NextRequest, eventId: string): Promise<boolean> {
-    console.log("Authorizing user for event: " + eventId); // Placeholder
-    return true; // Assume authorized for now
-}
+import { authenticateAndAuthorizeForEvent } from "@/lib/auth.server";
 
 const eventIdSchema = z.string();
 
@@ -29,14 +18,11 @@ export async function DELETE(
         return NextResponse.json({ error: validationResult.error.errors[0].message }, { status: 400 });
     }
 
-    // Authenticate user
-    const authenticated = await isAuthenticated(req, eventId);
-    if (!authenticated) {
+    // Authenticate and authorize user
+    const { user, authorized } = await authenticateAndAuthorizeForEvent(req, eventId);
+    if (!user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    // Authorize user
-    const authorized = await isAuthorized(req, eventId);
     if (!authorized) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
@@ -94,14 +80,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
-    // Authenticate user
-    const authenticated = await isAuthenticated(req, eventId);
-    if (!authenticated) {
+    // Authenticate and authorize user
+    const { user, authorized } = await authenticateAndAuthorizeForEvent(req, eventId);
+    if (!user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    // Authorize user
-    const authorized = await isAuthorized(req, eventId);
     if (!authorized) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

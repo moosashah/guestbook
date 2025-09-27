@@ -3,11 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { EventEntity } from "@/lib/models";
 import { qrCodeDownloadUrl } from "@/lib/s3.server";
-
-async function isAuthenticated(req: NextRequest, eventId: string): Promise<boolean> {
-    console.log(`Authenticating user for event: ${eventId}`); // Placeholder
-    return true; // Assume authenticated for now
-}
+import { authenticateAndAuthorizeForEvent } from "@/lib/auth.server";
 
 async function eventExists(eventId: string): Promise<boolean> {
     const e = await EventEntity.get({ id: eventId }).go();
@@ -33,10 +29,13 @@ export async function GET(
         return NextResponse.json({ error: validationResult.error.errors[0].message }, { status: 400 });
     }
 
-    // Authenticate user
-    const authenticated = await isAuthenticated(req, eventId);
-    if (!authenticated) {
+    // Authenticate and authorize user
+    const { user, authorized } = await authenticateAndAuthorizeForEvent(req, eventId);
+    if (!user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (!authorized) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Check if event exists

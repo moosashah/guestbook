@@ -6,6 +6,7 @@ import { generateAndUploadQRCode } from '@/lib/qr-code';
 import { VIABLE_PACKAGES } from '@/lib/consts';
 import { nanoid } from 'nanoid';
 import { multipartUpload } from '@/lib/s3.server';
+import { authenticate } from '@/lib/auth.server';
 
 const eventCreateSchema = z
   .object({
@@ -37,6 +38,12 @@ const eventCreateSchema = z
 
 export async function POST(req: NextRequest) {
   console.log('[event] Incoming request');
+
+  // Authenticate user
+  const user = await authenticate(req);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const eventId = nanoid(10);
   console.log('[event] Generated event ID:', eventId);

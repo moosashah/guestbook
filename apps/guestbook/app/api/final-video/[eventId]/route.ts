@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { EventEntity } from '@/lib/models';
 import { getFinalVideoDownloadUrl } from '@/lib/s3.server';
+import { authenticateAndAuthorizeForEvent } from '@/lib/auth.server';
 
 export async function GET(
     request: NextRequest,
@@ -8,6 +9,15 @@ export async function GET(
 ) {
     try {
         const { eventId } = await params;
+
+        // Authenticate and authorize user
+        const { user, authorized } = await authenticateAndAuthorizeForEvent(request, eventId);
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+        if (!authorized) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
 
         // Fetch event to check if final video exists
         const event = await EventEntity.get({ id: eventId }).go();

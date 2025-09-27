@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { EventEntity } from "@/lib/models";
 import { EditEventForm } from "@/components/edit-event";
 import { getBannerImageUrl, getWelcomeMessageUrl } from "@/lib/s3.server";
+import { auth } from "../../../actions";
+import { redirect } from "next/navigation";
+import { isAuthorizedForEvent } from "@/lib/auth.server";
 
 interface EditEventPageProps {
   params: Promise<{
@@ -22,6 +25,31 @@ const loadEvent = async (id: string) => {
 
 export default async function EditEventPage({ params }: EditEventPageProps) {
   const { id } = await params;
+
+  // Check authentication
+  const subject = await auth();
+  if (!subject) {
+    redirect("/login");
+  }
+
+  // Check authorization
+  const authorized = await isAuthorizedForEvent(subject.properties, id);
+  if (!authorized) {
+    return (
+      <div className="container mx-auto py-8 px-4 text-center">
+        <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+        <p className="text-muted-foreground mb-4">
+          You don't have permission to edit this event.
+        </p>
+        <Link href="/">
+          <Button>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </Link>
+      </div>
+    );
+  }
 
   // Find the event by ID
   const { data: event } = await loadEvent(id);
