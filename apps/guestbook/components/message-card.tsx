@@ -51,7 +51,7 @@ export default function MessageCard({ message }: MessageCardProps) {
     <Card className="overflow-hidden">
       <CardContent className="p-4">
         <div className="flex items-center gap-4">
-          <div className="flex-shrink-0 w-12 h-12 bg-muted rounded-full flex items-center justify-center">
+          <div className="shrink-0 w-12 h-12 bg-muted rounded-full flex items-center justify-center">
             {message.media_type === "video" ? (
               <Video className="h-6 w-6 text-muted-foreground" />
             ) : (
@@ -59,7 +59,7 @@ export default function MessageCard({ message }: MessageCardProps) {
             )}
           </div>
 
-          <div className="flex-grow min-w-0">
+          <div className="grow min-w-0">
             <h3 className="font-semibold truncate">{message.guest_name}</h3>
             <p className="text-sm text-muted-foreground">{formatDate(message.created_at)}</p>
           </div>
@@ -67,7 +67,7 @@ export default function MessageCard({ message }: MessageCardProps) {
           <Button
             size="sm"
             variant="outline"
-            className="flex-shrink-0"
+            className="shrink-0"
             onClick={handlePlayClick}
             disabled={isLoading}
           >
