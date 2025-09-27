@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { z } from "zod";
 
-const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+// const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 
-if (!STRIPE_SECRET_KEY) {
-  throw new Error("STRIPE_SECRET_KEY is not set");
-}
+// if (!STRIPE_SECRET_KEY) {
+//   throw new Error("STRIPE_SECRET_KEY is not set");
+// }
 
 // Initialize Stripe with your secret key from the environment
-const stripe = new Stripe(STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-04-30.basil",
 });
 
