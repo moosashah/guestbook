@@ -122,17 +122,20 @@ export default async function EventPage({
         </Link>
 
         <div className="relative rounded-lg overflow-hidden h-64 w-full mb-6">
-          <Image
-            src={
-              bannerImageUrl ||
-              (event.payment_status === "pending"
-                ? "/placeholder.svg?height=600&width=1200&query=wedding event"
-                : "/wedding-ceremony.png")
-            }
-            alt={event.name}
-            fill
-            className="object-cover"
-          />
+          {/* TODO: Remove this debug logging for production */}
+          <Link href={`/guest/${id}`}>
+            <Image
+              src={
+                bannerImageUrl ||
+                (event.payment_status === "pending"
+                  ? "/placeholder.svg?height=600&width=1200&query=wedding event"
+                  : "/wedding-ceremony.png")
+              }
+              alt={event.name}
+              fill
+              className="object-cover"
+            />
+          </Link>
         </div>
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">

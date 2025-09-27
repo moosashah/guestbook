@@ -237,3 +237,12 @@ export const getBannerImageUrl = async (key: string, expiresIn: number = 3600) =
     });
     return getSignedUrl(s3Client(), command, { expiresIn });
 };
+
+// Welcome message operations
+export const getWelcomeMessageUrl = async (key: string, expiresIn: number = 3600) => {
+    const command = new GetObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: key,
+    });
+    return getSignedUrl(s3Client(), command, { expiresIn });
+};

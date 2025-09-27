@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
         const contentType = req.headers.get("content-type") || "";
         let body: any;
         let bannerImage: File | null = null;
+        let welcomeMessageBlob: Blob | null = null;
 
         if (contentType.includes("multipart/form-data")) {
             // Handle FormData (with potential file upload)
@@ -66,6 +67,13 @@ export async function POST(req: NextRequest) {
             if (bannerFile && bannerFile.size > 0) {
                 bannerImage = bannerFile;
                 console.log("[event] Banner image found:", bannerFile.name, bannerFile.size, "bytes");
+            }
+
+            // Extract welcome message blob if present
+            const welcomeMessageFile = formData.get("welcome_message") as Blob | null;
+            if (welcomeMessageFile && welcomeMessageFile.size > 0) {
+                welcomeMessageBlob = welcomeMessageFile;
+                console.log("[event] Welcome message found:", welcomeMessageFile.size, "bytes");
             }
         }
 
@@ -96,6 +104,21 @@ export async function POST(req: NextRequest) {
             console.log("[event] Banner image uploaded successfully");
         }
 
+        // Upload welcome message to S3 if provided
+        let welcomeMessageKey: string | undefined;
+        if (welcomeMessageBlob) {
+            welcomeMessageKey = `events/${eventId}/welcome-message.webm`;
+            console.log("[event] Uploading welcome message to S3:", welcomeMessageKey);
+
+            const arrayBuffer = await welcomeMessageBlob.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+
+            // Welcome messages are typically video/webm from MediaRecorder
+            const contentType = "video/webm";
+            await multipartUpload(welcomeMessageKey, buffer, contentType);
+            console.log("[event] Welcome message uploaded successfully");
+        }
+
         // Generate QR code and get S3 URL
         console.log("[event] Starting QR code generation process...");
         const qrCodeKey = await generateAndUploadQRCode(eventId);
@@ -107,6 +130,7 @@ export async function POST(req: NextRequest) {
             id: eventId,
             description: data.description,
             banner_image: bannerImageKey, // Store the S3 key
+            welcome_message: welcomeMessageKey, // Store the S3 key
             qr_code_key: qrCodeKey,
         }).go();
 

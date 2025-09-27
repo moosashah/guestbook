@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MediaRecorder } from "@/components/media-recorder";
 import { UploadProgressComponent } from "@/components/upload-progress";
+import { WelcomeMessagePlayer } from "@/components/welcome-message-player";
 import { useState } from "react";
 import type { Event } from "@/lib/types";
 import { uploadMessage, UploadProgress } from "@/lib/upload-client";
@@ -111,16 +112,7 @@ export function GuestForm({ event }: { event: Event }) {
             </p>
           </div>
 
-          {event.welcome_message && (
-            <div className="mb-6 bg-muted rounded-lg p-4 text-center">
-              <p className="text-sm text-muted-foreground mb-2">
-                Welcome message from the couple:
-              </p>
-              <div className="aspect-video bg-black/10 rounded flex items-center justify-center">
-                <Mic className="h-12 w-12 text-muted-foreground" />
-              </div>
-            </div>
-          )}
+          {event.welcome_message && <WelcomeMessagePlayer eventId={event.id} />}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
