@@ -1,8 +1,15 @@
 FROM node:18-alpine
 
-# Install ffmpeg and pnpm
-RUN apk add --no-cache ffmpeg
+# Install ffmpeg, fonts, and pnpm
+RUN apk add --no-cache ffmpeg fontconfig ttf-liberation
 RUN npm install -g pnpm
+
+# Create fonts directory and copy custom fonts
+RUN mkdir -p /usr/share/fonts/custom
+COPY apps/compiler/fonts/ /usr/share/fonts/custom/
+
+# Update font cache
+RUN fc-cache -f -v
 
 WORKDIR /app
 

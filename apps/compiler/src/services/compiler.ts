@@ -1,7 +1,7 @@
 import { createMessageEntity, createEventEntity, EventEntityType, MessageEntityType } from '@guestbook/shared';
 import DynamoDB from 'aws-sdk/clients/dynamodb';
 import { S3Service } from './s3';
-import { VideoProcessor } from './video-processor';
+import { VideoProcessor, MediaFile } from './video-processor';
 import { nanoid } from 'nanoid';
 
 export interface CompilationStatus {
@@ -92,7 +92,7 @@ export class CompilerService {
             // Update progress
             this.updateProgress(eventId, 20);
 
-            // Download media files from S3
+            // Download media files from S3 and create MediaFile objects
             const mediaFiles = await this.downloadMediaFiles(messages.data);
             this.updateProgress(eventId, 40);
 
@@ -179,7 +179,7 @@ export class CompilerService {
         }
     }
 
-    private async downloadMediaFiles(messages: any[]): Promise<string[]> {
+    private async downloadMediaFiles(messages: any[]): Promise<MediaFile[]> {
         const downloadPromises = messages.map(async (message, index) => {
             // Use the correct file extension based on media_type
             const extension = message.media_type === 'video' ? 'webm' : 'wav';
@@ -190,10 +190,15 @@ export class CompilerService {
                 message: 'Downloaded media file',
                 messageId: message.id,
                 mediaType: message.media_type,
+                guestName: message.guest_name,
                 localPath: localPath
             }, null, 4));
 
-            return localPath;
+            return {
+                path: localPath,
+                guestName: message.guest_name,
+                mediaType: message.media_type
+            } as MediaFile;
         });
 
         return Promise.all(downloadPromises);
