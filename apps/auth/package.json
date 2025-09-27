@@ -2,12 +2,12 @@
   "name": "auth",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.ts",
+  "main": "dist/index.js",
   "scripts": {
-    "dev": "bun run --hot index.ts",
+    "dev": "bun run --hot dev.ts",
     "build": "tsc",
     "type-check": "tsc --noEmit",
-    "start": "node dist/index.js"
+    "start": "node dist/dev.js"
   },
   "packageManager": "pnpm@10.15.0",
   "dependencies": {
