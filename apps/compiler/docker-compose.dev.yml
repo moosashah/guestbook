@@ -2,7 +2,7 @@ services:
   compiler:
     build:
       context: ../..
-      dockerfile: apps/compiler/Dockerfile
+      dockerfile: apps/compiler/Dockerfile.dev
     ports:
       - "3001:3001"
     environment:
