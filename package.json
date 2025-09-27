@@ -15,13 +15,21 @@
     "start": "turbo start",
     "format": "turbo format",
     "format:check": "turbo format:check",
-    "compiler:deploy": "pnpm --filter=compiler run deploy"
+    "compiler:deploy": "pnpm --filter=compiler run deploy",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.1",
     "prettier": "^3.6.2",
     "turbo": "^2.0.0"
   },
   "dependencies": {
     "dotenv": "^17.2.2"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx,js,jsx,json,css,md}": [
+      "prettier --write"
+    ]
   }
 }
