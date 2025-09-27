@@ -3,6 +3,7 @@ import { promises as fs } from 'fs';
 import { nanoid } from 'nanoid';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import path from 'path';
 
 const execAsync = promisify(exec);
 
