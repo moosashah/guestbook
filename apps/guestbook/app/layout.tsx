@@ -9,8 +9,8 @@ const inter = Inter({ subsets: ["latin"] });
 
 import type { Viewport } from "next";
 import { auth, logout } from "./actions";
-import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { headers } from "next/headers";
 
 export const viewport: Viewport = {
   themeColor: "white",
@@ -29,11 +29,17 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const subject = await auth();
+  const headersList = await headers();
+  const pathname = headersList.get('x-pathname') || '';
+
+  // Check if current path should hide header
+  const shouldHideHeader = pathname.startsWith('/guest') || pathname.startsWith('/login');
+
   return (
     <html lang="en" className="bg-white">
       <body className={cn(inter.className, "bg-white")}>
         {/* User Info Display */}
-        {subject ? (
+        {subject && !shouldHideHeader ? (
           <div className="mb-6 p-4 bg-muted rounded-lg">
             <div className="flex items-center gap-4">
               <img
