@@ -2,6 +2,7 @@ import {
     S3Client,
     GetObjectCommand,
     PutObjectCommand,
+    DeleteObjectCommand,
     CreateMultipartUploadCommand,
     UploadPartCommand,
     CompleteMultipartUploadCommand,
@@ -10,12 +11,26 @@ import {
 import { BUCKET_NAME } from "./consts";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-export const s3Client = new S3Client({
-    region: "eu-west-2", credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
+// Initialize S3Client only if credentials are available
+let s3ClientInstance: S3Client | null = null;
+
+function getS3Client(): S3Client {
+    if (!s3ClientInstance) {
+        if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+            throw new Error('S3Client not available - missing AWS credentials');
+        }
+        s3ClientInstance = new S3Client({
+            region: "eu-west-2",
+            credentials: {
+                accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+            }
+        });
     }
-});
+    return s3ClientInstance;
+}
+
+export const s3Client = getS3Client;
 
 const qrCodeDownloadCommand = (key: string) => new GetObjectCommand({
     Bucket: BUCKET_NAME,
@@ -26,7 +41,7 @@ const qrCodeDownloadCommand = (key: string) => new GetObjectCommand({
 
 export const qrCodeDownloadUrl = async (key: string) => {
     const command = qrCodeDownloadCommand(key);
-    return getSignedUrl(s3Client, command, { expiresIn: 60 })
+    return getSignedUrl(s3Client(), command, { expiresIn: 60 })
 }
 
 const mediaAccessCommand = (key: string) => new GetObjectCommand({
@@ -36,7 +51,7 @@ const mediaAccessCommand = (key: string) => new GetObjectCommand({
 
 export const getMediaUrl = async (key: string, expiresIn: number = 3600) => {
     const command = mediaAccessCommand(key);
-    return getSignedUrl(s3Client, command, { expiresIn })
+    return getSignedUrl(s3Client(), command, { expiresIn })
 }
 
 
@@ -75,7 +90,7 @@ export const createMultipartUpload = async (key: string, contentType: string) =>
         ContentType: contentType,
     });
 
-    const response = await s3Client.send(command);
+    const response = await s3Client().send(command);
     return response.UploadId;
 };
 
@@ -93,7 +108,7 @@ export const uploadPart = async (
         Body: body,
     });
 
-    const response = await s3Client.send(command);
+    const response = await s3Client().send(command);
     return response.ETag;
 };
 
@@ -111,7 +126,7 @@ export const completeMultipartUpload = async (
         },
     });
 
-    const response = await s3Client.send(command);
+    const response = await s3Client().send(command);
     return {
         Location: response.Location || `https://${BUCKET_NAME}.s3.eu-west-2.amazonaws.com/${key}`,
         Key: response.Key || key,
@@ -126,7 +141,7 @@ export const abortMultipartUpload = async (key: string, uploadId: string) => {
         UploadId: uploadId,
     });
 
-    await s3Client.send(command);
+    await s3Client().send(command);
 };
 
 export const multipartUpload = async (
@@ -140,7 +155,7 @@ export const multipartUpload = async (
     if (!shouldUseMultipartUpload(fileSize)) {
         // Use regular upload for smaller files
         const command = s3UploadCommand(key, buffer, contentType);
-        await s3Client.send(command);
+        await s3Client().send(command);
     }
 
     console.log(`[multipart-upload] Starting multipart upload for ${key}, size: ${fileSize} bytes`);
@@ -194,4 +209,22 @@ export const multipartUpload = async (
 
 
 export const qrCodeUpload = async (key: string, qrCodeBuffer: Buffer) =>
-    await s3Client.send(s3UploadCommand(key, qrCodeBuffer, 'image/png', 'public, max-age=31536000'))
+    await s3Client().send(s3UploadCommand(key, qrCodeBuffer, 'image/png', 'public, max-age=31536000'))
+
+// Final video operations
+export const getFinalVideoDownloadUrl = async (key: string, eventId: string) => {
+    const command = new GetObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: key,
+        ResponseContentDisposition: `attachment; filename="compiled-video-${eventId}.mp4"`
+    });
+    return getSignedUrl(s3Client(), command, { expiresIn: 3600 }); // 1 hour
+};
+
+export const deleteFinalVideo = async (key: string) => {
+    const command = new DeleteObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: key,
+    });
+    await s3Client().send(command);
+};

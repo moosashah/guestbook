@@ -1,17 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { EventEntity } from '@/lib/models';
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-
-const s3Client = new S3Client({
-    region: process.env.AWS_REGION || 'eu-west-2',
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-    },
-});
-
-const bucketName = process.env.S3_BUCKET_NAME || "guestbook-assets-2024-dev";
+import { getFinalVideoDownloadUrl } from '@/lib/s3.server';
 
 export async function GET(
     request: NextRequest,
@@ -36,16 +25,8 @@ export async function GET(
             );
         }
 
-        // Generate signed URL for download (expires in 1 hour)
-        const command = new GetObjectCommand({
-            Bucket: bucketName,
-            Key: event.data.final_video_key,
-            ResponseContentDisposition: `attachment; filename="compiled-video-${eventId}.mp4"`
-        });
-
-        const signedUrl = await getSignedUrl(s3Client, command, {
-            expiresIn: 3600, // 1 hour
-        });
+        // Generate signed URL for download using centralized S3 service
+        const signedUrl = await getFinalVideoDownloadUrl(event.data.final_video_key, eventId);
 
         return NextResponse.json({
             downloadUrl: signedUrl,

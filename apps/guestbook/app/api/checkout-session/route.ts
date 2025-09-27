@@ -2,16 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { z } from "zod";
 
-// const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 
-// if (!STRIPE_SECRET_KEY) {
-//   throw new Error("STRIPE_SECRET_KEY is not set");
-// }
-
-// Initialize Stripe with your secret key from the environment
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-04-30.basil",
-});
+// Initialize Stripe only if the secret key is available
+let stripe: Stripe | null = null;
+if (STRIPE_SECRET_KEY) {
+  stripe = new Stripe(STRIPE_SECRET_KEY, {
+    apiVersion: "2025-08-27.basil",
+  });
+}
 
 // Map your package names to Stripe price IDs (replace with your actual price IDs from Stripe dashboard)
 const PACKAGE_PRICE_IDS: Record<string, string> = {
@@ -28,6 +27,15 @@ const BASE_URL =
 export async function POST(req: NextRequest) {
   //TODO: Add authentication
   try {
+    // Check if Stripe is properly initialized
+    if (!stripe) {
+      console.error("[checkout-session] Stripe not initialized - missing STRIPE_SECRET_KEY");
+      return NextResponse.json(
+        { error: "Payment service not available" },
+        { status: 500 }
+      );
+    }
+
     const body = await req.json();
     console.log("[checkout-session] Incoming body:", body);
     const checkoutSessionSchema = z.object({
