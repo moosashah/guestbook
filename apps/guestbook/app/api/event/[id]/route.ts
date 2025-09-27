@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { EventEntity } from "@/lib/models";
 import { z } from "zod";
+import { multipartUpload } from "@/lib/s3.server";
 
 
 async function isAuthenticated(req: NextRequest, eventId: string): Promise<boolean> {
@@ -67,16 +68,20 @@ export async function DELETE(
 }
 
 const editEventSchema = z.object({
-    submission_start_date: z.string().datetime().refine(
-        (date) => new Date(date) > new Date(),
-        "Start date must be in the future"
-    ),
+    name: z.string().min(1, "Event name is required").optional(),
+    description: z.string().optional(),
+    submission_start_date: z.string().datetime().optional(),
     submission_end_date: z.string().datetime().refine(
         (date) => new Date(date) > new Date(),
         "End date must be in the future"
-    ),
+    ).optional(),
 }).refine(
-    (data) => new Date(data.submission_end_date) > new Date(data.submission_start_date),
+    (data) => {
+        if (data.submission_start_date && data.submission_end_date) {
+            return new Date(data.submission_end_date) > new Date(data.submission_start_date);
+        }
+        return true;
+    },
     "End date must be after start date"
 );
 
@@ -101,15 +106,28 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Validate payload with zod
-    let body;
+    // Parse FormData
+    let formData: FormData;
     try {
-        body = await req.json();
+        formData = await req.formData();
     } catch (err) {
-        return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+        return NextResponse.json({ error: "Invalid form data" }, { status: 400 });
     }
 
-    const validatedEditEventBody = editEventSchema.safeParse(body);
+    // Extract text fields from FormData
+    const textFields = {
+        name: formData.get("name") as string | null,
+        description: formData.get("description") as string | null,
+        submission_start_date: formData.get("submission_start_date") as string | null,
+        submission_end_date: formData.get("submission_end_date") as string | null,
+    };
+
+    // Filter out null/empty values and validate
+    const filteredFields = Object.fromEntries(
+        Object.entries(textFields).filter(([_, value]) => value !== null && value !== "")
+    );
+
+    const validatedEditEventBody = editEventSchema.safeParse(filteredFields);
     if (!validatedEditEventBody.success) {
         return NextResponse.json(
             { error: validatedEditEventBody.error.errors[0].message },
@@ -118,12 +136,36 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     try {
-        const updatedEvent = await EventEntity.update({ id: eventId }).set({
-            submission_start_date: validatedEditEventBody.data.submission_start_date,
-            submission_end_date: validatedEditEventBody.data.submission_end_date
-        }).go();
+        // Prepare update data
+        const updateData: any = { ...validatedEditEventBody.data };
+
+        // Handle banner image upload
+        const bannerImage = formData.get("banner_image") as File | null;
+        if (bannerImage && bannerImage.size > 0) {
+            console.log("[PATCH] Uploading banner image:", bannerImage.name);
+            const bannerKey = `events/${eventId}/banner.png`;
+            const bannerBuffer = Buffer.from(await bannerImage.arrayBuffer());
+
+            await multipartUpload(bannerKey, bannerBuffer, bannerImage.type);
+            updateData.banner_image = bannerKey;
+        }
+
+        // Handle welcome message upload
+        const welcomeMessage = formData.get("welcome_message") as Blob | null;
+        if (welcomeMessage && welcomeMessage.size > 0) {
+            console.log("[PATCH] Uploading welcome message");
+            const welcomeMessageKey = `events/${eventId}/welcome-message.webm`;
+            const welcomeMessageBuffer = Buffer.from(await welcomeMessage.arrayBuffer());
+
+            await multipartUpload(welcomeMessageKey, welcomeMessageBuffer, "video/webm");
+            updateData.welcome_message = welcomeMessageKey;
+        }
+
+        // Update the event with only the fields that were provided
+        const updatedEvent = await EventEntity.update({ id: eventId }).set(updateData).go();
         return NextResponse.json(updatedEvent);
     } catch (error) {
+        console.error("[PATCH] Error updating event:", error);
         return NextResponse.json({ error: "Failed to update event" }, { status: 500 });
     }
 }

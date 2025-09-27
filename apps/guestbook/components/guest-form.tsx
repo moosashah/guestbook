@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, Mic, Video } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,10 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MediaRecorder } from "@/components/media-recorder";
 import { UploadProgressComponent } from "@/components/upload-progress";
-import { WelcomeMessagePlayer } from "@/components/welcome-message-player";
 import { useState } from "react";
 import type { Event } from "@/lib/types";
 import { uploadMessage, UploadProgress } from "@/lib/upload-client";
+import { WelcomeMessagePlayer } from "./welcome-message-player";
 
 export function GuestForm({ event }: { event: Event }) {
   const [mediaType, setMediaType] = useState<"video" | "audio">("video");
@@ -106,7 +107,9 @@ export function GuestForm({ event }: { event: Event }) {
       <Card className="w-full max-w-md">
         <CardContent className="pt-6 pb-8 px-6">
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold mb-2">{event.name}</h1>
+            <Link href={`/events/${event.id}`}>
+              <h1 className="text-2xl font-bold mb-2">{event.name}</h1>
+            </Link>
             <p className="text-muted-foreground">
               Leave a message for the happy couple
             </p>
