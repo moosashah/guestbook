@@ -13,8 +13,7 @@ const port = process.env.PORT || 3001;
 let inactivityTimer;
 const INACTIVITY_TIMEOUT = 10 * 1000; // 10 seconds
 const activeCompilations = new Set();
-const isDevelopment =
-  process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'dev';
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 function resetInactivityTimer(activeCompilations) {
   // Skip timeout in development mode
