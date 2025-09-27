@@ -10,6 +10,7 @@ import MessageCard from "@/components/message-card";
 import { EventButtons } from "@/components/event-buttons";
 import { EventVideoControls } from "@/components/event-video-controls";
 import { EventEntity, MessageEntity } from "@/lib/models";
+import { getBannerImageUrl } from "@/lib/s3.server";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -49,6 +50,16 @@ export default async function EventPage({
         </Link>
       </div>
     );
+  }
+
+  // Fetch banner image URL server-side if banner exists
+  let bannerImageUrl: string | null = null;
+  if (event.banner_image) {
+    try {
+      bannerImageUrl = await getBannerImageUrl(event.banner_image, 3600); // 1 hour expiry
+    } catch (error) {
+      console.error("[EventPage] Failed to get banner image URL:", error);
+    }
   }
 
   if (sp.session_id && event.payment_status === "pending") {
@@ -113,9 +124,10 @@ export default async function EventPage({
         <div className="relative rounded-lg overflow-hidden h-64 w-full mb-6">
           <Image
             src={
-              event.banner_image || event.payment_status === "pending"
+              bannerImageUrl ||
+              (event.payment_status === "pending"
                 ? "/placeholder.svg?height=600&width=1200&query=wedding event"
-                : "/wedding-ceremony.png"
+                : "/wedding-ceremony.png")
             }
             alt={event.name}
             fill

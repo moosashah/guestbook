@@ -5,10 +5,11 @@ import { z } from "zod";
 import { generateAndUploadQRCode } from "@/lib/qr-code";
 import { VIABLE_PACKAGES } from "@/lib/consts";
 import { nanoid } from "nanoid";
+import { multipartUpload } from "@/lib/s3.server";
 
 
 
-export const eventCreateSchema = z.object({
+const eventCreateSchema = z.object({
     creator_id: z.string(),
     name: z.string().min(1, "Event name is required"),
     description: z.string().optional().default("my description"),
@@ -34,15 +35,40 @@ export const eventCreateSchema = z.object({
 
 export async function POST(req: NextRequest) {
     console.log("[event] Incoming request");
-    //TODO: This will need to be a form submission since we're also sending the voice message blob
-    //TODO: We need to store the voice message blob to S3 and store the uri to dynamodb
-
 
     const eventId = nanoid(10);
     console.log("[event] Generated event ID:", eventId);
 
     try {
-        const body = await req.json();
+        const contentType = req.headers.get("content-type") || "";
+        let body: any;
+        let bannerImage: File | null = null;
+
+        if (contentType.includes("multipart/form-data")) {
+            // Handle FormData (with potential file upload)
+            const formData = await req.formData();
+            console.log("[event] Processing FormData");
+
+            // Extract form fields
+            body = {
+                creator_id: formData.get("creator_id") as string,
+                name: formData.get("name") as string,
+                description: formData.get("description") as string || "my description",
+                submission_start_date: formData.get("submission_start_date") as string,
+                submission_end_date: formData.get("submission_end_date") as string,
+                package: formData.get("package") as string,
+                message_count: 0,
+                payment_status: "pending" as const,
+            };
+
+            // Extract banner image if present
+            const bannerFile = formData.get("banner_image") as File | null;
+            if (bannerFile && bannerFile.size > 0) {
+                bannerImage = bannerFile;
+                console.log("[event] Banner image found:", bannerFile.name, bannerFile.size, "bytes");
+            }
+        }
+
         console.log("[event] Incoming body:", body);
 
         const validatedData = eventCreateSchema.safeParse(body);
@@ -57,6 +83,19 @@ export async function POST(req: NextRequest) {
         const { data } = validatedData;
         console.log("[event] Data validated successfully");
 
+        // Upload banner image to S3 if provided
+        let bannerImageKey: string | undefined;
+        if (bannerImage) {
+            bannerImageKey = `events/${eventId}/banner.png`;
+            console.log("[event] Uploading banner image to S3:", bannerImageKey);
+
+            const arrayBuffer = await bannerImage.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+
+            await multipartUpload(bannerImageKey, buffer, bannerImage.type);
+            console.log("[event] Banner image uploaded successfully");
+        }
+
         // Generate QR code and get S3 URL
         console.log("[event] Starting QR code generation process...");
         const qrCodeKey = await generateAndUploadQRCode(eventId);
@@ -67,6 +106,7 @@ export async function POST(req: NextRequest) {
             ...data,
             id: eventId,
             description: data.description,
+            banner_image: bannerImageKey, // Store the S3 key
             qr_code_key: qrCodeKey,
         }).go();
 

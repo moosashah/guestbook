@@ -118,25 +118,33 @@ export default function CreateEventPage() {
     console.log("[onSubmit] Starting form submission");
     setIsSubmitting(true);
     try {
-      // In a real app, we would submit the form data to the server
-      // and handle file uploads to S3
+      // Create FormData to handle file uploads
+      const formData = new FormData();
 
-      const eventData = {
-        creator_id: getLoggedinUserId(),
-        // welcomeMessageBlob,
-        name: data.name,
-        // bannerImage,
-        description: data.description,
-        submission_start_date: data.dateRange.from?.toISOString(),
-        submission_end_date: data.dateRange.to?.toISOString(),
-        package: data.package,
-      };
-      console.log("[onSubmit] Form data to submit:", eventData);
+      // Add text fields
+      formData.append("creator_id", getLoggedinUserId());
+      formData.append("name", data.name);
+      formData.append("description", data.description || "");
+      formData.append("submission_start_date", data.dateRange.from?.toISOString() || "");
+      formData.append("submission_end_date", data.dateRange.to?.toISOString() || "");
+      formData.append("package", data.package);
+
+      // Add banner image if selected
+      if (bannerImage) {
+        formData.append("banner_image", bannerImage);
+        console.log("[onSubmit] Adding banner image to form data:", bannerImage.name);
+      }
+
+      // Add welcome message blob if recorded
+      if (welcomeMessageBlob) {
+        formData.append("welcome_message", welcomeMessageBlob);
+        console.log("[onSubmit] Adding welcome message to form data");
+      }
 
       console.log("[onSubmit] Creating event...");
       const createdEvent = await fetch(`${BASE_URL}/api/event`, {
         method: "POST",
-        body: JSON.stringify(eventData),
+        body: formData, // Send FormData instead of JSON
       });
 
       if (!createdEvent.ok) {

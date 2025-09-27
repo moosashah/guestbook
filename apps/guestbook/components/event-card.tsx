@@ -1,4 +1,3 @@
-"use client";
 import Link from "next/link";
 import Image from "next/image";
 import { Calendar, MessageSquare } from "lucide-react";
@@ -8,7 +7,7 @@ import { formatDate } from "@/lib/utils";
 import type { Event } from "@/lib/types";
 
 interface EventCardProps {
-  event: Event;
+  event: Event & { bannerImageUrl?: string | null };
 }
 
 export default function EventCard({ event }: EventCardProps) {
@@ -22,9 +21,10 @@ export default function EventCard({ event }: EventCardProps) {
         <div className="relative h-48 w-full">
           <Image
             src={
-              event.banner_image || event.payment_status === "pending"
+              event.bannerImageUrl ||
+              (event.payment_status === "pending"
                 ? "/placeholder.svg?height=400&width=600&query=wedding event"
-                : "/wedding-ceremony.png"
+                : "/wedding-ceremony.png")
             }
             alt={event.name}
             fill
@@ -33,11 +33,10 @@ export default function EventCard({ event }: EventCardProps) {
           <div className="absolute top-2 right-2">
             <Badge
               variant={isActive ? "default" : "secondary"}
-              className={`font-medium ${
-                isActive
-                  ? "bg-green-100 text-green-800 hover:bg-green-200"
-                  : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-              }`}
+              className={`font-medium ${isActive
+                ? "bg-green-100 text-green-800 hover:bg-green-200"
+                : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                }`}
             >
               {isActive ? "Active" : "Inactive"}
             </Badge>

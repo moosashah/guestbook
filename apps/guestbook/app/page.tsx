@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import EventCard from "@/components/event-card";
 import { GitSHA } from "@/components/git-sha";
 import { EventEntity } from "@/lib/models";
+import { getBannerImageUrl } from "@/lib/s3.server";
+import type { Event } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +17,21 @@ const loadEvents = async () =>
 
 export default async function Dashboard() {
   const { data: events } = await loadEvents();
+
+  // Fetch banner URLs for all events server-side
+  const eventsWithBanners = await Promise.all(
+    events.map(async (event) => {
+      let bannerImageUrl: string | null = null;
+      if (event.banner_image) {
+        try {
+          bannerImageUrl = await getBannerImageUrl(event.banner_image, 3600);
+        } catch (error) {
+          console.error(`Failed to get banner URL for event ${event.id}:`, error);
+        }
+      }
+      return { ...event, bannerImageUrl };
+    })
+  );
 
   return (
     <div className="container mx-auto py-8 px-4 min-h-screen">
@@ -29,8 +46,8 @@ export default async function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {events.length > 0 ? (
-          events.map((event) => <EventCard key={event.id} event={event} />)
+        {eventsWithBanners.length > 0 ? (
+          eventsWithBanners.map((event) => <EventCard key={event.id} event={event} />)
         ) : (
           <div className="col-span-full text-center">
             <p className="text-muted-foreground">No events found</p>

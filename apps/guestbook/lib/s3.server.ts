@@ -228,3 +228,12 @@ export const deleteFinalVideo = async (key: string) => {
     });
     await s3Client().send(command);
 };
+
+// Banner image operations
+export const getBannerImageUrl = async (key: string, expiresIn: number = 3600) => {
+    const command = new GetObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: key,
+    });
+    return getSignedUrl(s3Client(), command, { expiresIn });
+};
