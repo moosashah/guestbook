@@ -5,7 +5,8 @@ import EventCard from "@/components/event-card";
 import { GitSHA } from "@/components/git-sha";
 import { EventEntity } from "@/lib/models";
 import { getBannerImageUrl } from "@/lib/s3.server";
-import type { Event } from "@/lib/types";
+import { auth } from "./actions";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,13 @@ const loadEvents = async () =>
 
 export default async function Dashboard() {
   const { data: events } = await loadEvents();
+  const subject = await auth();
+
+
+  if (!subject) {
+    redirect("/login");
+  }
+
 
   // Fetch banner URLs for all events server-side
   const eventsWithBanners = await Promise.all(
@@ -35,6 +43,8 @@ export default async function Dashboard() {
 
   return (
     <div className="container mx-auto py-8 px-4 min-h-screen">
+
+
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Your Events</h1>
         <Link href="/create">

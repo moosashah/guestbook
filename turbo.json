@@ -21,7 +21,9 @@
                 "S3_BUCKET_NAME",
                 "COMPILER_SERVICE_URL",
                 "NEXT_PUBLIC_PROD_URL",
-                "NODE_ENV"
+                "NODE_ENV",
+                "GOOGLE_CLIENT_ID",
+                "GOOGLE_CLIENT_SECRET"
             ]
         },
         "dev": {
