@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   // Authenticate user
   const user = await authenticate(req);
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const eventId = nanoid(10);

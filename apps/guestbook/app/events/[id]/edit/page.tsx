@@ -1,13 +1,13 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-import { EventEntity } from "@/lib/models";
-import { EditEventForm } from "@/components/edit-event";
-import { getBannerImageUrl, getWelcomeMessageUrl } from "@/lib/s3.server";
-import { auth } from "../../../actions";
-import { redirect } from "next/navigation";
-import { isAuthorizedForEvent } from "@/lib/auth.server";
+import { EventEntity } from '@/lib/models';
+import { EditEventForm } from '@/components/edit-event';
+import { getBannerImageUrl, getWelcomeMessageUrl } from '@/lib/s3.server';
+import { auth } from '../../../actions';
+import { redirect } from 'next/navigation';
+import { isAuthorizedForEvent } from '@/lib/auth.server';
 
 interface EditEventPageProps {
   params: Promise<{
@@ -29,21 +29,21 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
   // Check authentication
   const subject = await auth();
   if (!subject) {
-    redirect("/login");
+    redirect('/login');
   }
 
   // Check authorization
   const authorized = await isAuthorizedForEvent(subject.properties, id);
   if (!authorized) {
     return (
-      <div className="container mx-auto py-8 px-4 text-center">
-        <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-        <p className="text-muted-foreground mb-4">
+      <div className='container mx-auto py-8 px-4 text-center'>
+        <h1 className='text-2xl font-bold mb-4'>Access Denied</h1>
+        <p className='text-muted-foreground mb-4'>
           You don't have permission to edit this event.
         </p>
-        <Link href="/">
+        <Link href='/'>
           <Button>
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className='mr-2 h-4 w-4' />
             Back to Dashboard
           </Button>
         </Link>
@@ -56,11 +56,11 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
 
   if (!event) {
     return (
-      <div className="container mx-auto py-8 px-4 text-center">
-        <h1 className="text-2xl font-bold mb-4">Event not found</h1>
-        <Link href="/">
+      <div className='container mx-auto py-8 px-4 text-center'>
+        <h1 className='text-2xl font-bold mb-4'>Event not found</h1>
+        <Link href='/'>
           <Button>
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className='mr-2 h-4 w-4' />
             Back to Dashboard
           </Button>
         </Link>
@@ -74,7 +74,7 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
     try {
       bannerImageUrl = await getBannerImageUrl(event.banner_image, 3600); // 1 hour expiry
     } catch (error) {
-      console.error("[EditEventPage] Failed to get banner image URL:", error);
+      console.error('[EditEventPage] Failed to get banner image URL:', error);
     }
   }
 
@@ -82,23 +82,29 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
   let welcomeMessageUrl: string | null = null;
   if (event.welcome_message) {
     try {
-      welcomeMessageUrl = await getWelcomeMessageUrl(event.welcome_message, 3600); // 1 hour expiry
+      welcomeMessageUrl = await getWelcomeMessageUrl(
+        event.welcome_message,
+        3600
+      ); // 1 hour expiry
     } catch (error) {
-      console.error("[EditEventPage] Failed to get welcome message URL:", error);
+      console.error(
+        '[EditEventPage] Failed to get welcome message URL:',
+        error
+      );
     }
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className='container mx-auto py-8 px-4'>
       <Link
         href={`/events/${event.id}`}
-        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
+        className='inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4'
       >
-        <ArrowLeft className="mr-1 h-4 w-4" />
+        <ArrowLeft className='mr-1 h-4 w-4' />
         Back to Event Details
       </Link>
 
-      <h1 className="text-3xl font-bold mb-6">Edit Event</h1>
+      <h1 className='text-3xl font-bold mb-6'>Edit Event</h1>
 
       <EditEventForm
         event={event}

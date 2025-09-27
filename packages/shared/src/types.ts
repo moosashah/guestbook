@@ -1,5 +1,5 @@
-import { EntityItem } from "electrodb";
-import { createEventEntity, createMessageEntity } from "./models";
+import { EntityItem } from 'electrodb';
+import { createEventEntity, createMessageEntity } from './models';
 
 export type Event = EntityItem<ReturnType<typeof createEventEntity>>;
 export type Message = EntityItem<ReturnType<typeof createMessageEntity>>;

@@ -15,9 +15,11 @@ A microservice that stitches together guest messages (video/audio) and uploads t
 ## API Endpoints
 
 ### POST `/compile/:eventId`
+
 Starts compilation for an event.
 
 **Body:**
+
 ```json
 {
   "webhookUrl": "https://your-app.com/webhook/compilation-complete" // optional
@@ -25,6 +27,7 @@ Starts compilation for an event.
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Compilation started",
@@ -34,9 +37,11 @@ Starts compilation for an event.
 ```
 
 ### GET `/status/:eventId`
+
 Gets compilation status for an event.
 
 **Response:**
+
 ```json
 {
   "eventId": "event-123",
@@ -47,11 +52,12 @@ Gets compilation status for an event.
 ```
 
 ### GET `/health`
+
 Health check endpoint.
 
 ## Environment Variables
 
-**Important:** The compiler service requires AWS credentials to function. 
+**Important:** The compiler service requires AWS credentials to function.
 
 Copy `env.example` to `.env` and configure:
 

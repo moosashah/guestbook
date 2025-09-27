@@ -1,21 +1,23 @@
 {
-    "name": "@guestbook/shared",
-    "version": "0.1.0",
-    "private": true,
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
-    "scripts": {
-        "build": "tsc",
-        "dev": "tsc --watch",
-        "type-check": "tsc --noEmit"
-    },
-    "dependencies": {
-        "electrodb": "^3.4.1",
-        "aws-sdk": "^2.1692.0",
-        "zod": "^3.24.1"
-    },
-    "devDependencies": {
-        "typescript": "^5",
-        "@types/node": "^22"
-    }
+  "name": "@guestbook/shared",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md}\""
+  },
+  "dependencies": {
+    "electrodb": "^3.4.1",
+    "aws-sdk": "^2.1692.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^22"
+  }
 }

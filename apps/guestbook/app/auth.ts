@@ -1,28 +1,31 @@
-import { createClient } from "@openauthjs/openauth/client"
-import { cookies as getCookies } from "next/headers"
+import { createClient } from '@openauthjs/openauth/client';
+import { cookies as getCookies } from 'next/headers';
 
 export const client = createClient({
-    clientID: "nextjs",
-    issuer: process.env.NODE_ENV === "development" ? "http://localhost:3002" : "https://guestbook-auth.vercel.app",
-})
+  clientID: 'nextjs',
+  issuer:
+    process.env.NODE_ENV === 'development'
+      ? 'http://localhost:3002'
+      : 'https://guestbook-auth.vercel.app',
+});
 
 export async function setTokens(access: string, refresh: string) {
-    const cookies = await getCookies()
+  const cookies = await getCookies();
 
-    cookies.set({
-        name: "access_token",
-        value: access,
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 34560000,
-    })
-    cookies.set({
-        name: "refresh_token",
-        value: refresh,
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 34560000,
-    })
+  cookies.set({
+    name: 'access_token',
+    value: access,
+    httpOnly: true,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 34560000,
+  });
+  cookies.set({
+    name: 'refresh_token',
+    value: refresh,
+    httpOnly: true,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 34560000,
+  });
 }

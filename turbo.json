@@ -1,47 +1,41 @@
 {
-    "$schema": "https://turbo.build/schema.json",
-    "globalDependencies": [
-        "**/.env.*local"
-    ],
-    "tasks": {
-        "build": {
-            "dependsOn": [
-                "^build"
-            ],
-            "outputs": [
-                ".next/**",
-                "!.next/cache/**",
-                "dist/**"
-            ],
-            "env": [
-                "STRIPE_SECRET_KEY",
-                "AWS_ACCESS_KEY_ID",
-                "AWS_SECRET_ACCESS_KEY",
-                "AWS_REGION",
-                "S3_BUCKET_NAME",
-                "COMPILER_SERVICE_URL",
-                "NEXT_PUBLIC_PROD_URL",
-                "NODE_ENV",
-                "GOOGLE_CLIENT_ID",
-                "GOOGLE_CLIENT_SECRET"
-            ]
-        },
-        "dev": {
-            "cache": false,
-            "persistent": true
-        },
-        "lint": {},
-        "type-check": {
-            "dependsOn": [
-                "^build"
-            ],
-            "outputs": []
-        },
-        "start": {
-            "dependsOn": [
-                "build"
-            ],
-            "cache": false
-        }
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["**/.env.*local"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": [
+        "STRIPE_SECRET_KEY",
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "AWS_REGION",
+        "S3_BUCKET_NAME",
+        "COMPILER_SERVICE_URL",
+        "NEXT_PUBLIC_PROD_URL",
+        "NODE_ENV",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET"
+      ]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {},
+    "type-check": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "start": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "format": {
+      "outputs": []
+    },
+    "format:check": {
+      "outputs": []
     }
+  }
 }

@@ -1,6 +1,6 @@
-import { EventEntity } from "@/lib/models";
-import { GuestForm } from "@/components/guest-form";
-import { PACKAGE_LIMITS } from "@/lib/consts";
+import { EventEntity } from '@/lib/models';
+import { GuestForm } from '@/components/guest-form';
+import { PACKAGE_LIMITS } from '@/lib/consts';
 
 interface GuestPageProps {
   params: Promise<{ id: string }>;
@@ -34,13 +34,14 @@ export default async function GuestPage({ params }: GuestPageProps) {
   const messageLimit = PACKAGE_LIMITS[eventData.package];
   if (eventData.message_count >= messageLimit) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="max-w-md text-center">
-          <h1 className="text-2xl font-bold mb-4">Event is Full</h1>
-          <p className="text-gray-600 mb-2">
-            This event has reached its maximum capacity of {messageLimit} messages.
+      <div className='flex flex-col items-center justify-center   p-4'>
+        <div className='max-w-md text-center'>
+          <h1 className='text-2xl font-bold mb-4'>Event is Full</h1>
+          <p className='text-gray-600 mb-2'>
+            This event has reached its maximum capacity of {messageLimit}{' '}
+            messages.
           </p>
-          <p className="text-sm text-gray-500">
+          <p className='text-sm text-gray-500'>
             Current messages: {eventData.message_count}/{messageLimit}
           </p>
         </div>

@@ -78,10 +78,6 @@ app.use((_req, _res, next) => {
   next();
 });
 
-
-
-
-
 // Auth middleware - check for API key
 app.use((req, res, next) => {
   const apiKey = req.headers['x-api-key'];
@@ -89,7 +85,7 @@ app.use((req, res, next) => {
   if (!apiKey || apiKey !== process.env.COMPILER_API_KEY) {
     return res.status(401).json({
       error: 'Unauthorized',
-      message: 'Valid API key required'
+      message: 'Valid API key required',
     });
   }
 

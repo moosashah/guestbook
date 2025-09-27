@@ -1,25 +1,21 @@
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "AllowPublicReadForQRCodes",
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::guestbook-assets-2024-dev/events/*/qr.png"
-        },
-        {
-            "Sid": "AllowIAMUserAccess",
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": "arn:aws:iam::339712892525:user/root"
-            },
-            "Action": [
-                "s3:PutObject",
-                "s3:GetObject",
-                "s3:DeleteObject"
-            ],
-            "Resource": "arn:aws:s3:::guestbook-assets-2024-dev/*"
-        }
-    ]
-} 
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowPublicReadForQRCodes",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::guestbook-assets-2024-dev/events/*/qr.png"
+    },
+    {
+      "Sid": "AllowIAMUserAccess",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::339712892525:user/root"
+      },
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::guestbook-assets-2024-dev/*"
+    }
+  ]
+}

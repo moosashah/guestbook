@@ -3,14 +3,14 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-    const response = NextResponse.next();
+  const response = NextResponse.next();
 
-    // Add the pathname to headers
-    response.headers.set('x-pathname', request.nextUrl.pathname);
+  // Add the pathname to headers
+  response.headers.set('x-pathname', request.nextUrl.pathname);
 
-    return response;
+  return response;
 }
 
 export const config = {
-    matcher: '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  matcher: '/((?!api|_next/static|_next/image|favicon.ico).*)',
 };

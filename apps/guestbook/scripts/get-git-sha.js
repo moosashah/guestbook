@@ -5,4 +5,4 @@ try {
   console.log(gitSha);
 } catch (error) {
   console.log('development');
-} 
+}

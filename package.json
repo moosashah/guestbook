@@ -13,9 +13,12 @@
     "lint": "turbo lint",
     "type-check": "turbo type-check",
     "start": "turbo start",
+    "format": "turbo format",
+    "format:check": "turbo format:check",
     "compiler:deploy": "pnpm --filter=compiler run deploy"
   },
   "devDependencies": {
+    "prettier": "^3.6.2",
     "turbo": "^2.0.0"
   },
   "dependencies": {

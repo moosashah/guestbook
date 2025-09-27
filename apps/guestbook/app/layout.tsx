@@ -1,34 +1,34 @@
-import type React from "react";
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
-import { cn } from "@/lib/utils";
+import type React from 'react';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { Toaster } from '@/components/ui/sonner';
+import { cn } from '@/lib/utils';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
-import type { Viewport } from "next";
-import { auth } from "./actions";
-import { Button } from "@/components/ui/button";
-import { headers } from "next/headers";
-import { Logo, LogoText } from "@/components/svgs/logo";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { Viewport } from 'next';
+import { auth } from './actions';
+import { Button } from '@/components/ui/button';
+import { headers } from 'next/headers';
+import { Logo, LogoText } from '@/components/svgs/logo';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { LogoutButton } from "@/components/logout-button";
+} from '@/components/ui/dropdown-menu';
+import { LogoutButton } from '@/components/logout-button';
 
 export const viewport: Viewport = {
-  themeColor: "white",
-  width: "device-width",
+  themeColor: 'white',
+  width: 'device-width',
   initialScale: 1,
 };
 
 export const metadata: Metadata = {
-  title: "Wedding Memories",
-  description: "Collect and cherish wedding memories from your guests",
+  title: 'Wedding Memories',
+  description: 'Collect and cherish wedding memories from your guests',
 };
 
 export default async function RootLayout({
@@ -41,15 +41,14 @@ export default async function RootLayout({
   const pathname = headersList.get('x-pathname') || '';
 
   // Check if current path should hide header
-  const shouldHideHeader = pathname.startsWith('/guest') || pathname.startsWith('/login');
+  const shouldHideHeader =
+    pathname.startsWith('/guest') || pathname.startsWith('/login');
 
   return (
-    <html lang="en" className="bg-white">
-      <body className={cn(inter.className, "bg-white")}>
+    <html lang='en'>
+      <body className={cn(inter.className, 'bg-cream')}>
         {/* Header */}
-        {subject && !shouldHideHeader ? (
-          <Header subject={subject} />
-        ) : null}
+        {subject && !shouldHideHeader ? <Header subject={subject} /> : null}
         {children}
         <Toaster />
       </body>
@@ -57,43 +56,59 @@ export default async function RootLayout({
   );
 }
 
-
-
 function Header({ subject }: { subject: any }) {
   return (
-    <header className="sticky top-0 z-50 w-full bg-white shadow-xs">
-
+    <header className='sticky top-0 z-50 w-full shadow-xs bg-cream'>
       {/* Main Header */}
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className='flex items-center justify-between px-4 py-3'>
         {/* Logo and Brand */}
-        <div className="flex items-center gap-3">
+        <div className='flex items-center gap-3'>
           <Logo />
-          <LogoText color="#2B1105" />
+          <LogoText color='#2B1105' />
         </div>
 
         {/* User Profile */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:bg-gray-50">
-              <Avatar className="h-10 w-10 ring-2 ring-white shadow-sm">
-                <AvatarImage src={subject.properties.picture} alt={subject.properties.name} />
-                <AvatarFallback className="bg-gradient-to-br from-pink-500 to-purple-600 text-white font-semibold text-sm">
-                  {subject.properties.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+            <Button
+              variant='ghost'
+              className='relative h-10 w-10 rounded-full p-0 hover:bg-gray-50'
+            >
+              <Avatar className='h-10 w-10 ring-2 ring-white shadow-sm'>
+                <AvatarImage
+                  src={subject.properties.picture}
+                  alt={subject.properties.name}
+                />
+                <AvatarFallback className='bg-gradient-to-br from-pink-500 to-purple-600 text-white font-semibold text-sm'>
+                  {subject.properties.name
+                    .split(' ')
+                    .map(n => n[0])
+                    .join('')
+                    .toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-64" align="end" forceMount>
-            <div className="flex items-center justify-start gap-3 p-3 border-b">
-              <Avatar className="h-12 w-12">
-                <AvatarImage src={subject.properties.picture} alt={subject.properties.name} />
-                <AvatarFallback className="bg-gradient-to-br from-pink-500 to-purple-600 text-white font-semibold">
-                  {subject.properties.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+          <DropdownMenuContent className='w-64' align='end' forceMount>
+            <div className='flex items-center justify-start gap-3 p-3 border-b'>
+              <Avatar className='h-12 w-12'>
+                <AvatarImage
+                  src={subject.properties.picture}
+                  alt={subject.properties.name}
+                />
+                <AvatarFallback className='bg-gradient-to-br from-pink-500 to-purple-600 text-white font-semibold'>
+                  {subject.properties.name
+                    .split(' ')
+                    .map(n => n[0])
+                    .join('')
+                    .toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex flex-col space-y-1 leading-none">
-                <p className="font-semibold text-sm text-gray-900">{subject.properties.name}</p>
-                <p className="w-[180px] truncate text-xs text-gray-500">
+              <div className='flex flex-col space-y-1 leading-none'>
+                <p className='font-semibold text-sm text-gray-900'>
+                  {subject.properties.name}
+                </p>
+                <p className='w-[180px] truncate text-xs text-gray-500'>
                   {subject.properties.email}
                 </p>
               </div>
@@ -103,5 +118,5 @@ function Header({ subject }: { subject: any }) {
         </DropdownMenu>
       </div>
     </header>
-  )
+  );
 }

@@ -6,71 +6,72 @@
 
 ### NFRs
 
-| NFRs                | Delivery phase | Implementation                                                                                  | Notes/Links                                                                                      |
-|---------------------|---------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
-| Repo set up         | Demo          | Monorepo/turborepo                                                                            |                                                                                                  |
-| Infrastructure      | Demo          | S3, EventBridge, ECS/Fargate, Dynamo (?)                                                      |                                                                                                  |
-| CI/CD               | Demo          | GitHub Actions                                                                                |                                                                                                  |
-| App Clip/Instant Apps | MVP         | If S3 version, then consider WebView at end                                                   |                                                                                                  |
-| UI/UX               | Demo          | Next                                                                                          |                                                                                                  |
-| QR code CDN         | Demo          | Cloudinary? s3??                                                                              |                                                                                                  |
+| NFRs                  | Delivery phase | Implementation                              | Notes/Links |
+| --------------------- | -------------- | ------------------------------------------- | ----------- |
+| Repo set up           | Demo           | Monorepo/turborepo                          |             |
+| Infrastructure        | Demo           | S3, EventBridge, ECS/Fargate, Dynamo (?)    |             |
+| CI/CD                 | Demo           | GitHub Actions                              |             |
+| App Clip/Instant Apps | MVP            | If S3 version, then consider WebView at end |             |
+| UI/UX                 | Demo           | Next                                        |             |
+| QR code CDN           | Demo           | Cloudinary? s3??                            |             |
 
 ---
 
 ### Backend services
 
-| Feature                        | Delivery phase | Implementation/Notes                                                                                  |
-|--------------------------------|---------------|-------------------------------------------------------------------------------------------------------|
-| QR code generate -> Event      | Demo          | Library - if invalidation and regeneration is a lot of work, push to V2                               |
-| Create a message               | Demo          | S3 upload API > Limit 2 audio and 2 video                                                             |
-| Create an event                | Demo          | Next/Dynamo                                                                                           |
-| Edit an event                  | Demo          | Next/Dynamo                                                                                           |
-| List events                    | Demo          | Next/Dynamo                                                                                           |
-| Get Event (guests, package, dates) | MVP      | Next/Dynamo                                                                                           |
-| Payment integration            | Demo          | Stripe or wrapper                                                                                     |
-| Audio batch processing         | Demo          | Event driven job                                                                                      |
-| Video batch processing         | Demo          | Event driven job                                                                                      |
+| Feature                            | Delivery phase | Implementation/Notes                                                    |
+| ---------------------------------- | -------------- | ----------------------------------------------------------------------- |
+| QR code generate -> Event          | Demo           | Library - if invalidation and regeneration is a lot of work, push to V2 |
+| Create a message                   | Demo           | S3 upload API > Limit 2 audio and 2 video                               |
+| Create an event                    | Demo           | Next/Dynamo                                                             |
+| Edit an event                      | Demo           | Next/Dynamo                                                             |
+| List events                        | Demo           | Next/Dynamo                                                             |
+| Get Event (guests, package, dates) | MVP            | Next/Dynamo                                                             |
+| Payment integration                | Demo           | Stripe or wrapper                                                       |
+| Audio batch processing             | Demo           | Event driven job                                                        |
+| Video batch processing             | Demo           | Event driven job                                                        |
 
 ---
 
 ### Guest Portal (Browser/PWA)
 
-| Feature                        | Delivery phase | Implementation/Notes                                                                                  |
-|--------------------------------|---------------|-------------------------------------------------------------------------------------------------------|
-| QR code display                | Demo          | qrcode library                                                                                        |
-| Event has not started/ended page | Demo        |                                                                                                       |
-| Event reached recording limit  | Demo          | 50% buffer on the cookies                                                                            |
-| Audio recording                | Demo          | Client side blob, no need for playback in browser                                                     |
-| Paywalled video recording      | Demo          | Client side blob                                                                                      |
-| Cancel recording               | Demo          | Client side blob                                                                                      |
-| Compression                    | Demo          |                                                                                                       |
-| Submit message                 | Demo          | S3 file storage solution + save url or "path" to database                                             |
-| Limit recordings per person    | Demo          |                                                                                                       |
+| Feature                          | Delivery phase | Implementation/Notes                                      |
+| -------------------------------- | -------------- | --------------------------------------------------------- |
+| QR code display                  | Demo           | qrcode library                                            |
+| Event has not started/ended page | Demo           |                                                           |
+| Event reached recording limit    | Demo           | 50% buffer on the cookies                                 |
+| Audio recording                  | Demo           | Client side blob, no need for playback in browser         |
+| Paywalled video recording        | Demo           | Client side blob                                          |
+| Cancel recording                 | Demo           | Client side blob                                          |
+| Compression                      | Demo           |                                                           |
+| Submit message                   | Demo           | S3 file storage solution + save url or "path" to database |
+| Limit recordings per person      | Demo           |                                                           |
 
 ---
 
 ### Event Portal (Desktop/mobile)
 
-| Feature                        | Delivery phase | Implementation/Notes                                                                                  |
-|--------------------------------|---------------|-------------------------------------------------------------------------------------------------------|
-| Authentication                 | Demo          | openauth/clerk                                                                                        |
-| SSO                            | MVP           | ^                                                                                                     |
-| Create new event               | Demo          |                                                                                                       |
-| Audio recording                | Demo          |                                                                                                       |
-| Images upload                  | Demo          |                                                                                                       |
-| Text entry                     | Demo          | Title and description                                                                                 |
-| Pay for event                  | Demo          | Payment after create account                                                                          |
-| QR code display                | Demo          |                                                                                                       |
-| List events                    | Demo          |                                                                                                       |
-| Message list                   | Demo          |                                                                                                       |
-| Message playback               | Demo          | Both individual and stitched                                                                          |
-| Event sharing                  | Demo          | Sharing?                                                                                              |
+| Feature          | Delivery phase | Implementation/Notes         |
+| ---------------- | -------------- | ---------------------------- |
+| Authentication   | Demo           | openauth/clerk               |
+| SSO              | MVP            | ^                            |
+| Create new event | Demo           |                              |
+| Audio recording  | Demo           |                              |
+| Images upload    | Demo           |                              |
+| Text entry       | Demo           | Title and description        |
+| Pay for event    | Demo           | Payment after create account |
+| QR code display  | Demo           |                              |
+| List events      | Demo           |                              |
+| Message list     | Demo           |                              |
+| Message playback | Demo           | Both individual and stitched |
+| Event sharing    | Demo           | Sharing?                     |
 
 ---
 
 ## Project Status Checklist
 
 ### Partially Complete / In Progress
+
 - [ ] Infrastructure: S3 upload logic is stubbed, not fully implemented; Dynamo/EventBridge/ECS not confirmed
 - [ ] Audio/video recording (`components/media-recorder.tsx`)
 - [ ] Message playback (`components/media-player.tsx`)
@@ -85,6 +86,7 @@
 - [ ] QR code CDN: No Cloudinary or CDN logic found, only static asset
 
 ### Completed Features
+
 - [x] Repo set up (Monorepo/turborepo, Next.js, pnpm, etc.)
 - [x] UI/UX (Next.js, Tailwind, custom components)
 - [x] QR code display (static asset, likely used in UI)
@@ -110,6 +112,7 @@ If full flow works then add auth
 ## Proof of Concept Priorities
 
 ### 1. QR Code System
+
 - [x] Generate QR code using event UUID
 - [x] Store QR code URI in event record
 - [x] Validate event exists and is active in `/guest/[code]` route
@@ -117,27 +120,32 @@ If full flow works then add auth
 - [x] Add message limit validation (if implemented)
 
 ### 2. Media Recording & Processing
+
 - [ ] Fix permission handling bug
 - [ ] Add warning when switching mediums
 - [ ] Implement basic S3 upload
 - [ ] Basic media validation
 
 ### 3. Event Management
+
 - [x] Event validation for dates
 - [ ] Basic package validation
 - [x] Message limits per event
 - [x] Basic event sharing
 
 ### 4. Infrastructure
+
 - [x] S3 upload implementation
 
 ### 5. Design & UX
+
 - [ ] Basic loading states
 - [ ] Basic error states
 - [ ] Basic success states
 - [ ] Basic form validation
 
 ### 6. Authentication (Post-PoC)
+
 - [ ] Set up Clerk provider and middleware
 - [ ] Protect event creation route (`/create`)
 - [ ] Protect event management routes (`/events/[id]/*`)

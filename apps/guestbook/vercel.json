@@ -1,5 +1,5 @@
 {
-    "buildCommand": "cd ../.. && pnpm build --filter=guestbook",
-    "outputDirectory": ".next",
-    "installCommand": "cd ../.. && pnpm install --frozen-lockfile"
+  "buildCommand": "cd ../.. && pnpm build --filter=guestbook",
+  "outputDirectory": ".next",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile"
 }

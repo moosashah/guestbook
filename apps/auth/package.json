@@ -7,7 +7,9 @@
     "dev": "bun run --hot dev.ts",
     "build": "tsc",
     "type-check": "tsc --noEmit",
-    "start": "node dist/dev.js"
+    "start": "node dist/dev.js",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md}\""
   },
   "packageManager": "pnpm@10.15.0",
   "dependencies": {

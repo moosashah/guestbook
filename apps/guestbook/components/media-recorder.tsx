@@ -1,19 +1,24 @@
-"use client"
+'use client';
 
-import { useRecorder } from "@/hooks/use-recorder"
-import { Inactive } from "./recorder/inactive"
-import { Recording } from "./recorder/recording"
-import { Preview } from "./recorder/preview"
-import { Dispatch, SetStateAction } from "react"
+import { useRecorder } from '@/hooks/use-recorder';
+import { Inactive } from './recorder/inactive';
+import { Recording } from './recorder/recording';
+import { Preview } from './recorder/preview';
+import { Dispatch, SetStateAction } from 'react';
 
 interface MediaRecorderProps {
-  type: "audio" | "video"
-  setBlob: Dispatch<SetStateAction<Blob | null>>
-  description: string
-  className?: string
+  type: 'audio' | 'video';
+  setBlob: Dispatch<SetStateAction<Blob | null>>;
+  description: string;
+  className?: string;
 }
 
-export const MediaRecorder = ({ type, setBlob, className, description }: MediaRecorderProps) => {
+export const MediaRecorder = ({
+  type,
+  setBlob,
+  className,
+  description,
+}: MediaRecorderProps) => {
   const {
     audioRef,
     liveVideoRef,
@@ -23,11 +28,11 @@ export const MediaRecorder = ({ type, setBlob, className, description }: MediaRe
     startRecording,
     stopRecording,
     stream,
-    videoRef
-  } = useRecorder({ type, setBlob })
+    videoRef,
+  } = useRecorder({ type, setBlob });
 
   switch (recordingStatus) {
-    case "inactive":
+    case 'inactive':
       return (
         <Inactive
           type={type}
@@ -36,8 +41,8 @@ export const MediaRecorder = ({ type, setBlob, className, description }: MediaRe
           liveVideoRef={liveVideoRef}
           startRecording={startRecording}
         />
-      )
-    case "recording":
+      );
+    case 'recording':
       return (
         <Recording
           type={type}
@@ -46,8 +51,8 @@ export const MediaRecorder = ({ type, setBlob, className, description }: MediaRe
           stopRecording={stopRecording}
           stream={stream}
         />
-      )
-    case "preview":
+      );
+    case 'preview':
       return (
         <Preview
           type={type}
@@ -58,8 +63,8 @@ export const MediaRecorder = ({ type, setBlob, className, description }: MediaRe
           resetRecording={resetRecording}
           stream={stream}
         />
-      )
+      );
     default:
-      return null
+      return null;
   }
-}
+};
