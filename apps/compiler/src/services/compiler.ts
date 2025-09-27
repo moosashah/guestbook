@@ -1,4 +1,4 @@
-import { createMessageEntity, createEventEntity, EventEntityType, MessageEntityType } from '@guestbook/shared';
+import { createMessageEntity, createEventEntity, EventEntityType, MessageEntityType } from '../shared';
 import DynamoDB from 'aws-sdk/clients/dynamodb';
 import { S3Service } from './s3';
 import { VideoProcessor, MediaFile } from './video-processor';

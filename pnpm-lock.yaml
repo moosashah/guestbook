@@ -24,9 +24,6 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.817.0
         version: 3.896.0
-      '@guestbook/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
       aws-sdk:
         specifier: ^2.1692.0
         version: 2.1692.0
