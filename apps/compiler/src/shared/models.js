@@ -4,7 +4,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 const table = "guestbook-dev"
 
 // Factory function to create Event entity with provided client
-export const createEventEntity = (client: DynamoDBClient) => new Entity({
+export const createEventEntity = (client) => new Entity({
     model: {
         entity: "Event",
         version: "1",
@@ -36,8 +36,8 @@ export const createEventEntity = (client: DynamoDBClient) => new Entity({
         deleted_at: { type: "number", required: true, default: () => 0 },
         qr_code_key: { type: "string", required: true },
         final_video_key: { type: "string", required: false },
-        package: { type: ["basic", "deluxe", "premium"] as const, required: true },
-        payment_status: { type: ["pending", "success"] as const, required: true }
+        package: { type: ["basic", "deluxe", "premium"], required: true },
+        payment_status: { type: ["pending", "success"], required: true }
     },
     indexes: {
         event: {
@@ -56,7 +56,7 @@ export const createEventEntity = (client: DynamoDBClient) => new Entity({
 });
 
 // Factory function to create Message entity with provided client
-export const createMessageEntity = (client: DynamoDBClient) => new Entity({
+export const createMessageEntity = (client) => new Entity({
     model: {
         entity: "Message",
         version: "1",
@@ -66,7 +66,7 @@ export const createMessageEntity = (client: DynamoDBClient) => new Entity({
         id: { type: "string", required: true },
         event_id: { type: "string", required: true },
         guest_name: { type: "string", required: true },
-        media_type: { type: ["audio", "video"] as const, required: true },
+        media_type: { type: ["audio", "video"], required: true },
         media_key: { type: "string", required: true },
         created_at: { type: "number", required: true, default: () => Date.now(), readOnly: true },
         updated_at: {

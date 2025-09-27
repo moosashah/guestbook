@@ -19,10 +19,8 @@ COPY package.json ./
 RUN npm install
 
 # Copy source code
-COPY . .
-
-# Build the application
-RUN npm run build
+COPY src/ ./src/
+COPY fonts/ ./fonts/
 
 # Expose port
 EXPOSE 3001

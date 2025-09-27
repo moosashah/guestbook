@@ -3,16 +3,13 @@
     "version": "0.1.0",
     "private": true,
     "type": "module",
-    "main": "dist/index.js",
     "scripts": {
         "dev": "docker-compose -f docker-compose.dev.yml up --build",
-        "dev:local": "tsx watch src/index.ts",
-        "build": "tsc",
-        "start": "node dist/index.js",
-        "type-check": "tsc --noEmit"
+        "dev:local": "node --watch src/index.js",
+        "start": "node src/index.js"
     },
     "dependencies": {
-        "@aws-sdk/client-dynamodb": "^3.817.0",
+        "@aws-sdk/client-dynamodb": "^3.896.0",
         "@aws-sdk/client-s3": "^3.817.0",
         "@aws-sdk/s3-request-presigner": "^3.817.0",
         "dotenv": "^16.3.1",
@@ -21,12 +18,5 @@
         "fluent-ffmpeg": "^2.1.2",
         "nanoid": "^5.1.6",
         "zod": "^3.24.1"
-    },
-    "devDependencies": {
-        "@types/express": "^4.17.21",
-        "@types/fluent-ffmpeg": "^2.1.24",
-        "@types/node": "^22",
-        "tsx": "^4.7.1",
-        "typescript": "^5"
     }
 }

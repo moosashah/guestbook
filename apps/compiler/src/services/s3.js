@@ -1,26 +1,25 @@
 import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
-import { createReadStream, createWriteStream } from 'fs';
+import { createWriteStream } from 'fs';
 import { promises as fs } from 'fs';
-import path from 'path';
 import { nanoid } from 'nanoid';
 
 export class S3Service {
-    private s3Client: S3Client;
-    private bucketName: string;
+    s3Client
+    bucketName
 
     constructor() {
         this.s3Client = new S3Client({
             region: process.env.AWS_REGION || 'eu-west-2',
             credentials: {
-                accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+                accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
             },
         });
 
         this.bucketName = process.env.S3_BUCKET_NAME || "guestbook-assets-2024-dev";
     }
 
-    async downloadFile(s3Key: string, localPath: string): Promise<void> {
+    async downloadFile(s3Key, localPath) {
         try {
             console.log(JSON.stringify({
                 message: 'Downloading file from S3',
@@ -42,7 +41,7 @@ export class S3Service {
             // Create write stream and pipe the S3 object body to it
             const writeStream = createWriteStream(localPath);
 
-            return new Promise<void>((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 if (response.Body instanceof ReadableStream) {
                     // Handle ReadableStream (browser environment)
                     const reader = response.Body.getReader();
@@ -63,7 +62,7 @@ export class S3Service {
                     pump();
                 } else {
                     // Handle Node.js readable stream - check if it has pipe method
-                    const body = response.Body as any;
+                    const body = response.Body;
                     if (body && typeof body.pipe === 'function') {
                         body.pipe(writeStream)
                             .on('finish', resolve)
@@ -77,13 +76,13 @@ export class S3Service {
             console.error(JSON.stringify({
                 error: 'Failed to download file from S3',
                 s3Key,
-                message: (error as Error).message
+                message: error.message
             }, null, 4));
             throw error;
         }
     }
 
-    async uploadFinalVideo(localPath: string, eventId: string): Promise<{ s3Key: string; s3Url: string }> {
+    async uploadFinalVideo(localPath, eventId) {
         try {
             const fileName = `events/${eventId}/compiled-${nanoid()}.mp4`;
 
@@ -123,13 +122,13 @@ export class S3Service {
             console.error(JSON.stringify({
                 error: 'Failed to upload final video to S3',
                 localPath,
-                message: (error as Error).message
+                message: error.message
             }, null, 4));
             throw error;
         }
     }
 
-    async getSignedUrl(s3Key: string, expiresIn: number = 3600): Promise<string> {
+    async getSignedUrl(s3Key, expiresIn = 3600) {
         try {
             const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
 
@@ -147,7 +146,7 @@ export class S3Service {
             console.error(JSON.stringify({
                 error: 'Failed to generate signed URL',
                 s3Key,
-                message: (error as Error).message
+                message: error.message
             }, null, 4));
             throw error;
         }

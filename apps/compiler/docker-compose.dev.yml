@@ -2,14 +2,9 @@ services:
   compiler:
     build:
       context: ../..
-      dockerfile: apps/compiler/Dockerfile.dev
+      dockerfile: apps/compiler/Dockerfile
     ports:
       - "3001:3001"
-    volumes:
-      - ./src:/app/src
-      - ../../packages/shared/src:/app/packages/shared/src
-      - /app/node_modules
-      - /app/packages/shared/node_modules
     environment:
       - NODE_ENV=development
     env_file:

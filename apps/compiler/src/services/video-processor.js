@@ -1,20 +1,14 @@
 import ffmpeg from 'fluent-ffmpeg';
 import { promises as fs } from 'fs';
-import path from 'path';
 import { nanoid } from 'nanoid';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
-export interface MediaFile {
-    path: string;
-    guestName: string;
-    mediaType: 'video' | 'audio';
-}
 
 export class VideoProcessor {
-    private fontPath: string;
+    fontPath;
 
     constructor() {
         // Set ffmpeg path based on environment
@@ -40,7 +34,7 @@ export class VideoProcessor {
         this.validateFontPath();
     }
 
-    private async validateFontPath(): Promise<void> {
+    async validateFontPath() {
         try {
             await fs.access(this.fontPath);
             console.log(JSON.stringify({
@@ -51,7 +45,7 @@ export class VideoProcessor {
             console.warn(JSON.stringify({
                 warning: 'Font file not found, will use fallback',
                 fontPath: this.fontPath,
-                message: (error as Error).message
+                message: error.message
             }, null, 4));
 
             // Try fallback fonts
@@ -83,10 +77,10 @@ export class VideoProcessor {
     }
 
     async stitchVideos(
-        mediaFiles: MediaFile[],
-        event: any,
-        onProgress?: (progress: number) => void
-    ): Promise<string> {
+        mediaFiles,
+        event,
+        onProgress
+    ) {
         const outputPath = `/tmp/final_${nanoid()}.mp4`;
 
         console.log(JSON.stringify({
@@ -122,17 +116,17 @@ export class VideoProcessor {
         } catch (error) {
             console.error(JSON.stringify({
                 error: 'Video stitching failed',
-                message: (error as Error).message
+                message: error.message
             }, null, 4));
             throw error;
         }
     }
 
-    private async convertToConsistentFormat(
-        mediaFiles: MediaFile[],
-        onProgress?: (progress: number) => void
-    ): Promise<string[]> {
-        const tempFiles: string[] = [];
+    async convertToConsistentFormat(
+        mediaFiles,
+        onProgress
+    ) {
+        const tempFiles = [];
         const totalFiles = mediaFiles.length;
 
         console.log(JSON.stringify({
@@ -170,7 +164,7 @@ export class VideoProcessor {
         return tempFiles;
     }
 
-    private async convertAudioToVideo(inputPath: string, outputPath: string, guestName: string): Promise<void> {
+    async convertAudioToVideo(inputPath, outputPath, guestName) {
         // Trim audio from the start (like proven method)
         const audioTrimStart = '0.1';
 
@@ -198,7 +192,7 @@ export class VideoProcessor {
         await execAsync(command);
     }
 
-    private async convertVideoToConsistentFormat(inputPath: string, outputPath: string, guestName: string): Promise<void> {
+    async convertVideoToConsistentFormat(inputPath, outputPath, guestName) {
         // Detect and trim black frames at the start (like proven method)
         const trimStart = await this.detectBlackFrameEnd(inputPath);
 
@@ -224,7 +218,7 @@ export class VideoProcessor {
         await execAsync(command);
     }
 
-    private async createConcatList(tempFiles: string[]): Promise<string> {
+    async createConcatList(tempFiles) {
         const concatListPath = `/tmp/concat_list_${nanoid()}.txt`;
 
         const concatContent = tempFiles.map(file => `file '${file}'`).join('\n');
@@ -240,7 +234,7 @@ export class VideoProcessor {
         return concatListPath;
     }
 
-    private async concatenateFiles(concatListPath: string, outputPath: string): Promise<void> {
+    async concatenateFiles(concatListPath, outputPath) {
         // Use the exact proven method concatenation with additional flags
         const command = `ffmpeg -y -f concat -safe 0 -i "${concatListPath}" ` +
             `-c:v copy -c:a copy ` +
@@ -256,7 +250,7 @@ export class VideoProcessor {
         await execAsync(command);
     }
 
-    private async detectBlackFrameEnd(inputPath: string): Promise<string> {
+    async detectBlackFrameEnd(inputPath) {
         try {
             console.log(JSON.stringify({
                 message: 'Detecting first non-black frame',
@@ -291,13 +285,13 @@ export class VideoProcessor {
         } catch (error) {
             console.error(JSON.stringify({
                 error: 'Black frame detection failed, using default trim',
-                message: (error as Error).message
+                message: error.message
             }, null, 4));
             return '0.2'; // Fallback to aggressive trim
         }
     }
 
-    private async cleanupTempFiles(tempFiles: string[], concatListPath: string): Promise<void> {
+    async cleanupTempFiles(tempFiles, concatListPath) {
         try {
             // Clean up temporary MP4 files
             await Promise.all(
@@ -308,7 +302,7 @@ export class VideoProcessor {
                         console.error(JSON.stringify({
                             error: 'Failed to cleanup temp file',
                             file,
-                            message: (error as Error).message
+                            message: error.message
                         }, null, 4));
                     }
                 })
@@ -321,7 +315,7 @@ export class VideoProcessor {
                 console.error(JSON.stringify({
                     error: 'Failed to cleanup concat list',
                     file: concatListPath,
-                    message: (error as Error).message
+                    message: error.message
                 }, null, 4));
             }
 
@@ -332,14 +326,14 @@ export class VideoProcessor {
         } catch (error) {
             console.error(JSON.stringify({
                 error: 'Temp file cleanup failed',
-                message: (error as Error).message
+                message: error.message
             }, null, 4));
         }
     }
 
 
 
-    async cleanup(mediaFiles: MediaFile[], outputPath?: string): Promise<void> {
+    async cleanup(mediaFiles, outputPath) {
         try {
             // Clean up downloaded media files
             await Promise.all(
@@ -351,7 +345,7 @@ export class VideoProcessor {
                         console.error(JSON.stringify({
                             error: 'Failed to cleanup file',
                             file: mediaFile.path,
-                            message: (error as Error).message
+                            message: error.message
                         }, null, 4));
                     }
                 })
@@ -366,14 +360,14 @@ export class VideoProcessor {
                     console.error(JSON.stringify({
                         error: 'Failed to cleanup output file',
                         outputPath,
-                        message: (error as Error).message
+                        message: error.message
                     }, null, 4));
                 }
             }
         } catch (error) {
             console.error(JSON.stringify({
                 error: 'Cleanup failed',
-                message: (error as Error).message
+                message: error.message
             }, null, 4));
         }
     }

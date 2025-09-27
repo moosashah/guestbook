@@ -1,24 +1,17 @@
-import { createMessageEntity, createEventEntity, EventEntityType, MessageEntityType } from '../shared';
+import { createMessageEntity, createEventEntity } from '../shared/models.js';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { S3Service } from './s3';
-import { VideoProcessor, MediaFile } from './video-processor';
+import { S3Service } from './s3.js';
+import { VideoProcessor } from './video-processor.js';
 import { nanoid } from 'nanoid';
 
-export interface CompilationStatus {
-    eventId: string;
-    status: 'pending' | 'processing' | 'completed' | 'failed';
-    progress?: number;
-    outputUrl?: string;
-    error?: string;
-}
 
 export class CompilerService {
-    private s3Service: S3Service;
-    private videoProcessor: VideoProcessor;
-    private compilationStatuses: Map<string, CompilationStatus> = new Map();
-    private dynamoClient: DynamoDBClient;
-    private EventEntity: EventEntityType;
-    private MessageEntity: MessageEntityType;
+    s3Service
+    videoProcessor
+    compilationStatuses = new Map();
+    dynamoClient
+    EventEntity
+    MessageEntity
 
     constructor() {
         this.s3Service = new S3Service();
@@ -54,7 +47,7 @@ export class CompilerService {
         }, null, 4));
     }
 
-    async compileEvent(eventId: string, webhookUrl?: string): Promise<void> {
+    async compileEvent(eventId, webhookUrl) {
         try {
             // Set initial status
             this.compilationStatuses.set(eventId, {
@@ -143,33 +136,33 @@ export class CompilerService {
             console.error(JSON.stringify({
                 error: 'Compilation failed',
                 eventId,
-                message: (error as Error).message
+                message: error.message
             }, null, 4));
 
             this.compilationStatuses.set(eventId, {
                 eventId,
                 status: 'failed',
-                error: (error as Error).message
+                error: error.message
             });
 
             if (webhookUrl) {
                 await this.notifyWebhook(webhookUrl, {
                     eventId,
                     status: 'failed',
-                    error: (error as Error).message
+                    error: error.message
                 });
             }
         }
     }
 
-    async getCompilationStatus(eventId: string): Promise<CompilationStatus> {
+    async getCompilationStatus(eventId) {
         return this.compilationStatuses.get(eventId) || {
             eventId,
             status: 'pending'
         };
     }
 
-    private updateProgress(eventId: string, progress: number): void {
+    updateProgress(eventId, progress) {
         const current = this.compilationStatuses.get(eventId);
         if (current) {
             this.compilationStatuses.set(eventId, {
@@ -179,7 +172,7 @@ export class CompilerService {
         }
     }
 
-    private async downloadMediaFiles(messages: any[]): Promise<MediaFile[]> {
+    async downloadMediaFiles(messages) {
         const downloadPromises = messages.map(async (message, index) => {
             // Use the correct file extension based on media_type
             const extension = message.media_type === 'video' ? 'webm' : 'wav';
@@ -198,13 +191,13 @@ export class CompilerService {
                 path: localPath,
                 guestName: message.guest_name,
                 mediaType: message.media_type
-            } as MediaFile;
+            }
         });
 
         return Promise.all(downloadPromises);
     }
 
-    private async notifyWebhook(webhookUrl: string, data: any): Promise<void> {
+    async notifyWebhook(webhookUrl, data) {
         try {
             const response = await fetch(webhookUrl, {
                 method: 'POST',
@@ -223,7 +216,7 @@ export class CompilerService {
         } catch (error) {
             console.error(JSON.stringify({
                 error: 'Failed to call webhook',
-                message: (error as Error).message
+                message: error.message
             }, null, 4));
         }
     }

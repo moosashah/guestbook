@@ -3,14 +3,13 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import express from 'express';
-import { CompilerService } from './services/compiler';
-import { S3Service } from './services/s3';
+import { CompilerService } from './services/stitcher.js';
 
 const app = express();
 const port = process.env.PORT || 3001;
 
 // Inactivity timer - exit after 10 seconds of no requests
-let inactivityTimer: NodeJS.Timeout;
+let inactivityTimer;
 const INACTIVITY_TIMEOUT = 10 * 1000; // 10 seconds
 
 function resetInactivityTimer() {
@@ -38,7 +37,6 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 const compilerService = new CompilerService();
-const s3Service = new S3Service();
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -55,7 +53,7 @@ app.post('/compile/:eventId', async (req, res) => {
 
         // Start compilation in background
         compilerService.compileEvent(eventId, webhookUrl).catch(error => {
-            console.error(JSON.stringify({ error: 'Compilation failed', eventId, message: (error as Error).message }, null, 4));
+            console.error(JSON.stringify({ error: 'Compilation failed', eventId, message: error.message }, null, 4));
         });
 
         res.json({
@@ -64,7 +62,7 @@ app.post('/compile/:eventId', async (req, res) => {
             status: 'processing'
         });
     } catch (error) {
-        console.error(JSON.stringify({ error: 'Failed to start compilation', message: (error as Error).message }, null, 4));
+        console.error(JSON.stringify({ error: 'Failed to start compilation', message: error.message }, null, 4));
         res.status(500).json({ error: 'Failed to start compilation' });
     }
 });
@@ -76,7 +74,7 @@ app.get('/status/:eventId', async (req, res) => {
         const status = await compilerService.getCompilationStatus(eventId);
         res.json(status);
     } catch (error) {
-        console.error(JSON.stringify({ error: 'Failed to get status', message: (error as Error).message }, null, 4));
+        console.error(JSON.stringify({ error: 'Failed to get status', message: error.message }, null, 4));
         res.status(500).json({ error: 'Failed to get compilation status' });
     }
 });
