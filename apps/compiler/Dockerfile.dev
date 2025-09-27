@@ -5,7 +5,7 @@ RUN apk add --no-cache ffmpeg fontconfig ttf-liberation
 
 # Create fonts directory and copy custom fonts
 RUN mkdir -p /usr/share/fonts/custom
-COPY fonts/ /usr/share/fonts/custom/
+COPY apps/compiler/fonts/ /usr/share/fonts/custom/
 
 # Update font cache
 RUN fc-cache -f -v
@@ -13,14 +13,17 @@ RUN fc-cache -f -v
 WORKDIR /app
 
 # Copy package files
-COPY package.json ./
+COPY apps/compiler/package.json ./
+
+# Install pnpm
+RUN npm install -g pnpm
 
 # Install dependencies
-RUN npm install
+RUN pnpm install
 
 # For development, we'll mount the source code as a volume
 # Expose port
 EXPOSE 3001
 
 # Start in development mode with hot reload (local dev script)
-CMD ["npm", "run", "dev:local"]
+CMD ["pnpm", "run", "dev:local"]

@@ -1,0 +1,21 @@
+# fly.toml app configuration file generated for compiler-wispy-haze-4097 on 2025-09-27T08:40:01+01:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'compiler-wispy-haze-4097'
+primary_region = 'lhr'
+
+[build]
+
+[http_service]
+  internal_port = 3001
+  force_https = true
+  auto_start_machines = true
+  auto_stop_machines = "off" 
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1

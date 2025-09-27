@@ -9,6 +9,32 @@ import { S3Service } from './services/s3';
 const app = express();
 const port = process.env.PORT || 3001;
 
+// Inactivity timer - exit after 10 seconds of no requests
+let inactivityTimer: NodeJS.Timeout;
+const INACTIVITY_TIMEOUT = 10 * 1000; // 10 seconds
+
+function resetInactivityTimer() {
+    if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+    }
+    inactivityTimer = setTimeout(() => {
+        console.log(JSON.stringify({
+            message: 'No requests received for 10 seconds, shutting down compiler service',
+            timestamp: new Date().toISOString()
+        }, null, 4));
+        process.exit(0);
+    }, INACTIVITY_TIMEOUT);
+}
+
+// Initialize the timer
+resetInactivityTimer();
+
+// Middleware to reset timer on every request
+app.use((req, res, next) => {
+    resetInactivityTimer();
+    next();
+});
+
 app.use(express.json());
 
 const compilerService = new CompilerService();
