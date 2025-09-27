@@ -89,6 +89,3 @@ export const createMessageEntity = (client: DynamoDB.DocumentClient) => new Enti
     table,
     client
 });
-
-// Export factory functions and types only
-// Apps must create their own DynamoDB clients and use the factory functions 
