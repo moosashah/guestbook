@@ -13,10 +13,16 @@ interface MediaPlayerProps {
   src: string;
   type: 'audio' | 'video';
   className?: string;
+  autoPlay?: boolean;
 }
 
-export function MediaPlayer({ src, type, className }: MediaPlayerProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
+export function MediaPlayer({
+  src,
+  type,
+  className,
+  autoPlay = false,
+}: MediaPlayerProps) {
+  const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
@@ -88,14 +94,44 @@ export function MediaPlayer({ src, type, className }: MediaPlayerProps) {
 
     const handleLoadedMetadata = () => {
       setDuration(media.duration);
+
+      // Auto-play if specified
+      if (autoPlay && !isPlaying) {
+        media
+          .play()
+          .then(() => {
+            setIsPlaying(true);
+          })
+          .catch(error => {
+            console.warn('Auto-play failed:', error);
+            setIsPlaying(false);
+          });
+      }
+    };
+
+    const handleCanPlay = () => {
+      // Additional opportunity to start playback once enough data is loaded
+      if (autoPlay && !isPlaying && media.paused) {
+        media
+          .play()
+          .then(() => {
+            setIsPlaying(true);
+          })
+          .catch(error => {
+            console.warn('Auto-play failed on canplay:', error);
+            setIsPlaying(false);
+          });
+      }
     };
 
     media.addEventListener('loadedmetadata', handleLoadedMetadata);
+    media.addEventListener('canplay', handleCanPlay);
 
     return () => {
       media.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      media.removeEventListener('canplay', handleCanPlay);
     };
-  }, [src]);
+  }, [src, autoPlay, isPlaying]);
 
   return (
     <div className={cn('rounded-md overflow-hidden', className)}>

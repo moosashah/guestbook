@@ -1,15 +1,13 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Download, Edit, Trash2 } from 'lucide-react';
+import { Download, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-export function EventButtons({ eventId }: { eventId: string }) {
+export function DownloadQrCodeButton({ eventId }: { eventId: string }) {
   const [isDownloading, setIsDownloading] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const router = useRouter();
 
   const handleDownloadQR = async () => {
     setIsDownloading(true);
@@ -33,6 +31,25 @@ export function EventButtons({ eventId }: { eventId: string }) {
     }
   };
 
+  return (
+    <div className='flex flex-col gap-2 justify-end'>
+      <Button
+        variant='outline'
+        size='sm'
+        onClick={handleDownloadQR}
+        disabled={isDownloading}
+        className={cn('gap-2', isDownloading && 'animate-pulse')}
+      >
+        <Download className='size-4' />
+        Download QR Code
+      </Button>
+    </div>
+  );
+}
+
+export function DeleteEventButton({ eventId }: { eventId: string }) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const router = useRouter();
   const handleDeleteEvent = async () => {
     if (
       !confirm(
@@ -61,60 +78,15 @@ export function EventButtons({ eventId }: { eventId: string }) {
       setIsDeleting(false);
     }
   };
-
   return (
-    <div className='flex flex-col gap-2'>
-      <div className='flex gap-2 flex-wrap'>
-        <Link href={`/events/${eventId}/edit`}>
-          <Button variant='outline' size='sm'>
-            <Edit className='mr-2 h-4 w-4' />
-            Edit Event
-          </Button>
-        </Link>
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={handleDownloadQR}
-          disabled={isDownloading}
-        >
-          <Download className='mr-2 h-4 w-4' />
-          {isDownloading ? (
-            <span className='flex items-center'>
-              <svg
-                className='animate-spin h-4 w-4 mr-2 text-muted-foreground'
-                xmlns='http://www.w3.org/2000/svg'
-                fill='none'
-                viewBox='0 0 24 24'
-              >
-                <circle
-                  className='opacity-25'
-                  cx='12'
-                  cy='12'
-                  r='10'
-                  stroke='currentColor'
-                  strokeWidth='4'
-                ></circle>
-                <path
-                  className='opacity-75'
-                  fill='currentColor'
-                  d='M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z'
-                ></path>
-              </svg>
-            </span>
-          ) : (
-            'Download QR'
-          )}
-        </Button>
-        <Button
-          variant='destructive'
-          size='sm'
-          onClick={handleDeleteEvent}
-          disabled={isDeleting}
-        >
-          <Trash2 className='mr-2 h-4 w-4' />
-          {isDeleting ? 'Deleting...' : 'Delete Event'}
-        </Button>
-      </div>
-    </div>
+    <Button
+      variant='destructive'
+      size='sm'
+      onClick={handleDeleteEvent}
+      disabled={isDeleting}
+      className={cn('gap-2 cursor-pointer', isDeleting && 'animate-pulse')}
+    >
+      <Trash2 className='size-4' />
+    </Button>
   );
 }

@@ -30,16 +30,11 @@ interface CreateEventClientProps {
 
 export default function CreateEventClient({ user }: CreateEventClientProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [mediaType, setMediaType] = useState<'video' | 'audio'>('video');
   const [welcomeMessageBlob, setWelcomeMessageBlob] = useState<Blob | null>(
     null
   );
   const [bannerImage, setBannerImage] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
-
-  const getLoggedinUserId = () => {
-    return user.id;
-  };
 
   const STRIPE_PUBLIC_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY;
   const BASE_URL =
@@ -137,7 +132,7 @@ export default function CreateEventClient({ user }: CreateEventClientProps) {
         data.dateRange.to!.toISOString()
       );
       eventFormData.append('package', data.package);
-      eventFormData.append('creator_id', getLoggedinUserId());
+      eventFormData.append('creator_id', user.id);
       eventFormData.append('payment_status', 'pending');
 
       if (bannerImage) {
@@ -217,7 +212,7 @@ export default function CreateEventClient({ user }: CreateEventClientProps) {
       <div className='mb-6'>
         <Link
           href='/'
-          className='inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4'
+          className='inline-flex items-center text-sm text-primary/60 hover:text-primary mb-4'
         >
           <ArrowLeft className='mr-1 h-4 w-4' />
           Back to Dashboard
@@ -395,9 +390,7 @@ export default function CreateEventClient({ user }: CreateEventClientProps) {
             size='lg'
             className='min-w-[200px]'
           >
-            {isSubmitting
-              ? 'Creating...'
-              : `Create Event - $${packagePrices[selectedPackage]}`}
+            {isSubmitting ? 'Creating...' : `Create Event`}
           </Button>
         </div>
       </form>

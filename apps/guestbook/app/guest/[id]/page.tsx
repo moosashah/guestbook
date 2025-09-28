@@ -60,9 +60,12 @@ export default async function GuestPage({ params }: GuestPageProps) {
     }
   }
 
-  const isActive =
-    new Date() >= new Date(eventData.submission_start_date) &&
-    new Date() <= new Date(eventData.submission_end_date);
+  const now = new Date();
+  const submissionStartDate = new Date(eventData.submission_start_date);
+  const submissionEndDate = new Date(eventData.submission_end_date);
+
+  const isUpcoming = now < submissionStartDate;
+  const isActive = now >= submissionStartDate && now <= submissionEndDate;
 
   const messageLimit = PACKAGE_LIMITS[eventData.package];
 
@@ -97,7 +100,7 @@ export default async function GuestPage({ params }: GuestPageProps) {
             }
           />
         )
-      ) : (
+      ) : isUpcoming ? (
         <div className='flex items-center justify-center bg-muted/20 p-4'>
           <Card className='w-full max-w-md text-center bg-destructive/10 border-destructive'>
             <CardContent className='pt-4 pb-8 px-6'>
@@ -111,6 +114,24 @@ export default async function GuestPage({ params }: GuestPageProps) {
               <p className='text-sm text-destructive/80'>
                 The happy couple will let you know when you can start leaving
                 your messages!
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        <div className='flex items-center justify-center bg-muted/20 p-4'>
+          <Card className='w-full max-w-md text-center bg-destructive/10 border-destructive'>
+            <CardContent className='pt-4 pb-8 px-6'>
+              <h1 className='text-2xl font-bold mb-4 text-destructive'>
+                Submissions Closed
+              </h1>
+              <p className='text-destructive/80 mb-4'>
+                The message submission period for this event has ended. You can
+                no longer send messages for this event.
+              </p>
+              <p className='text-sm text-destructive/80'>
+                Thank you for your interest! The couple will cherish all the
+                messages they received.
               </p>
             </CardContent>
           </Card>

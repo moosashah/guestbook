@@ -1,12 +1,17 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { formatDate } from '@/lib/utils';
 import type { Message } from '@/lib/types';
-import { Mic, Video, Play, Pause, Loader2, AlertCircle } from 'lucide-react';
+import {
+  Mic,
+  Video,
+  Eye,
+  EyeOff,
+  Download,
+  Loader2,
+  AlertCircle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { MediaPlayer } from '@/components/media-player';
-import { useMediaPlayer } from '@/hooks/use-media-player';
 import { useState } from 'react';
 
 interface MessageCardProps {
@@ -15,29 +20,67 @@ interface MessageCardProps {
 
 export default function MessageCard({ message }: MessageCardProps) {
   const [showPlayer, setShowPlayer] = useState(false);
-  const { mediaData, isLoading, error, isPlaying, fetchMediaUrl, play, pause } =
-    useMediaPlayer({ messageId: message.id, eventId: message.event_id });
+  const [streamUrl, setStreamUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
-  const handlePlayClick = async () => {
-    if (showPlayer && mediaData) {
-      if (isPlaying) {
-        pause();
-      } else {
-        play();
-      }
-    } else {
-      // First time playing - fetch URL and show player
-      const data = await fetchMediaUrl();
-      if (data) {
-        setShowPlayer(true);
-        play();
-      }
+  const handleTogglePlayer = async () => {
+    if (showPlayer) {
+      // Just hide player, keep the stream URL cached
+      setShowPlayer(false);
+      return;
+    }
+
+    // If we already have a stream URL, just show the player
+    if (streamUrl) {
+      setShowPlayer(true);
+      return;
+    }
+
+    // Only fetch stream URL if we don't have one yet
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Use streaming endpoint instead of pre-signed URL
+      const streamingUrl = `/api/media/${message.id}/stream?eventId=${message.event_id}`;
+      setStreamUrl(streamingUrl);
+      setShowPlayer(true);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to load media';
+      console.error('[MessageCard] Error setting up stream:', err);
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleClosePlayer = () => {
-    setShowPlayer(false);
-    pause();
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      // Fetch the presigned download URL from API
+      const res = await fetch(
+        `/api/media/${message.id}/download?eventId=${message.event_id}`
+      );
+      const data = await res.json();
+      if (!data.url) throw new Error('No presigned URL returned');
+
+      // Trigger download
+      const link = document.createElement('a');
+      link.href = data.url;
+      const fileExtension = message.media_type === 'video' ? 'webm' : 'wav';
+      link.download = `${message.guest_name}-${message.media_type}.${fileExtension}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('[MessageCard] Download error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to download media');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -54,40 +97,41 @@ export default function MessageCard({ message }: MessageCardProps) {
 
           <div className='grow min-w-0'>
             <h3 className='font-semibold truncate'>{message.guest_name}</h3>
-            <p className='text-sm text-muted-foreground'>
-              {formatDate(message.created_at)}
-            </p>
+            {!showPlayer && (
+              <p className='text-sm text-muted-foreground capitalize'>
+                {message.media_type} message
+              </p>
+            )}
           </div>
 
-          <Button
-            size='sm'
-            variant='outline'
-            className='shrink-0'
-            onClick={handlePlayClick}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className='h-4 w-4 mr-1 animate-spin' />
-                Loading
-              </>
-            ) : error ? (
-              <>
-                <AlertCircle className='h-4 w-4 mr-1' />
-                Error
-              </>
-            ) : showPlayer && isPlaying ? (
-              <>
-                <Pause className='h-4 w-4 mr-1' />
-                Pause
-              </>
-            ) : (
-              <>
-                <Play className='h-4 w-4 mr-1' />
-                Play
-              </>
-            )}
-          </Button>
+          <div className='flex gap-2 shrink-0'>
+            <Button
+              size='sm'
+              variant='outline'
+              onClick={handleTogglePlayer}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : showPlayer ? (
+                <EyeOff className='h-4 w-4' />
+              ) : (
+                <Eye className='h-4 w-4' />
+              )}
+            </Button>
+            <Button
+              size='sm'
+              variant='outline'
+              onClick={handleDownload}
+              disabled={isDownloading}
+            >
+              {isDownloading ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : (
+                <Download className='h-4 w-4' />
+              )}
+            </Button>
+          </div>
         </div>
 
         {/* Error Display */}
@@ -99,27 +143,27 @@ export default function MessageCard({ message }: MessageCardProps) {
           </div>
         )}
 
-        {/* Media Player */}
-        {showPlayer && mediaData && (
+        {/* Native HTML Media Elements - Streaming */}
+        {showPlayer && streamUrl && (
           <div className='mt-4'>
-            <div className='flex justify-between items-center mb-2'>
-              <h4 className='text-sm font-medium'>
-                Playing message from {message.guest_name}
-              </h4>
-              <Button
-                size='sm'
-                variant='ghost'
-                onClick={handleClosePlayer}
-                className='text-muted-foreground hover:text-foreground'
-              >
-                ✕
-              </Button>
-            </div>
-            <MediaPlayer
-              src={mediaData.url}
-              type={mediaData.media_type}
-              className='w-full'
-            />
+            {message.media_type === 'video' ? (
+              <video
+                src={streamUrl}
+                className='w-full aspect-video object-cover rounded-md'
+                controls
+                autoPlay
+                playsInline
+                preload='none'
+              />
+            ) : (
+              <audio
+                src={streamUrl}
+                className='w-full'
+                controls
+                autoPlay
+                preload='none'
+              />
+            )}
           </div>
         )}
       </CardContent>

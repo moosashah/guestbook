@@ -17,7 +17,6 @@ export const useMediaPlayer = ({ messageId, eventId }: UseMediaPlayerProps) => {
   const [mediaData, setMediaData] = useState<MediaData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   const fetchMediaUrl = useCallback(async () => {
     if (mediaData && mediaData.url) {
@@ -63,20 +62,8 @@ export const useMediaPlayer = ({ messageId, eventId }: UseMediaPlayerProps) => {
     }
   }, [messageId, eventId, mediaData]);
 
-  const play = useCallback(async () => {
-    if (!mediaData) {
-      await fetchMediaUrl();
-    }
-    setIsPlaying(true);
-  }, [mediaData, fetchMediaUrl]);
-
-  const pause = useCallback(() => {
-    setIsPlaying(false);
-  }, []);
-
   const reset = useCallback(() => {
     setMediaData(null);
-    setIsPlaying(false);
     setError(null);
   }, []);
 
@@ -84,10 +71,7 @@ export const useMediaPlayer = ({ messageId, eventId }: UseMediaPlayerProps) => {
     mediaData,
     isLoading,
     error,
-    isPlaying,
     fetchMediaUrl,
-    play,
-    pause,
     reset,
   };
 };

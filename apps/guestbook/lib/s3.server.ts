@@ -9,6 +9,7 @@ import {
   UploadPartCommand,
   CompleteMultipartUploadCommand,
   AbortMultipartUploadCommand,
+  HeadObjectCommand,
 } from '@aws-sdk/client-s3';
 import { BUCKET_NAME } from './consts';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -44,6 +45,24 @@ const qrCodeDownloadCommand = (key: string) =>
 export const qrCodeDownloadUrl = async (key: string) => {
   const command = qrCodeDownloadCommand(key);
   return getSignedUrl(s3Client(), command, { expiresIn: 60 });
+};
+
+const mediaDownloadCommand = (key: string, filename?: string) =>
+  new GetObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: key,
+    ResponseContentDisposition: filename
+      ? `attachment; filename="${filename}"`
+      : 'attachment',
+  });
+
+export const getMediaDownloadUrl = async (
+  key: string,
+  filename?: string,
+  expiresIn: number = 300
+) => {
+  const command = mediaDownloadCommand(key, filename);
+  return getSignedUrl(s3Client(), command, { expiresIn });
 };
 
 const mediaAccessCommand = (key: string) =>
@@ -281,3 +300,20 @@ export const getWelcomeMessageUrl = async (
   });
   return getSignedUrl(s3Client(), command, { expiresIn });
 };
+
+export function headObject(key: string) {
+  const command = new HeadObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: key,
+  });
+  return s3Client().send(command);
+}
+
+export function getObjectByRange(key: string, range: string) {
+  const command = new GetObjectCommand({
+    Bucket: BUCKET_NAME,
+    Key: key,
+    Range: range,
+  });
+  return s3Client().send(command);
+}
