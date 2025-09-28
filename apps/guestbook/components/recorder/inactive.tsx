@@ -21,9 +21,9 @@ export const Inactive = ({
 }: InactiveProps) => (
   <div className={cn('border rounded-lg p-6 text-center', className)}>
     {type === 'video' ? (
-      <Video className='h-12 w-12 mx-auto mb-2 text-muted-foreground' />
+      <Video className='h-12 w-12 mx-auto mb-2 text-primary' />
     ) : (
-      <Mic className='h-12 w-12 mx-auto mb-2 text-muted-foreground' />
+      <Mic className='h-12 w-12 mx-auto mb-2 text-primary' />
     )}
     <p className='text-sm text-muted-foreground mb-4'>{description}</p>
     <Button type='button' variant='outline' onClick={startRecording}>

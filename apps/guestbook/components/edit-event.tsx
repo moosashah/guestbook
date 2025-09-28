@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm, Controller } from 'react-hook-form';
 import { useState } from 'react';
-import { Upload } from 'lucide-react';
+import { ArrowLeft, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -100,7 +100,6 @@ export function EditEventForm({
 
   const onSubmit = async (data: FormValues) => {
     try {
-      // Create FormData to handle file uploads
       const formData = new FormData();
 
       // Add text fields
@@ -156,201 +155,223 @@ export function EditEventForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+        <div className='flex justify-between sm:flex-row flex-col sm:mb-0 mb-6'>
+          <div className='flex flex-col items-center sm:items-start'>
+            <Link
+              href={`/events/${event.id}`}
+              className='inline-flex items-center text-sm text-primary/60 hover:text-primary mb-4'
+            >
+              <ArrowLeft className='mr-1 h-4 w-4' />
+              Back to Event Details
+            </Link>
+
+            <h1 className='text-3xl md:text-4xl font-bold mb-6'>Edit Event</h1>
+          </div>
+
+          <div className='flex items-center justify-center sm:justify-end gap-3'>
+            <Link href={`/events/${event.id}`}>
+              <Button
+                variant='outline'
+                type='button'
+                className='text-xs md:text-sm'
+              >
+                Cancel
+              </Button>
+            </Link>
+            <Button
+              type='submit'
+              disabled={form.formState.isSubmitting}
+              className='text-xs md:text-sm'
+            >
+              {form.formState.isSubmitting
+                ? 'Updating Event...'
+                : 'Update Event'}
+            </Button>
+          </div>
+        </div>
         <Card>
           <CardContent className='pt-6'>
-            <h2 className='text-xl font-semibold mb-4'>Event Details</h2>
-
             {form.formState.errors.root && (
               <div className='mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm'>
                 {form.formState.errors.root.message}
               </div>
             )}
 
-            <div className='space-y-4'>
-              <FormField
-                control={form.control}
-                name='name'
-                rules={{ required: 'Event name is required' }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Event Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g., John & Sarah's Wedding"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className='space-y-4 grid grid-cols-1 sm:grid-cols-2 gap-4'>
+              <div className='space-y-4 col-span-full md:col-span-1'>
+                <FormField
+                  control={form.control}
+                  name='name'
+                  rules={{ required: 'Event name is required' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Event Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., John & Sarah's Wedding"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name='description'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description (Optional)</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder='Tell your guests about this event'
-                        className='resize-none'
-                        rows={3}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name='dateRange'
+                  rules={{
+                    validate: validateDateRange,
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Submission Date Range</FormLabel>
+                      <FormControl>
+                        <DateRangePicker
+                          dateRange={field.value}
+                          setDateRange={field.onChange}
+                          className='w-full'
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <div className='space-y-2'>
-                <Label htmlFor='banner'>Banner Image</Label>
-                {bannerPreview ? (
-                  <div className='space-y-2'>
-                    {bannerImageUrl && !bannerImage && (
-                      <p className='text-sm text-muted-foreground'>
-                        Current banner image:
-                      </p>
-                    )}
-                    {bannerImage && (
-                      <p className='text-sm text-muted-foreground'>
-                        New banner image preview:
-                      </p>
-                    )}
-                    <div className='relative aspect-video rounded-lg overflow-hidden mb-2'>
-                      <img
-                        src={bannerPreview}
-                        alt='Banner preview'
-                        className='w-full h-full object-cover'
-                      />
-                      <Button
-                        type='button'
-                        variant='outline'
-                        size='sm'
-                        className='absolute bottom-2 right-2 bg-white/80'
-                        onClick={() => {
-                          setBannerPreview(bannerImageUrl || null);
-                          setBannerImage(null);
-                        }}
-                      >
-                        {bannerImageUrl ? 'Reset to Current' : 'Remove Image'}
-                      </Button>
+                <FormField
+                  control={form.control}
+                  name='description'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Welcome Message</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder='Tell your guests about this event'
+                          className='resize-none h-[120px] md:h-[300px]'
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className='col-span-full md:col-span-1'>
+                <div className='space-y-2'>
+                  <Label htmlFor='banner'>Upload Image</Label>
+                  {bannerPreview ? (
+                    <div className='space-y-2'>
+                      {bannerImageUrl && !bannerImage && (
+                        <p className='text-sm text-muted-foreground'>
+                          Current banner image:
+                        </p>
+                      )}
+                      {bannerImage && (
+                        <p className='text-sm text-muted-foreground'>
+                          New banner image preview:
+                        </p>
+                      )}
+                      <div className='relative aspect-video rounded-lg overflow-hidden mb-2'>
+                        <img
+                          src={bannerPreview}
+                          alt='Banner preview'
+                          className='w-full h-full object-cover'
+                        />
+                        <div className='absolute bottom-2 right-2 flex gap-2'>
+                          <Button
+                            type='button'
+                            variant='outline'
+                            size='sm'
+                            className='bg-white/80'
+                            onClick={() =>
+                              document.getElementById('banner')?.click()
+                            }
+                          >
+                            Change Image
+                          </Button>
+                          <Button
+                            type='button'
+                            variant='outline'
+                            size='sm'
+                            className='bg-white/80'
+                            onClick={() => {
+                              setBannerPreview(bannerImageUrl || null);
+                              setBannerImage(null);
+                            }}
+                          >
+                            {bannerImageUrl
+                              ? 'Reset to Current'
+                              : 'Remove Image'}
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <div>
-                    <p className='text-sm text-muted-foreground mb-2'>
-                      {!bannerImageUrl
-                        ? 'No banner image currently set.'
-                        : 'Upload a new banner image for your event.'}
-                    </p>
-                    <div className='border-2 border-dashed rounded-lg p-6 text-center'>
-                      <Upload className='h-8 w-8 mx-auto mb-2 text-muted-foreground' />
+                  ) : (
+                    <div>
                       <p className='text-sm text-muted-foreground mb-2'>
-                        Drag and drop an image, or click to browse
+                        {!bannerImageUrl
+                          ? 'No banner image currently set.'
+                          : 'Upload a new banner image for your event.'}
                       </p>
-                      <Input
-                        id='banner'
-                        type='file'
-                        accept='image/*'
-                        className='hidden'
-                        onChange={handleBannerChange}
-                      />
-                      <Button
-                        type='button'
-                        variant='outline'
-                        size='sm'
-                        onClick={() =>
-                          document.getElementById('banner')?.click()
-                        }
-                      >
-                        Choose File
-                      </Button>
+                      <div className='border-2 border-dashed rounded-lg p-6 text-center'>
+                        <Upload className='h-8 w-8 mx-auto mb-2 text-muted-foreground' />
+                        <p className='text-sm text-muted-foreground mb-2'>
+                          Drag and drop an image, or click to browse
+                        </p>
+                        <Button
+                          type='button'
+                          variant='outline'
+                          size='sm'
+                          onClick={() =>
+                            document.getElementById('banner')?.click()
+                          }
+                        >
+                          Choose File
+                        </Button>
+                      </div>
                     </div>
+                  )}
+                  {/* Hidden file input - always present */}
+                  <Input
+                    id='banner'
+                    type='file'
+                    accept='image/*'
+                    className='hidden'
+                    onChange={handleBannerChange}
+                  />
+                </div>
+
+                <h2 className='mt-8'>Audio Message</h2>
+                {welcomeMessageUrl && (
+                  <div className='mb-4'>
+                    <p className='text-sm text-muted-foreground mb-2'>
+                      Current welcome message:
+                    </p>
+                    <audio
+                      src={welcomeMessageUrl}
+                      controls
+                      className='w-full'
+                      preload='metadata'
+                    />
                   </div>
                 )}
+
+                <p className='text-sm text-muted-foreground mb-4'>
+                  {welcomeMessageUrl
+                    ? 'Record a new audio message for your guests. This will replace the existing welcome message.'
+                    : 'Record an audio message for your guests. They will be able to listen to it by scanning the Event QR code.'}
+                </p>
+
+                <MediaRecorder
+                  type='audio'
+                  setBlob={setWelcomeMessageBlob}
+                  description='Record an audio message for your guests'
+                />
               </div>
             </div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardContent className='pt-6'>
-            <h2 className='text-xl font-semibold mb-4'>Welcome Message</h2>
-
-            {welcomeMessageUrl && (
-              <div className='mb-4'>
-                <p className='text-sm text-muted-foreground mb-2'>
-                  Current welcome message:
-                </p>
-                <div className='relative aspect-video rounded-lg overflow-hidden bg-black'>
-                  <video
-                    src={welcomeMessageUrl}
-                    controls
-                    className='w-full h-full object-contain'
-                    preload='metadata'
-                  />
-                </div>
-              </div>
-            )}
-
-            <p className='text-sm text-muted-foreground mb-4'>
-              {welcomeMessageUrl
-                ? 'Record a new welcome message for your guests. This will replace the existing welcome message.'
-                : 'Upload a welcome message for your guests.'}
-            </p>
-
-            <MediaRecorder
-              type='video'
-              setBlob={setWelcomeMessageBlob}
-              description='Record a welcome message for your guests'
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className='pt-6'>
-            <h2 className='text-xl font-semibold mb-4'>
-              Message Submission Period
-            </h2>
-            <p className='text-sm text-muted-foreground mb-4'>
-              Set the time period during which guests can submit messages
-            </p>
-
-            <FormField
-              control={form.control}
-              name='dateRange'
-              rules={{
-                validate: validateDateRange,
-              }}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Submission Date Range</FormLabel>
-                  <FormControl>
-                    <DateRangePicker
-                      dateRange={field.value}
-                      setDateRange={field.onChange}
-                      className='w-full'
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
-
-        <div className='flex justify-end gap-3'>
-          <Link href={`/events/${event.id}`}>
-            <Button variant='outline' type='button'>
-              Cancel
-            </Button>
-          </Link>
-          <Button type='submit' disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? 'Updating Event...' : 'Update Event'}
-          </Button>
-        </div>
       </form>
     </Form>
   );

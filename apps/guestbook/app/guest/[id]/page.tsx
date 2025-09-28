@@ -1,6 +1,15 @@
 import { EventEntity } from '@/lib/models';
 import { GuestForm } from '@/components/guest-form';
-import { PACKAGE_LIMITS } from '@/lib/consts';
+import {
+  PACKAGE_LIMITS,
+  PACKAGE_MEDIA_OPTIONS,
+  PackageMediaOption,
+} from '@/lib/consts';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Event } from '@/lib/types';
+import { getBannerImageUrl, getWelcomeMessageUrl } from '@/lib/s3.server';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface GuestPageProps {
   params: Promise<{ id: string }>;
@@ -19,35 +28,133 @@ export default async function GuestPage({ params }: GuestPageProps) {
 
   const { data: eventData } = await loadEvent(id);
   if (!eventData) {
-    return <div>Event not found</div>;
+    return (
+      <Image
+        src='/wedding-event-not-found.png'
+        alt='Event not found'
+        width={800}
+        height={800}
+        className='object-cover rounded-lg'
+      />
+    );
+  }
+
+  let bannerImageUrl: string | null = null;
+  if (eventData.banner_image) {
+    try {
+      bannerImageUrl = await getBannerImageUrl(eventData.banner_image, 3600);
+    } catch (error) {
+      console.error('[GuestPage] Failed to get banner image URL:', error);
+    }
+  }
+
+  let welcomeMessageUrl: string | null = null;
+  if (eventData.welcome_message) {
+    try {
+      welcomeMessageUrl = await getWelcomeMessageUrl(
+        eventData.welcome_message,
+        3600
+      );
+    } catch (error) {
+      console.error('[GuestPage] Failed to get welcome message URL:', error);
+    }
   }
 
   const isActive =
     new Date() >= new Date(eventData.submission_start_date) &&
     new Date() <= new Date(eventData.submission_end_date);
 
-  if (!isActive) {
-    return <div>Event is not active</div>;
-  }
-
-  // Check if event has reached its message limit based on package
   const messageLimit = PACKAGE_LIMITS[eventData.package];
-  if (eventData.message_count >= messageLimit) {
-    return (
-      <div className='flex flex-col items-center justify-center   p-4'>
-        <div className='max-w-md text-center'>
-          <h1 className='text-2xl font-bold mb-4'>Event is Full</h1>
-          <p className='text-gray-600 mb-2'>
-            This event has reached its maximum capacity of {messageLimit}{' '}
-            messages.
-          </p>
-          <p className='text-sm text-gray-500'>
-            Current messages: {eventData.message_count}/{messageLimit}
-          </p>
+
+  return (
+    <div className='flex flex-col items-center justify-center'>
+      <TopSection
+        event={eventData}
+        bannerImageUrl={bannerImageUrl}
+        welcomeMessageUrl={welcomeMessageUrl}
+      />
+      {isActive ? (
+        eventData.message_count >= messageLimit ? (
+          <div className='flex items-center justify-center bg-muted/20 p-4'>
+            <Card className='w-full max-w-md text-center bg-destructive/10 border-destructive'>
+              <CardContent className='pt-4 pb-8 px-6'>
+                <h1 className='text-2xl font-bold mb-4 text-destructive'>
+                  Event is Full
+                </h1>
+                <p className='text-destructive/80'>
+                  This event has reached its maximum capacity of messages.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <GuestForm
+            event={eventData}
+            mediaOptions={
+              PACKAGE_MEDIA_OPTIONS[
+                eventData.package
+              ] as unknown as PackageMediaOption[]
+            }
+          />
+        )
+      ) : (
+        <div className='flex items-center justify-center bg-muted/20 p-4'>
+          <Card className='w-full max-w-md text-center bg-destructive/10 border-destructive'>
+            <CardContent className='pt-4 pb-8 px-6'>
+              <h1 className='text-2xl font-bold mb-4 text-destructive'>
+                Event Not Started
+              </h1>
+              <p className='text-destructive/80 mb-4'>
+                The message submission period for this event hasn't begun yet.
+                Please check back later when the event is active.
+              </p>
+              <p className='text-sm text-destructive/80'>
+                The happy couple will let you know when you can start leaving
+                your messages!
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TopSection({
+  event,
+  bannerImageUrl,
+  welcomeMessageUrl,
+}: {
+  event: Event;
+  bannerImageUrl: string | null;
+  welcomeMessageUrl: string | null;
+}) {
+  return (
+    <div className='flex flex-col items-center justify-center'>
+      <div className='text-center mb-6'>
+        {/* TODO: Remove this link for production */}
+        <Link href={`/events/${event.id}`}>
+          <h1 className='text-2xl mb-2'>{event.name}</h1>
+          {bannerImageUrl && (
+            <Image
+              src={bannerImageUrl}
+              alt={event.name}
+              width={600}
+              height={600}
+              className='object-cover rounded-lg'
+            />
+          )}
+        </Link>
+        <p className='text-muted-foreground pt-4'>{event.description}</p>
+        {/* TODO: Remove this for production */}
+        <div className='mt-2 text-sm text-muted-foreground'>
+          Messages: {event.message_count}/{PACKAGE_LIMITS[event.package]}
         </div>
       </div>
-    );
-  }
 
-  return <GuestForm event={eventData} />;
+      {welcomeMessageUrl && (
+        <audio src={welcomeMessageUrl} controls className='w-full' />
+      )}
+    </div>
+  );
 }

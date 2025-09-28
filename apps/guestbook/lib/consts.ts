@@ -9,3 +9,11 @@ export const PACKAGE_LIMITS = {
 } as const;
 
 export type PackageType = keyof typeof PACKAGE_LIMITS;
+
+export const PACKAGE_MEDIA_OPTIONS = {
+  basic: ['audio'],
+  premium: ['audio'],
+  deluxe: ['audio', 'video'],
+} as const;
+
+export type PackageMediaOption = 'video' | 'audio';

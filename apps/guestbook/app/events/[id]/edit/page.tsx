@@ -96,16 +96,6 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
 
   return (
     <div className='container mx-auto py-8 px-4'>
-      <Link
-        href={`/events/${event.id}`}
-        className='inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4'
-      >
-        <ArrowLeft className='mr-1 h-4 w-4' />
-        Back to Event Details
-      </Link>
-
-      <h1 className='text-3xl font-bold mb-6'>Edit Event</h1>
-
       <EditEventForm
         event={event}
         bannerImageUrl={bannerImageUrl}

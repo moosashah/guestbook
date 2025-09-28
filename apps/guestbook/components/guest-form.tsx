@@ -1,7 +1,6 @@
 'use client';
 
 import { Check, Mic, Video } from 'lucide-react';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,11 +11,18 @@ import { UploadProgressComponent } from '@/components/upload-progress';
 import { useState } from 'react';
 import type { Event } from '@/lib/types';
 import { uploadMessage, UploadProgress } from '@/lib/upload-client';
-import { WelcomeMessagePlayer } from './welcome-message-player';
-import { PACKAGE_LIMITS } from '@/lib/consts';
+import { PackageMediaOption } from '@/lib/consts';
 
-export function GuestForm({ event }: { event: Event }) {
-  const [mediaType, setMediaType] = useState<'video' | 'audio'>('video');
+export function GuestForm({
+  event,
+  mediaOptions,
+}: {
+  event: Event;
+  mediaOptions: PackageMediaOption[];
+}) {
+  const [mediaType, setMediaType] = useState<PackageMediaOption>(
+    mediaOptions[0]
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [guestName, setGuestName] = useState('');
@@ -108,54 +114,42 @@ export function GuestForm({ event }: { event: Event }) {
     );
   }
   return (
-    <div className='  flex items-center justify-center bg-muted/20 p-4'>
-      <Card className='w-full max-w-md'>
-        <CardContent className='pt-6 pb-8 px-6'>
-          <div className='text-center mb-6'>
-            <Link href={`/events/${event.id}`}>
-              <h1 className='text-2xl font-bold mb-2'>{event.name}</h1>
-            </Link>
-            <p className='text-muted-foreground'>
-              Leave a message for the happy couple
-            </p>
-            <div className='mt-2 text-sm text-muted-foreground'>
-              Messages: {event.message_count}/{PACKAGE_LIMITS[event.package]}
-            </div>
-          </div>
+    <div className='flex items-center justify-center bg-muted/20 w-full mt-4'>
+      <form onSubmit={handleSubmit} className='space-y-6 w-full'>
+        <div className='space-y-2'>
+          <Label htmlFor='name'>Your Name</Label>
+          <Input
+            id='name'
+            placeholder='Enter your name'
+            required
+            value={guestName}
+            onChange={e => setGuestName(e.target.value)}
+          />
+        </div>
 
-          {event.welcome_message && <WelcomeMessagePlayer eventId={event.id} />}
-
-          <form onSubmit={handleSubmit} className='space-y-6'>
-            <div className='space-y-2'>
-              <Label htmlFor='name'>Your Name</Label>
-              <Input
-                id='name'
-                placeholder='Enter your name'
-                required
-                value={guestName}
-                onChange={e => setGuestName(e.target.value)}
-              />
-            </div>
-
-            <div className='space-y-2'>
-              <Label>Record Your Message</Label>
-              <Tabs
-                defaultValue='video'
-                onValueChange={value =>
-                  setMediaType(value as 'video' | 'audio')
-                }
-              >
-                <TabsList className='mb-4 border'>
+        <div className='space-y-2'>
+          <Label>Record Your Message</Label>
+          {mediaOptions.length > 1 ? (
+            <Tabs
+              defaultValue={mediaOptions[0]}
+              onValueChange={value => setMediaType(value as PackageMediaOption)}
+            >
+              <TabsList className='mb-4 border'>
+                {mediaOptions.includes('video') && (
                   <TabsTrigger value='video'>
                     <Video className='mr-2 h-4 w-4' />
                     Video
                   </TabsTrigger>
+                )}
+                {mediaOptions.includes('audio') && (
                   <TabsTrigger value='audio'>
                     <Mic className='mr-2 h-4 w-4' />
                     Audio
                   </TabsTrigger>
-                </TabsList>
+                )}
+              </TabsList>
 
+              {mediaOptions.includes('video') && (
                 <TabsContent value='video'>
                   <MediaRecorder
                     type='video'
@@ -163,7 +157,9 @@ export function GuestForm({ event }: { event: Event }) {
                     description='Record a video message for the happy couple'
                   />
                 </TabsContent>
+              )}
 
+              {mediaOptions.includes('audio') && (
                 <TabsContent value='audio'>
                   <MediaRecorder
                     type='audio'
@@ -171,30 +167,36 @@ export function GuestForm({ event }: { event: Event }) {
                     description='Record an audio message for the happy couple'
                   />
                 </TabsContent>
-              </Tabs>
-            </div>
+              )}
+            </Tabs>
+          ) : (
+            <MediaRecorder
+              type={mediaOptions[0]}
+              setBlob={setMessageBlob}
+              description={`Record ${mediaOptions[0] === 'video' ? 'a video' : 'an audio'} message for the happy couple`}
+            />
+          )}
+        </div>
 
-            {/* Upload Progress */}
-            {uploadStatus !== 'idle' && (
-              <UploadProgressComponent
-                progress={uploadProgress}
-                status={uploadStatus}
-                error={uploadError}
-                onRetry={handleRetryUpload}
-                onCancel={handleCancelUpload}
-              />
-            )}
+        {/* Upload Progress */}
+        {uploadStatus !== 'idle' && (
+          <UploadProgressComponent
+            progress={uploadProgress}
+            status={uploadStatus}
+            error={uploadError}
+            onRetry={handleRetryUpload}
+            onCancel={handleCancelUpload}
+          />
+        )}
 
-            <Button
-              type='submit'
-              className='w-full'
-              disabled={isSubmitting || !messageBlob || !guestName}
-            >
-              {isSubmitting ? 'Uploading...' : 'Submit Message'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+        <Button
+          type='submit'
+          className='w-full'
+          disabled={isSubmitting || !messageBlob || !guestName}
+        >
+          {isSubmitting ? 'Uploading...' : 'Submit Message'}
+        </Button>
+      </form>
     </div>
   );
 }
