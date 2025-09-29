@@ -10,12 +10,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { DateRangePicker } from '@/components/date-picker';
 import { MediaRecorder } from '@/components/media-recorder';
 import { useForm, Controller } from 'react-hook-form';
 import { loadStripe } from '@stripe/stripe-js';
 import { DateRange } from 'react-day-picker';
 import type { AuthenticatedUser } from '@/lib/auth.server';
+import RangePickerCalendar from '@/components/range-picker-calendar';
 
 interface FormValues {
   name: string;
@@ -251,7 +251,7 @@ export default function CreateEventClient({ user }: CreateEventClientProps) {
               </div>
 
               <div>
-                <Label htmlFor='description'>Description</Label>
+                <Label htmlFor='description'>Welcome Message</Label>
                 <Controller
                   name='description'
                   control={control}
@@ -266,15 +266,16 @@ export default function CreateEventClient({ user }: CreateEventClientProps) {
               </div>
 
               <div>
-                <Label>Message Collection Period *</Label>
+                <Label htmlFor='dateRange'>Message Collection Period *</Label>
                 <Controller
                   name='dateRange'
                   control={control}
                   rules={{ required: 'Date range is required' }}
                   render={({ field }) => (
-                    <DateRangePicker
-                      dateRange={field.value}
-                      setDateRange={field.onChange}
+                    <RangePickerCalendar
+                      placeholder='Select message collection period'
+                      range={field.value}
+                      setRange={field.onChange}
                     />
                   )}
                 />
@@ -319,14 +320,14 @@ export default function CreateEventClient({ user }: CreateEventClientProps) {
 
         <Card>
           <CardContent className='p-6'>
-            <h2 className='text-xl font-semibold mb-4'>Welcome Message</h2>
+            <h2 className='text-xl font-semibold mb-4'>Audio Message</h2>
             <p className='text-muted-foreground mb-4'>
-              Record a welcome message for your guests (optional)
+              Record an audio message for your guests (optional)
             </p>
             <MediaRecorder
-              type='video'
+              type='audio'
               setBlob={setWelcomeMessageBlob}
-              description='Record a welcome message for your guests'
+              description='Record an audio message for your guests'
             />
           </CardContent>
         </Card>

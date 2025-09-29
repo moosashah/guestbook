@@ -1,7 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { ArrowLeft, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,10 +17,10 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { DateRangePicker } from '@/components/date-picker';
 import { MediaRecorder } from '@/components/media-recorder';
 import { Event } from '@/lib/types';
 import { DateRange } from 'react-day-picker';
+import RangePickerCalendar from './range-picker-calendar';
 
 interface FormValues {
   name: string;
@@ -227,10 +227,10 @@ export function EditEventForm({
                     <FormItem>
                       <FormLabel>Submission Date Range</FormLabel>
                       <FormControl>
-                        <DateRangePicker
-                          dateRange={field.value}
-                          setDateRange={field.onChange}
-                          className='w-full'
+                        <RangePickerCalendar
+                          placeholder='Select submission date range'
+                          range={field.value}
+                          setRange={field.onChange}
                         />
                       </FormControl>
                       <FormMessage />
