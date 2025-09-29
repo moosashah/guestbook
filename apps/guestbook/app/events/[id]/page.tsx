@@ -5,13 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
 import { formatDate, cn } from '@/lib/utils';
 import MessageCard from '@/components/message-card';
 import {
@@ -26,7 +19,6 @@ import { redirect } from 'next/navigation';
 import { isAuthorizedForEvent } from '@/lib/auth.server';
 import { PACKAGE_MEDIA_OPTIONS } from '@/lib/consts';
 import Stripe from 'stripe';
-import { Event } from '@/lib/types';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -249,20 +241,23 @@ export default async function EventPage({
 
         <div className='flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6'>
           <div>
-            <HiddenControls event={event} id={id}>
-              <div className='flex items-center text-muted-foreground mb-2 gap-2 cursor-pointer hover:text-foreground transition-colors'>
-                <Calendar className='size-4' />
-                <p>
-                  Accepting messages: {formatDate(event.submission_start_date)}{' '}
-                  - {formatDate(event.submission_end_date)}
-                </p>
-              </div>
-            </HiddenControls>
+            <div className='flex items-center text-muted-foreground mb-2 gap-2'>
+              <Calendar className='size-4' />
+              <p>
+                Accepting messages: {formatDate(event.submission_start_date)} -{' '}
+                {formatDate(event.submission_end_date)}
+              </p>
+            </div>
             <h1 className='text-3xl mb-2'>{event.name}</h1>
           </div>
 
           <div className='flex flex-col gap-4'>
             <DownloadQrCodeButton eventId={id} />
+            <EventVideoControls
+              eventId={id}
+              initialHasFinalVideo={!!event.final_video_key}
+              event={event}
+            />
           </div>
         </div>
       </div>
@@ -370,32 +365,5 @@ export default async function EventPage({
         <h3>complete payment to share qr code and start collecting messages</h3>
       )}
     </div>
-  );
-}
-
-export function HiddenControls({
-  event,
-  id,
-  children,
-}: {
-  event: Event;
-  id: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Sheet>
-      <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Video Controls</SheetTitle>
-        </SheetHeader>
-        <div className='mt-6'>
-          <EventVideoControls
-            eventId={id}
-            initialHasFinalVideo={!!event.final_video_key}
-          />
-        </div>
-      </SheetContent>
-    </Sheet>
   );
 }

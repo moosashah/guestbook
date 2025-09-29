@@ -10,6 +10,7 @@ interface CompileVideoButtonProps {
   eventId: string;
   hasFinalVideo: boolean;
   onCompilationComplete: () => void;
+  disabled: boolean;
 }
 
 interface CompilationStatus {
@@ -24,6 +25,7 @@ export function CompileVideoButton({
   eventId,
   hasFinalVideo,
   onCompilationComplete,
+  disabled,
 }: CompileVideoButtonProps) {
   const [isCompiling, setIsCompiling] = useState(false);
   const [compilationStatus, setCompilationStatus] =
@@ -123,7 +125,11 @@ export function CompileVideoButton({
 
   return (
     <div className='flex flex-col gap-2'>
-      <Button onClick={handleCompile} disabled={isCompiling} variant='default'>
+      <Button
+        onClick={handleCompile}
+        disabled={isCompiling || disabled || hasFinalVideo}
+        variant='default'
+      >
         {isCompiling ? (
           <>
             <Loader2 className='mr-2 h-4 w-4 animate-spin' />
