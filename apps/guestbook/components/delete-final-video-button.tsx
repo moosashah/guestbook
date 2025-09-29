@@ -62,12 +62,12 @@ export function DeleteFinalVideoButton({
         <Button variant='destructive' size='sm' disabled={isDeleting}>
           {isDeleting ? (
             <>
-              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+              <Loader2 className='size-4 animate-spin' />
               Deleting...
             </>
           ) : (
             <>
-              <Trash2 className='mr-2 h-4 w-4' />
+              <Trash2 className='size-4' />
               Delete Final Video
             </>
           )}

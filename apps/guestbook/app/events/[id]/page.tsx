@@ -251,7 +251,7 @@ export default async function EventPage({
             <h1 className='text-3xl mb-2'>{event.name}</h1>
           </div>
 
-          <div className='flex flex-col gap-4'>
+          <div className='flex flex-col gap-2'>
             <DownloadQrCodeButton eventId={id} />
             <EventVideoControls
               eventId={id}
