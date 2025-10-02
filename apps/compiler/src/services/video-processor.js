@@ -256,7 +256,7 @@ export class VideoProcessor {
       `ffmpeg -y -i "${inputPath}" ` +
       `-f lavfi -i "color=c=#FFFAF9:s=640x480" -r 25 ` +
       `-ss "${audioTrimStart}" ` +
-      `-filter_complex "[0:a]showwaves=size=640x480:colors=#B34A6B:mode=line[vout];[1:v][vout]overlay=format=auto:shortest=1,format=yuv420p[v];[v]drawtext=text='${guestName}':fontfile='${this.fontPath}':fontcolor=#B34A6B:fontsize=44:x=(w-text_w)/2:y=h-80:shadowcolor=black@0.6:shadowx=2:shadowy=2[vfinal]" ` +
+      `-filter_complex "[0:a]showwaves=size=640x480:colors=#B34A6B:mode=line[vout];[1:v][vout]overlay=format=auto:shortest=1,format=yuv420p[v];[v]drawtext=text='${guestName}':fontfile='${this.fontPath}':fontcolor=white:fontsize=44:x=(w-text_w)/2:y=h-80:borderw=2:bordercolor=black[vfinal]" ` +
       `-map "[vfinal]" -map 0:a ` +
       `-c:v libx264 -c:a aac -preset fast -crf 23 ` +
       `-r 25 -video_track_timescale 25000 -avoid_negative_ts make_zero ` +
@@ -297,7 +297,7 @@ export class VideoProcessor {
     const command =
       `ffmpeg -y -i "${inputPath}" ` +
       `-ss "${trimStart}" ` +
-      `-vf "drawtext=text='${guestName}':fontfile='${this.fontPath}':fontcolor=#B34A6B:fontsize=44:x=(w-text_w)/2:y=h-80:shadowcolor=black@0.6:shadowx=2:shadowy=2" ` +
+      // `-vf "drawtext=text='${guestName}':fontfile='${this.fontPath}':fontcolor=#B34A6B:fontsize=44:x=(w-text_w)/2:y=h-80:shadowcolor=black@0.6:shadowx=2:shadowy=2" ` +
       `-c:v libx264 -c:a aac -preset fast -crf 23 ` +
       `-r 25 -video_track_timescale 25000 -avoid_negative_ts make_zero ` +
       `"${outputPath}"`;
