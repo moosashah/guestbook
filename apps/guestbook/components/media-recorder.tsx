@@ -4,6 +4,7 @@ import { useRecorder } from '@/hooks/use-recorder';
 import { Inactive } from './recorder/inactive';
 import { Recording } from './recorder/recording';
 import { Preview } from './recorder/preview';
+import { Error } from './recorder/error';
 import { Dispatch, SetStateAction } from 'react';
 
 interface MediaRecorderProps {
@@ -21,10 +22,12 @@ export const MediaRecorder = ({
 }: MediaRecorderProps) => {
   const {
     audioRef,
+    error,
     liveVideoRef,
     recordedMedia,
     recordingStatus,
     resetRecording,
+    retryPermission,
     startRecording,
     stopRecording,
     stream,
@@ -64,6 +67,16 @@ export const MediaRecorder = ({
           stream={stream}
         />
       );
+    case 'error':
+      return error ? (
+        <Error
+          type={type}
+          className={className}
+          error={error}
+          retryPermission={retryPermission}
+          resetRecording={resetRecording}
+        />
+      ) : null;
     default:
       return null;
   }

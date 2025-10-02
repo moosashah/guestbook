@@ -19,7 +19,7 @@ const mimeTypes = {
 
 export const useRecorder = ({ type, setBlob }: UseRecorderProps) => {
   const [recordingStatus, setRecordingStatus] = useState<
-    'inactive' | 'recording' | 'preview'
+    'inactive' | 'recording' | 'preview' | 'error'
   >('inactive');
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [chunks, setChunks] = useState<Blob[]>([]);
@@ -27,6 +27,10 @@ export const useRecorder = ({ type, setBlob }: UseRecorderProps) => {
     undefined
   );
   const [stats, setStats] = useState<any>({});
+  const [error, setError] = useState<{
+    type: 'permission' | 'device' | 'unknown';
+    message: string;
+  } | null>(null);
 
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -42,9 +46,16 @@ export const useRecorder = ({ type, setBlob }: UseRecorderProps) => {
 
   const startRecording = async () => {
     if (typeof window === 'undefined' || !navigator?.mediaDevices) {
-      console.error('Media devices not available');
+      setError({
+        type: 'device',
+        message: 'Media devices are not available in your browser.',
+      });
+      setRecordingStatus('error');
       return;
     }
+
+    // Clear any previous errors
+    setError(null);
 
     try {
       const userMedia = await navigator.mediaDevices.getUserMedia({
@@ -58,8 +69,55 @@ export const useRecorder = ({ type, setBlob }: UseRecorderProps) => {
             : false,
       });
       setStream(userMedia);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error accessing media devices:', err);
+
+      let errorType: 'permission' | 'device' | 'unknown' = 'unknown';
+      let errorMessage =
+        type === 'video'
+          ? 'An unknown error occurred while accessing your camera and microphone.'
+          : 'An unknown error occurred while accessing your microphone.';
+
+      if (
+        err.name === 'NotAllowedError' ||
+        err.name === 'PermissionDeniedError'
+      ) {
+        errorType = 'permission';
+        errorMessage =
+          type === 'video'
+            ? 'Permission to access your camera and microphone was denied. Please allow access and try again.'
+            : 'Permission to access your microphone was denied. Please allow access and try again.';
+      } else if (
+        err.name === 'NotFoundError' ||
+        err.name === 'DevicesNotFoundError'
+      ) {
+        errorType = 'device';
+        errorMessage =
+          type === 'video'
+            ? 'No camera or microphone device was found. Please check your device connections.'
+            : 'No microphone device was found. Please check your device connections.';
+      } else if (
+        err.name === 'NotReadableError' ||
+        err.name === 'TrackStartError'
+      ) {
+        errorType = 'device';
+        errorMessage =
+          type === 'video'
+            ? 'Your camera or microphone is already in use by another application.'
+            : 'Your microphone is already in use by another application.';
+      } else if (
+        err.name === 'OverconstrainedError' ||
+        err.name === 'ConstraintNotSatisfiedError'
+      ) {
+        errorType = 'device';
+        errorMessage =
+          type === 'video'
+            ? "Your camera or microphone doesn't meet the required specifications."
+            : "Your microphone doesn't meet the required specifications.";
+      }
+
+      setError({ type: errorType, message: errorMessage });
+      setRecordingStatus('error');
     }
   };
 
@@ -116,8 +174,15 @@ export const useRecorder = ({ type, setBlob }: UseRecorderProps) => {
     setRecordedMedia('');
     setChunks([]);
     setStream(null);
+    setError(null);
     videoRef.current?.removeAttribute('src');
     audioRef.current?.removeAttribute('src');
+  };
+
+  const retryPermission = () => {
+    setError(null);
+    setRecordingStatus('inactive');
+    startRecording();
   };
 
   useEffect(() => {
@@ -141,10 +206,12 @@ export const useRecorder = ({ type, setBlob }: UseRecorderProps) => {
 
   return {
     audioRef,
+    error,
     liveVideoRef,
     recordedMedia,
     recordingStatus,
     resetRecording,
+    retryPermission,
     stats,
     startRecording,
     stopRecording,
