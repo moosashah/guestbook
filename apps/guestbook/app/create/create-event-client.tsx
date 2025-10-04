@@ -79,7 +79,7 @@ export default function CreateEventClient({ user }: CreateEventClientProps) {
         data.dateRange.to!.toISOString()
       );
       eventFormData.append('package', 'basic'); // Default package, user can change on payment page
-      eventFormData.append('creator_id', user.id);
+      eventFormData.append('creator_id', user.email);
       eventFormData.append('payment_status', 'pending');
 
       if (bannerImage) {

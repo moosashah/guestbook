@@ -4,12 +4,64 @@ import { type NextRequest, NextResponse } from 'next/server';
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
+  const error = url.searchParams.get('error');
+  const errorDescription = url.searchParams.get('error_description');
 
-  const exchanged = await client.exchange(code!, `${url.origin}/api/callback`);
+  // Log the incoming callback request
+  console.log('=== OAuth Callback ===');
+  console.log('URL:', req.url);
+  console.log('Code present:', !!code);
+  console.log('Error present:', !!error);
 
-  if (exchanged.err) return NextResponse.json(exchanged.err, { status: 400 });
+  if (error) {
+    console.error('OAuth Error from provider:');
+    console.error('Error:', error);
+    console.error('Description:', errorDescription);
+    console.error(
+      'Full URL params:',
+      JSON.stringify(Object.fromEntries(url.searchParams.entries()), null, 4)
+    );
+    return NextResponse.json(
+      {
+        error: 'OAuth authentication failed',
+        details: { error, errorDescription },
+      },
+      { status: 400 }
+    );
+  }
 
-  await setTokens(exchanged.tokens.access, exchanged.tokens.refresh);
+  if (!code) {
+    console.error('No authorization code received in callback');
+    return NextResponse.json(
+      { error: 'No authorization code received' },
+      { status: 400 }
+    );
+  }
 
-  return NextResponse.redirect(`${url.origin}/`);
+  try {
+    const exchanged = await client.exchange(code, `${url.origin}/api/callback`);
+
+    if (exchanged.err) {
+      console.error('Token exchange failed:');
+      console.error('Error details:', JSON.stringify(exchanged.err, null, 4));
+      return NextResponse.json(exchanged.err, { status: 400 });
+    }
+
+    console.log('Token exchange successful');
+    await setTokens(exchanged.tokens.access, exchanged.tokens.refresh);
+
+    return NextResponse.redirect(`${url.origin}/`);
+  } catch (error) {
+    console.error('Unexpected error in callback handler:');
+    console.error('Error:', error);
+    console.error(
+      'Stack:',
+      error instanceof Error ? error.stack : 'No stack available'
+    );
+
+    return NextResponse.json(
+      { error: 'Internal server error during authentication' },
+      { status: 500 }
+    );
+  }
 }

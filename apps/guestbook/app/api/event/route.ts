@@ -10,7 +10,7 @@ import { authenticate } from '@/lib/auth.server';
 
 const eventCreateSchema = z
   .object({
-    creator_id: z.string(),
+    creator_id: z.string().email(),
     name: z.string().min(1, 'Event name is required'),
     description: z.string().optional().default('my description'),
     banner_image: z.string().optional(),
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
 
       // Extract form fields
       body = {
-        creator_id: formData.get('creator_id') as string,
+        creator_id: formData.get('creator_id'),
         name: formData.get('name') as string,
         description:
           (formData.get('description') as string) || 'my description',

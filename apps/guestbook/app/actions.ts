@@ -17,7 +17,6 @@ export async function auth() {
   const verified = await client.verify(
     {
       user: object({
-        id: string(),
         email: string(),
         name: string(),
         picture: string(),
@@ -48,7 +47,6 @@ export async function login() {
     const verified = await client.verify(
       {
         user: object({
-          id: string(),
           email: string(),
           name: string(),
           picture: string(),

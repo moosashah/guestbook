@@ -4,13 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Logo, LogoText } from '@/components/svgs/logo';
 import { login } from '../actions';
-import { toast } from 'sonner';
 
 export default function LoginPage() {
-  const handleFacebookLogin = () => {
-    toast.error('Facebook login needs to be implemented');
-  };
-
   return (
     <div className='flex flex-col lg:flex-row relative overflow-hidden h-screen'>
       {/* Mobile top image */}
@@ -90,7 +85,7 @@ export default function LoginPage() {
 
               <Button
                 type='button'
-                onClick={handleFacebookLogin}
+                onClick={login}
                 className='w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors'
                 variant='outline'
               >

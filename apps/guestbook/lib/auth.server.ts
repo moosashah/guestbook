@@ -4,7 +4,6 @@ import { object, string } from 'valibot';
 import { EventEntity } from './models';
 
 export interface AuthenticatedUser {
-  id: string;
   email: string;
   name: string;
   picture: string;
@@ -29,7 +28,6 @@ export async function authenticate(
     const verified = await client.verify(
       {
         user: object({
-          id: string(),
           email: string(),
           name: string(),
           picture: string(),
@@ -42,12 +40,31 @@ export async function authenticate(
     );
 
     if (verified.err) {
+      console.error('Token verification failed:');
+      console.error('Error type:', verified.err.constructor?.name || 'Unknown');
+      console.error('Error details:', JSON.stringify(verified.err, null, 4));
       return null;
     }
 
     return verified.subject.properties;
   } catch (error) {
-    console.error('Authentication error:', error);
+    console.error('Authentication error:');
+    console.error(
+      'Error type:',
+      error instanceof Error ? error.constructor.name : 'Unknown'
+    );
+    console.error(
+      'Error message:',
+      error instanceof Error ? error.message : String(error)
+    );
+    console.error('Full error:', JSON.stringify(error, null, 4));
+    console.error('Access token present:', !!accessToken?.value);
+    console.error('Refresh token present:', !!refreshToken?.value);
+
+    if (error instanceof Error && error.stack) {
+      console.error('Stack trace:', error.stack);
+    }
+
     return null;
   }
 }
@@ -70,7 +87,7 @@ export async function isAuthorizedForEvent(
     }
 
     // User is authorized if they are the creator of the event
-    return event.data.creator_id === user.id;
+    return event.data.creator_id === user.email;
   } catch (error) {
     console.error('Authorization error:', error);
     return false;
