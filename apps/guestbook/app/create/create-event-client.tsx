@@ -9,10 +9,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { MediaRecorder } from '@/components/media-recorder';
 import { useForm, Controller } from 'react-hook-form';
-import { loadStripe } from '@stripe/stripe-js';
 import { DateRange } from 'react-day-picker';
 import type { AuthenticatedUser } from '@/lib/auth.server';
 import RangePickerCalendar from '@/components/range-picker-calendar';
@@ -21,7 +19,6 @@ interface FormValues {
   name: string;
   description?: string;
   dateRange: DateRange;
-  package: 'basic' | 'premium' | 'deluxe';
 }
 
 interface CreateEventClientProps {
@@ -36,25 +33,10 @@ export default function CreateEventClient({ user }: CreateEventClientProps) {
   const [bannerImage, setBannerImage] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
 
-  const STRIPE_PUBLIC_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY;
-  const BASE_URL =
-    process.env.NODE_ENV === 'production'
-      ? `https://${process.env.NEXT_PUBLIC_PROD_URL}`
-      : 'http://localhost:3000';
-
-  if (!STRIPE_PUBLIC_KEY) {
-    throw new Error('STRIPE_PUBLIC_KEY is not set');
-  }
-
-  if (!BASE_URL) {
-    throw new Error('BASE_URL is not set');
-  }
-
   const {
     control,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm<FormValues>({
     defaultValues: {
       name: '',
@@ -63,43 +45,8 @@ export default function CreateEventClient({ user }: CreateEventClientProps) {
         from: new Date(),
         to: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
       },
-      package: 'basic',
     },
   });
-
-  const selectedPackage = watch('package');
-
-  const packagePrices = {
-    basic: 19,
-    premium: 39,
-    deluxe: 79,
-  };
-
-  const packageFeatures = {
-    basic: {
-      messages: 25,
-      features: ['25 messages', 'Basic editing', 'QR code sharing'],
-    },
-    premium: {
-      messages: 100,
-      features: [
-        '100 messages',
-        'Advanced editing',
-        'Custom branding',
-        'QR code sharing',
-      ],
-    },
-    deluxe: {
-      messages: 500,
-      features: [
-        '500 messages',
-        'Premium editing',
-        'Custom branding',
-        'Priority support',
-        'QR code sharing',
-      ],
-    },
-  };
 
   const handleBannerUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -117,7 +64,7 @@ export default function CreateEventClient({ user }: CreateEventClientProps) {
     setIsSubmitting(true);
 
     try {
-      // Step 1: Create the event first
+      // Create the event first
       const eventFormData = new FormData();
       eventFormData.append('name', data.name);
       if (data.description) {
@@ -131,7 +78,7 @@ export default function CreateEventClient({ user }: CreateEventClientProps) {
         'submission_end_date',
         data.dateRange.to!.toISOString()
       );
-      eventFormData.append('package', data.package);
+      eventFormData.append('package', 'basic'); // Default package, user can change on payment page
       eventFormData.append('creator_id', user.id);
       eventFormData.append('payment_status', 'pending');
 
@@ -161,42 +108,10 @@ export default function CreateEventClient({ user }: CreateEventClientProps) {
       }
 
       const createdEvent = await eventResponse.json();
-      console.log('Event created:', createdEvent);
+      console.log('Event created:', JSON.stringify(createdEvent, null, 4));
 
-      // Step 2: Create checkout session with the event ID
-      const checkoutData = {
-        package: data.package,
-        eventId: createdEvent.data.id,
-      };
-
-      console.log('Creating checkout session...');
-      const checkoutResponse = await fetch('/api/checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(checkoutData),
-      });
-
-      if (!checkoutResponse.ok) {
-        throw new Error('Failed to create checkout session');
-      }
-
-      const { sessionId } = await checkoutResponse.json();
-
-      // Step 3: Redirect to Stripe Checkout
-      const stripe = await loadStripe(STRIPE_PUBLIC_KEY);
-      if (!stripe) {
-        throw new Error('Failed to load Stripe');
-      }
-
-      const { error } = await stripe.redirectToCheckout({
-        sessionId,
-      });
-
-      if (error) {
-        throw error;
-      }
+      // Redirect to payment page
+      window.location.href = `/events/${createdEvent.data.id}/payment`;
     } catch (error) {
       console.error('Error creating event:', error);
       alert(
@@ -332,58 +247,6 @@ export default function CreateEventClient({ user }: CreateEventClientProps) {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className='p-6'>
-            <h2 className='text-xl font-semibold mb-4'>Choose Your Package</h2>
-
-            <Controller
-              name='package'
-              control={control}
-              render={({ field }) => (
-                <RadioGroup
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  className='space-y-4'
-                >
-                  {Object.entries(packageFeatures).map(([pkg, details]) => (
-                    <div
-                      key={pkg}
-                      className={`border rounded-lg p-4 transition-colors ${
-                        selectedPackage === pkg
-                          ? 'border-primary bg-primary/5'
-                          : 'border-gray-200'
-                      }`}
-                    >
-                      <div className='flex items-center space-x-3'>
-                        <RadioGroupItem value={pkg} id={pkg} />
-                        <div className='flex-1'>
-                          <div className='flex items-center justify-between'>
-                            <Label
-                              htmlFor={pkg}
-                              className='text-lg font-medium capitalize'
-                            >
-                              {pkg}
-                            </Label>
-                            <span className='text-2xl font-bold'>
-                              $
-                              {packagePrices[pkg as keyof typeof packagePrices]}
-                            </span>
-                          </div>
-                          <ul className='text-sm text-muted-foreground mt-2 space-y-1'>
-                            {details.features.map(feature => (
-                              <li key={feature}>• {feature}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </RadioGroup>
-              )}
-            />
-          </CardContent>
-        </Card>
-
         <div className='flex justify-end'>
           <Button
             type='submit'
@@ -391,7 +254,7 @@ export default function CreateEventClient({ user }: CreateEventClientProps) {
             size='lg'
             className='min-w-[200px]'
           >
-            {isSubmitting ? 'Creating...' : `Create Event`}
+            {isSubmitting ? 'Creating...' : 'Continue to Payment'}
           </Button>
         </div>
       </form>

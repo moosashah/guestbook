@@ -362,7 +362,20 @@ export default async function EventPage({
           </div>
         )
       ) : (
-        <h3>complete payment to share qr code and start collecting messages</h3>
+        <Card>
+          <CardContent className='text-center py-12'>
+            <h3 className='text-2xl font-medium mb-2'>
+              Complete Your Purchase
+            </h3>
+            <p className='text-muted-foreground mb-6'>
+              Complete payment to activate your event and start collecting
+              messages from guests
+            </p>
+            <Button asChild size='lg'>
+              <Link href={`/events/${id}/payment`}>Purchase Package</Link>
+            </Button>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
