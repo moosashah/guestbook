@@ -15,7 +15,11 @@
         "NEXT_PUBLIC_PROD_URL",
         "NODE_ENV",
         "GOOGLE_CLIENT_ID",
-        "GOOGLE_CLIENT_SECRET"
+        "GOOGLE_CLIENT_SECRET",
+        "AUTH_SERVICE_URL",
+        "FACEBOOK_CLIENT_ID",
+        "FACEBOOK_CLIENT_SECRET",
+        "COMPILER_API_KEY"
       ]
     },
     "dev": {
