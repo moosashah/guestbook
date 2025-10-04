@@ -55,7 +55,7 @@ export default function LoginPage() {
               <CardTitle className='text-2xl font-semibold'>Sign In</CardTitle>
             </CardHeader>
             <CardContent className='space-y-4'>
-              <form action={login} className='space-y-4'>
+              <form action={() => login('google')} className='space-y-4'>
                 <Button
                   type='submit'
                   className='w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors'
@@ -85,7 +85,7 @@ export default function LoginPage() {
 
               <Button
                 type='button'
-                onClick={login}
+                onClick={() => login('facebook')}
                 className='w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors'
                 variant='outline'
               >

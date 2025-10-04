@@ -38,7 +38,7 @@ export async function auth() {
   return verified.subject;
 }
 
-export async function login() {
+export async function login(provider: string) {
   const cookies = await getCookies();
   const accessToken = cookies.get('access_token');
   const refreshToken = cookies.get('refresh_token');
@@ -68,7 +68,10 @@ export async function login() {
   const protocol = host?.includes('localhost') ? 'http' : 'https';
   const { url } = await client.authorize(
     `${protocol}://${host}/api/callback`,
-    'code'
+    'code',
+    {
+      provider,
+    }
   );
   redirect(url);
 }
