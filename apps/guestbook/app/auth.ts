@@ -1,12 +1,14 @@
 import { createClient } from '@openauthjs/openauth/client';
 import { cookies as getCookies } from 'next/headers';
 
+const AUTH_SERVICE_URL =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:3002'
+    : process.env.AUTH_SERVICE_URL;
+
 export const client = createClient({
   clientID: 'nextjs',
-  issuer:
-    process.env.NODE_ENV === 'development'
-      ? 'http://localhost:3002'
-      : 'https://guestbook-auth.vercel.app',
+  issuer: AUTH_SERVICE_URL,
 });
 
 export async function setTokens(access: string, refresh: string) {
