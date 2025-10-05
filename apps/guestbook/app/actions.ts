@@ -10,10 +10,21 @@ export async function auth() {
   const accessToken = cookies.get('access_token');
   const refreshToken = cookies.get('refresh_token');
 
+  console.log('=== Auth Function Debug ===');
+  console.log('Access token present:', !!accessToken);
+  console.log('Refresh token present:', !!refreshToken);
+  console.log('Access token value length:', accessToken?.value?.length || 0);
+  console.log(
+    'All cookies:',
+    cookies.getAll().map(c => ({ name: c.name, hasValue: !!c.value }))
+  );
+
   if (!accessToken) {
+    console.log('❌ No access token found, returning false');
     return false;
   }
 
+  console.log('Attempting token verification...');
   const verified = await client.verify(
     {
       user: object({
@@ -29,8 +40,12 @@ export async function auth() {
   );
 
   if (verified.err) {
+    console.error('❌ Token verification failed:');
+    console.error('Error details:', JSON.stringify(verified.err, null, 4));
     return false;
   }
+
+  console.log('✅ Token verification successful');
   if (verified.tokens) {
     await setTokens(verified.tokens.access, verified.tokens.refresh);
   }
