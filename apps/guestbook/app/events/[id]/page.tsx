@@ -7,10 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatDate, cn } from '@/lib/utils';
 import MessageCard from '@/components/message-card';
-import {
-  DeleteEventButton,
-  DownloadQrCodeButton,
-} from '@/components/event-buttons';
+import { DeleteEventButton, QRPreviewButton } from '@/components/event-buttons';
 import { EventVideoControls } from '@/components/event-video-controls';
 import { EventEntity, MessageEntity } from '@/lib/models';
 import { getBannerImageUrl } from '@/lib/s3.server';
@@ -252,7 +249,7 @@ export default async function EventPage({
           </div>
 
           <div className='flex flex-col gap-2'>
-            <DownloadQrCodeButton eventId={id} />
+            <QRPreviewButton eventId={id} />
             <EventVideoControls
               eventId={id}
               initialHasFinalVideo={!!event.final_video_key}

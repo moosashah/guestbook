@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Download, Trash2 } from 'lucide-react';
+import { Download, Trash2, QrCode } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function DownloadQrCodeButton({ eventId }: { eventId: string }) {
@@ -88,5 +88,51 @@ export function DeleteEventButton({ eventId }: { eventId: string }) {
     >
       <Trash2 className='size-4' />
     </Button>
+  );
+}
+
+import { QRCodeModal } from './qr-code-modal';
+
+interface QRPreviewButtonProps {
+  eventId: string;
+  variant?:
+    | 'default'
+    | 'outline'
+    | 'secondary'
+    | 'ghost'
+    | 'link'
+    | 'destructive';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
+  className?: string;
+  children?: React.ReactNode;
+}
+
+export function QRPreviewButton({
+  eventId,
+  variant = 'outline',
+  size = 'sm',
+  className,
+  children,
+}: QRPreviewButtonProps) {
+  const defaultChildren = (
+    <>
+      <QrCode className='size-4' />
+      Show QR Code
+    </>
+  );
+
+  return (
+    <QRCodeModal
+      eventId={eventId}
+      trigger={
+        <Button
+          variant={variant}
+          size={size}
+          className={cn('gap-2', className)}
+        >
+          {children || defaultChildren}
+        </Button>
+      }
+    />
   );
 }
