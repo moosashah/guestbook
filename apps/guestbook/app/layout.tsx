@@ -5,6 +5,15 @@ import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 
+// Type for the authenticated user subject
+interface AuthenticatedUser {
+  properties: {
+    email: string;
+    name: string;
+    picture: string;
+  };
+}
+
 const inter = Inter({ subsets: ['latin'] });
 
 import type { Viewport } from 'next';
@@ -56,7 +65,7 @@ export default async function RootLayout({
   );
 }
 
-function Header({ subject }: { subject: any }) {
+function Header({ subject }: { subject: AuthenticatedUser }) {
   return (
     <header className='sticky top-0 z-50 w-full shadow-xs bg-cream container mx-auto'>
       {/* Main Header */}

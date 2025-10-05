@@ -1,11 +1,15 @@
-'use client';
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Logo, LogoText } from '@/components/svgs/logo';
-import { login } from '../actions';
+import { login, auth } from '../actions';
+import { redirect } from 'next/navigation';
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  // Check if user is already authenticated
+  const user = await auth();
+  if (user) {
+    redirect('/');
+  }
   return (
     <div className='flex flex-col lg:flex-row relative overflow-hidden h-screen'>
       {/* Mobile top image */}
@@ -83,40 +87,41 @@ export default function LoginPage() {
                 </Button>
               </form>
 
-              <Button
-                type='button'
-                onClick={() => login('facebook')}
-                className='w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors'
-                variant='outline'
-              >
-                <svg
-                  className='size-5'
-                  xmlns='http://www.w3.org/2000/svg'
-                  viewBox='0 0 36 36'
-                  fill='url(#facebook-a)'
-                  height='20'
-                  width='20'
+              <form action={() => login('facebook')} className='space-y-4'>
+                <Button
+                  type='submit'
+                  className='w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors'
+                  variant='outline'
                 >
-                  <defs>
-                    <linearGradient
-                      x1='50%'
-                      x2='50%'
-                      y1='97.078%'
-                      y2='0%'
-                      id='facebook-a'
-                    >
-                      <stop offset='0%' stopColor='#0062E0' />
-                      <stop offset='100%' stopColor='#19AFFF' />
-                    </linearGradient>
-                  </defs>
-                  <path d='M15 35.8C6.5 34.3 0 26.9 0 18 0 8.1 8.1 0 18 0s18 8.1 18 18c0 8.9-6.5 16.3-15 17.8l-1-.8h-4l-1 .8z' />
-                  <path
-                    fill='#FFF'
-                    d='m25 23 .8-5H21v-3.5c0-1.4.5-2.5 2.7-2.5H26V7.4c-1.3-.2-2.7-.4-4-.4-4.1 0-7 2.5-7 7v4h-4.5v5H15v12.7c1 .2 2 .3 3 .3s2-.1 3-.3V23h4z'
-                  />
-                </svg>
-                Sign in with Facebook
-              </Button>
+                  <svg
+                    className='size-5'
+                    xmlns='http://www.w3.org/2000/svg'
+                    viewBox='0 0 36 36'
+                    fill='url(#facebook-a)'
+                    height='20'
+                    width='20'
+                  >
+                    <defs>
+                      <linearGradient
+                        x1='50%'
+                        x2='50%'
+                        y1='97.078%'
+                        y2='0%'
+                        id='facebook-a'
+                      >
+                        <stop offset='0%' stopColor='#0062E0' />
+                        <stop offset='100%' stopColor='#19AFFF' />
+                      </linearGradient>
+                    </defs>
+                    <path d='M15 35.8C6.5 34.3 0 26.9 0 18 0 8.1 8.1 0 18 0s18 8.1 18 18c0 8.9-6.5 16.3-15 17.8l-1-.8h-4l-1 .8z' />
+                    <path
+                      fill='#FFF'
+                      d='m25 23 .8-5H21v-3.5c0-1.4.5-2.5 2.7-2.5H26V7.4c-1.3-.2-2.7-.4-4-.4-4.1 0-7 2.5-7 7v4h-4.5v5H15v12.7c1 .2 2 .3 3 .3s2-.1 3-.3V23h4z'
+                    />
+                  </svg>
+                  Sign in with Facebook
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </div>

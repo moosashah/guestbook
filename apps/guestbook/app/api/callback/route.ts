@@ -69,7 +69,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    return NextResponse.redirect(`${url.origin}/`);
+    // Clean redirect to home page without any query parameters or hash fragments
+    return NextResponse.redirect(`${url.origin}/`, { status: 302 });
   } catch (error) {
     console.error('Unexpected error in callback handler:');
     console.error('Error:', error);
