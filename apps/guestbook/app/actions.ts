@@ -25,32 +25,49 @@ export async function auth() {
   }
 
   console.log('Attempting token verification...');
-  const verified = await client.verify(
-    {
-      user: object({
-        email: string(),
-        name: string(),
-        picture: string(),
-      }),
-    },
-    accessToken.value,
-    {
-      refresh: refreshToken?.value,
-    }
-  );
+  console.log('AUTH_SERVICE_URL:', process.env.AUTH_SERVICE_URL);
+  console.log('NODE_ENV:', process.env.NODE_ENV);
 
-  if (verified.err) {
-    console.error('❌ Token verification failed:');
-    console.error('Error details:', JSON.stringify(verified.err, null, 4));
+  try {
+    const verified = await client.verify(
+      {
+        user: object({
+          email: string(),
+          name: string(),
+          picture: string(),
+        }),
+      },
+      accessToken.value,
+      {
+        refresh: refreshToken?.value,
+      }
+    );
+
+    if (verified.err) {
+      console.error('❌ Token verification failed:');
+      console.error('Error details:', JSON.stringify(verified.err, null, 4));
+      return false;
+    }
+
+    console.log('✅ Token verification successful');
+    if (verified.tokens) {
+      await setTokens(verified.tokens.access, verified.tokens.refresh);
+    }
+
+    return verified.subject;
+  } catch (error) {
+    console.error('❌ Exception during token verification:');
+    console.error(
+      'Error type:',
+      error instanceof Error ? error.constructor.name : 'Unknown'
+    );
+    console.error(
+      'Error message:',
+      error instanceof Error ? error.message : String(error)
+    );
+    console.error('Full error:', JSON.stringify(error, null, 4));
     return false;
   }
-
-  console.log('✅ Token verification successful');
-  if (verified.tokens) {
-    await setTokens(verified.tokens.access, verified.tokens.refresh);
-  }
-
-  return verified.subject;
 }
 
 export async function login(provider: string) {
