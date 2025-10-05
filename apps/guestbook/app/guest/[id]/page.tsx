@@ -12,6 +12,13 @@ import { Event } from '@/lib/types';
 import { getBannerImageUrl, getWelcomeMessageUrl } from '@/lib/s3.server';
 import { Card, CardContent } from '@/components/ui/card';
 
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Submit Message',
+  description: 'Collect and cherish wedding memories from your guests',
+};
+
 interface GuestPageProps {
   params: Promise<{ id: string }>;
 }

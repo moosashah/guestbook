@@ -7,6 +7,13 @@ import {
   GoogleLoginButton,
 } from '@/components/login-buttons';
 
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Login',
+  description: 'Collect and cherish wedding memories from your guests',
+};
+
 export default async function LoginPage() {
   // Check if user is already authenticated
   const user = await auth();

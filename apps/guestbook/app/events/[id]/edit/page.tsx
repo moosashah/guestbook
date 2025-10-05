@@ -9,6 +9,13 @@ import { auth } from '../../../actions';
 import { redirect } from 'next/navigation';
 import { isAuthorizedForEvent } from '@/lib/auth.server';
 
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Edit Event',
+  description: 'Collect and cherish wedding memories from your guests',
+};
+
 interface EditEventPageProps {
   params: Promise<{
     id: string;

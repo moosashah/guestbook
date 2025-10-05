@@ -2,6 +2,12 @@ import { auth } from '@/app/actions';
 import { redirect } from 'next/navigation';
 import { EventEntity } from '@/lib/models';
 import PaymentClient from './payment-client';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Complete Event Creation',
+  description: 'Collect and cherish wedding memories from your guests',
+};
 
 interface PaymentPageProps {
   params: {

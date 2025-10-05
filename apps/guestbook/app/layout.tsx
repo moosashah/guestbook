@@ -36,7 +36,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Wedding Memories',
+  title: 'Wedwi',
   description: 'Collect and cherish wedding memories from your guests',
 };
 
