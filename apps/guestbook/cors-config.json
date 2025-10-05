@@ -4,7 +4,13 @@
       "AllowedHeaders": ["*"],
       "AllowedMethods": ["GET", "PUT", "POST", "DELETE", "HEAD"],
       "AllowedOrigins": ["http://localhost:3000", "https://app.wedvi.com"],
-      "ExposeHeaders": ["ETag", "x-amz-request-id"],
+      "ExposeHeaders": [
+        "ETag",
+        "x-amz-request-id",
+        "x-amz-id-2",
+        "x-amz-server-side-encryption",
+        "x-amz-version-id"
+      ],
       "MaxAgeSeconds": 3600
     }
   ]
