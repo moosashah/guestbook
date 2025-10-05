@@ -101,13 +101,10 @@ export const uploadMessage = async (
         );
 
         // Upload part to S3 using presigned URL
+        // Don't set Content-Type header - it's already set in the multipart upload creation
         const uploadResponse = await fetch(presigned_urls[partNumber - 1], {
           method: 'PUT',
           body: chunk,
-          headers: {
-            'Content-Type':
-              media_type === 'video' ? 'video/webm' : 'audio/webm',
-          },
         });
 
         if (!uploadResponse.ok) {

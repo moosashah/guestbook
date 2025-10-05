@@ -2,10 +2,10 @@
   "CORSRules": [
     {
       "AllowedHeaders": ["*"],
-      "AllowedMethods": ["PUT", "POST", "GET"],
+      "AllowedMethods": ["GET", "PUT", "POST", "DELETE", "HEAD"],
       "AllowedOrigins": ["http://localhost:3000", "https://app.wedvi.com"],
-      "ExposeHeaders": ["ETag"],
-      "MaxAgeSeconds": 3000
+      "ExposeHeaders": ["ETag", "x-amz-request-id"],
+      "MaxAgeSeconds": 3600
     }
   ]
 }
