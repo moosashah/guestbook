@@ -15,6 +15,7 @@
     "start": "turbo start",
     "format": "turbo format",
     "format:check": "turbo format:check",
+    "kill:ports": "lsof -ti:3000,3001,3002 | xargs kill -9 2>/dev/null",
     "compiler:deploy": "pnpm --filter=compiler run deploy",
     "prepare": "husky"
   },

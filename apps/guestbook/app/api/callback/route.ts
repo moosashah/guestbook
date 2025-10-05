@@ -48,7 +48,26 @@ export async function GET(req: NextRequest) {
     }
 
     console.log('Token exchange successful');
-    await setTokens(exchanged.tokens.access, exchanged.tokens.refresh);
+    console.log(
+      'Access token received:',
+      exchanged.tokens.access ? 'YES' : 'NO'
+    );
+    console.log(
+      'Refresh token received:',
+      exchanged.tokens.refresh ? 'YES' : 'NO'
+    );
+
+    try {
+      await setTokens(exchanged.tokens.access, exchanged.tokens.refresh);
+      console.log('✅ Tokens set successfully, redirecting to home');
+    } catch (tokenError) {
+      console.error('❌ Failed to set tokens:');
+      console.error('Token error:', tokenError);
+      return NextResponse.json(
+        { error: 'Failed to set authentication tokens' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.redirect(`${url.origin}/`);
   } catch (error) {
