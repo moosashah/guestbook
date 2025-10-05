@@ -60,6 +60,18 @@ export default async function RootLayout({
         {subject && !shouldHideHeader ? <Header subject={subject} /> : null}
         {children}
         <Toaster />
+        {/* Clean up Facebook OAuth URL fragment */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Clean up Facebook OAuth URL fragment (#_=_)
+              if (window.location.hash === '#_=_') {
+                // Remove the fragment without causing a page reload
+                history.replaceState(null, null, window.location.pathname + window.location.search);
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );
