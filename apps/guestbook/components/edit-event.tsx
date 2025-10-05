@@ -17,6 +17,13 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { MediaRecorder } from '@/components/media-recorder';
 import { Event } from '@/lib/types';
 import { DateRange } from 'react-day-picker';
@@ -26,6 +33,7 @@ interface FormValues {
   name: string;
   description: string;
   dateRange: DateRange;
+  package: 'basic' | 'premium' | 'deluxe';
 }
 
 interface EditEventFormProps {
@@ -57,6 +65,7 @@ export function EditEventForm({
         from: new Date(event.submission_start_date),
         to: new Date(event.submission_end_date),
       },
+      package: event.package,
     },
   });
 
@@ -110,6 +119,7 @@ export function EditEventForm({
         data.dateRange.from!.toISOString()
       );
       formData.append('submission_end_date', data.dateRange.to!.toISOString());
+      formData.append('package', data.package);
 
       // Add banner image if selected
       if (bannerImage) {
@@ -212,6 +222,33 @@ export function EditEventForm({
                           {...field}
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name='package'
+                  rules={{ required: 'Package is required' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Event Package (Temporary)</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder='Select a package' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value='basic'>Basic</SelectItem>
+                          <SelectItem value='premium'>Premium</SelectItem>
+                          <SelectItem value='deluxe'>Deluxe</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

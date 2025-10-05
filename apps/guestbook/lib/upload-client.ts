@@ -21,8 +21,15 @@ export interface MessageUploadData {
   message_blob: Blob;
 }
 
+interface UploadPart {
+  ETag: string;
+  PartNumber: number;
+}
+
+const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks
+
 /**
- * Upload a message with progress tracking
+ * Upload a message with progress tracking using direct S3 multipart upload
  */
 export const uploadMessage = async (
   data: MessageUploadData,
@@ -31,96 +38,169 @@ export const uploadMessage = async (
   const { onProgress, onSuccess, onError } = options;
 
   try {
-    // Create FormData for the request
-    const formData = new FormData();
-    formData.append('event_id', data.event_id);
-    formData.append('guest_name', data.guest_name);
-    formData.append('media_type', data.media_type);
-    formData.append('message_blob', data.message_blob);
+    const { event_id, guest_name, media_type, message_blob } = data;
+    const fileSize = message_blob.size;
 
     console.log(
-      `[upload-client] Starting upload for ${data.media_type} message, size: ${data.message_blob.size} bytes`
+      `[upload-client] Starting multipart upload for ${media_type} message, size: ${fileSize} bytes`
     );
 
-    // Create XMLHttpRequest for progress tracking
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
+    // Calculate number of parts
+    const partsCount = Math.ceil(fileSize / CHUNK_SIZE);
 
-      // Track upload progress
-      xhr.upload.addEventListener('progress', event => {
-        if (event.lengthComputable && onProgress) {
+    console.log(`[upload-client] File will be split into ${partsCount} parts`);
+
+    // Step 1: Initiate multipart upload and get presigned URLs
+    const initiateResponse = await fetch('/api/message/initiate-upload', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        event_id,
+        guest_name,
+        media_type,
+        file_size: fileSize,
+        parts_count: partsCount,
+      }),
+    });
+
+    if (!initiateResponse.ok) {
+      const errorData = await initiateResponse.json();
+      throw new Error(errorData.error || 'Failed to initiate upload');
+    }
+
+    const {
+      message_id,
+      upload_id,
+      message_key,
+      presigned_urls,
+    }: {
+      message_id: string;
+      upload_id: string;
+      message_key: string;
+      presigned_urls: string[];
+    } = await initiateResponse.json();
+
+    console.log(
+      `[upload-client] Upload initiated, message_id: ${message_id}, upload_id: ${upload_id}`
+    );
+
+    // Step 2: Upload each part directly to S3
+    const uploadedParts: UploadPart[] = [];
+    let uploadedBytes = 0;
+
+    try {
+      for (let partNumber = 1; partNumber <= partsCount; partNumber++) {
+        const start = (partNumber - 1) * CHUNK_SIZE;
+        const end = Math.min(start + CHUNK_SIZE, fileSize);
+        const chunk = message_blob.slice(start, end);
+
+        console.log(
+          `[upload-client] Uploading part ${partNumber}/${partsCount}, size: ${chunk.size} bytes`
+        );
+
+        // Upload part to S3 using presigned URL
+        const uploadResponse = await fetch(presigned_urls[partNumber - 1], {
+          method: 'PUT',
+          body: chunk,
+          headers: {
+            'Content-Type':
+              media_type === 'video' ? 'video/webm' : 'audio/webm',
+          },
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error(
+            `Failed to upload part ${partNumber}: ${uploadResponse.status} ${uploadResponse.statusText}`
+          );
+        }
+
+        // Get ETag from response headers
+        const etag = uploadResponse.headers.get('ETag');
+        if (!etag) {
+          throw new Error(`No ETag returned for part ${partNumber}`);
+        }
+
+        uploadedParts.push({
+          ETag: etag,
+          PartNumber: partNumber,
+        });
+
+        uploadedBytes += chunk.size;
+
+        // Report progress
+        if (onProgress) {
           const progress: UploadProgress = {
-            loaded: event.loaded,
-            total: event.total,
-            percentage: Math.round((event.loaded / event.total) * 100),
+            loaded: uploadedBytes,
+            total: fileSize,
+            percentage: Math.round((uploadedBytes / fileSize) * 100),
           };
           console.log(
             `[upload-client] Upload progress: ${progress.percentage}%`
           );
           onProgress(progress);
         }
+      }
+
+      console.log(
+        `[upload-client] All parts uploaded successfully, completing upload...`
+      );
+
+      // Step 3: Complete multipart upload and create message record
+      const completeResponse = await fetch('/api/message/complete-upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message_id,
+          event_id,
+          guest_name,
+          media_type,
+          message_key,
+          upload_id,
+          parts: uploadedParts,
+        }),
       });
 
-      // Handle completion
-      xhr.addEventListener('load', () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const response = JSON.parse(xhr.responseText);
-            console.log(
-              '[upload-client] Upload completed successfully:',
-              response
-            );
-            if (onSuccess) onSuccess(response);
-            resolve(response);
-          } catch (parseError) {
-            const error = new Error('Failed to parse response');
-            console.error('[upload-client] Response parse error:', parseError);
-            if (onError) onError(error);
-            reject(error);
-          }
-        } else {
-          try {
-            const errorResponse = JSON.parse(xhr.responseText);
-            const error = new Error(
-              errorResponse.error || `Upload failed with status ${xhr.status}`
-            );
-            console.error('[upload-client] Upload failed:', errorResponse);
-            if (onError) onError(error);
-            reject(error);
-          } catch (parseError) {
-            const error = new Error(`Upload failed with status ${xhr.status}`);
-            console.error(
-              '[upload-client] Upload failed with unparseable response'
-            );
-            if (onError) onError(error);
-            reject(error);
-          }
-        }
-      });
+      if (!completeResponse.ok) {
+        const errorData = await completeResponse.json();
+        throw new Error(errorData.error || 'Failed to complete upload');
+      }
 
-      // Handle errors
-      xhr.addEventListener('error', () => {
-        const error = new Error('Network error during upload');
-        console.error('[upload-client] Network error during upload');
-        if (onError) onError(error);
-        reject(error);
-      });
+      const result = await completeResponse.json();
+      console.log('[upload-client] Upload completed successfully:', result);
 
-      // Handle timeout
-      xhr.addEventListener('timeout', () => {
-        const error = new Error('Upload timeout');
-        console.error('[upload-client] Upload timeout');
-        if (onError) onError(error);
-        reject(error);
-      });
-
-      // Configure and send request
-      xhr.open('POST', '/api/message');
-      xhr.timeout = 5 * 60 * 1000; // 5 minutes timeout for large files
-      xhr.send(formData);
-    });
+      if (onSuccess) onSuccess(result);
+      return result;
+    } catch (uploadError) {
+      // If upload fails, abort the multipart upload to clean up S3 resources
+      console.error(
+        '[upload-client] Upload failed, aborting multipart upload...'
+      );
+      try {
+        await fetch('/api/message/abort-upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message_key,
+            upload_id,
+          }),
+        });
+        console.log('[upload-client] Multipart upload aborted successfully');
+      } catch (abortError) {
+        console.error(
+          '[upload-client] Failed to abort multipart upload:',
+          abortError
+        );
+      }
+      throw uploadError;
+    }
   } catch (error) {
-    console.error('[upload-client] Error preparing upload:', error);
+    console.error('[upload-client] Error during upload:', error);
     const uploadError =
       error instanceof Error ? error : new Error('Unknown upload error');
     if (onError) onError(uploadError);

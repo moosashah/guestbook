@@ -3,7 +3,7 @@
     {
       "AllowedHeaders": ["*"],
       "AllowedMethods": ["PUT", "POST", "GET"],
-      "AllowedOrigins": ["http://localhost:3000", "https://*.vercel.app"],
+      "AllowedOrigins": ["http://localhost:3000", "https://app.wedvi.com"],
       "ExposeHeaders": ["ETag"],
       "MaxAgeSeconds": 3000
     }

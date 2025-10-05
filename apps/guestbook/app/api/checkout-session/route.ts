@@ -82,6 +82,7 @@ export async function POST(req: NextRequest) {
       cancel_url: `${BASE_URL}/events/${eventId}`,
       metadata: {
         eventId,
+        package: packageType,
       },
     });
 

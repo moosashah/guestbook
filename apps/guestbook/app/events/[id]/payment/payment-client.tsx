@@ -32,6 +32,8 @@ export default function PaymentClient({ event }: PaymentClientProps) {
     'basic' | 'premium' | 'deluxe'
   >(event.package);
 
+  console.log('selectedPackage', selectedPackage);
+
   const STRIPE_PUBLIC_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY;
 
   if (!STRIPE_PUBLIC_KEY) {

@@ -71,7 +71,7 @@ export default async function GuestPage({ params }: GuestPageProps) {
   const messageLimit = PACKAGE_LIMITS[eventData.package];
 
   return (
-    <div className='flex flex-col items-center justify-center'>
+    <div className='flex flex-col w-full items-center justify-center'>
       <TopSection
         event={eventData}
         bannerImageUrl={bannerImageUrl}
@@ -152,7 +152,7 @@ function TopSection({
   welcomeMessageUrl: string | null;
 }) {
   return (
-    <div className='flex flex-col items-center justify-center'>
+    <div className='flex flex-col items-center w-full justify-center'>
       <div className='text-center mb-6'>
         {/* TODO: Remove this link for production */}
         <Link href={`/events/${event.id}`}>

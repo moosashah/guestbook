@@ -3,6 +3,7 @@ import { EventEntity } from '@/lib/models';
 import { z } from 'zod';
 import { multipartUpload } from '@/lib/s3.server';
 import { authenticateAndAuthorizeForEvent } from '@/lib/auth.server';
+import { VIABLE_PACKAGES } from '@/lib/consts';
 
 const eventIdSchema = z.string();
 
@@ -73,6 +74,11 @@ const editEventSchema = z
         'End date must be in the future'
       )
       .optional(),
+    package: z
+      .enum(VIABLE_PACKAGES, {
+        errorMap: () => ({ message: 'Invalid package type' }),
+      })
+      .optional(),
   })
   .refine(data => {
     if (data.submission_start_date && data.submission_end_date) {
@@ -124,6 +130,7 @@ export async function PATCH(
       | string
       | null,
     submission_end_date: formData.get('submission_end_date') as string | null,
+    package: formData.get('package') as string | null,
   };
 
   // Filter out null/empty values and validate

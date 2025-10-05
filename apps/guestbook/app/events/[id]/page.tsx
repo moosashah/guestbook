@@ -102,9 +102,18 @@ export default async function EventPage({
       console.log('[EventPage] Checkout session:', checkoutSession);
       if (
         checkoutSession.payment_status === 'paid' &&
-        checkoutSession.metadata?.eventId === id
+        checkoutSession.metadata?.eventId === id &&
+        checkoutSession.metadata?.package
       ) {
-        await EventEntity.patch({ id }).set({ payment_status: 'success' }).go();
+        await EventEntity.patch({ id })
+          .set({
+            payment_status: 'success',
+            package: checkoutSession.metadata?.package as
+              | 'basic'
+              | 'deluxe'
+              | 'premium',
+          })
+          .go();
         event = (await loadEvent(id)).data;
       } else {
         console.log(
