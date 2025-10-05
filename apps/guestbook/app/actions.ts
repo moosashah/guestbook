@@ -46,6 +46,7 @@ export async function auth() {
     if (verified.err) {
       console.error('❌ Token verification failed:');
       console.error('Error details:', JSON.stringify(verified.err, null, 4));
+      console.error('Error type:', JSON.stringify(verified, null, 4));
       return false;
     }
 
