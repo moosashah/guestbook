@@ -24,13 +24,15 @@ export default async function LoginPage() {
   return (
     <div className='flex flex-col bg-[#FFFAF8] lg:flex-row relative overflow-hidden h-screen'>
       {/* Decorative Flower - Top Right */}
-      <div className='absolute top-[35%] right-0 lg:top-0 lg:right-0 z-0 opacity-30'>
+      <div className='absolute top-[35%] -right-50 sm:right-10 lg:top-0 lg:right-0 z-0 opacity-15 lg:opacity-30'>
         <Flower size={600} className='text-[#B3496B]' />
       </div>
 
       {/* Decorative Chapel - Bottom Left */}
-      <div className='absolute bottom-0 right-0 lg:bottom-0 lg:right-0 z-0 opacity-15'>
-        <Chapel size={600} className='text-[#B3496B]' />
+      <div className='absolute bottom-0 right-[30%] lg:bottom-0 lg:right-0 z-0 lg:opacity-15 opacity-5'>
+        <div className='w-60 h-auto lg:w-[600px]'>
+          <Chapel size={600} className='text-[#B3496B] w-full h-auto' />
+        </div>
       </div>
 
       {/* Mobile top image */}
