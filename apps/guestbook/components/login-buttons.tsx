@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button';
 import { login } from '@/app/actions';
 
 export const FacebookLoginButton = () => (
-  <form action={() => login('facebook')} className='space-y-4'>
+  <form action={() => login('facebook')}>
     <Button
       type='submit'
-      className='w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors'
+      className='w-full h-[43px] bg-white border border-[#E0E0E0] text-black hover:bg-primary transition-colors rounded-lg px-4 text-base font-normal gap-2'
+      style={{ boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.1)' }}
       variant='outline'
     >
       <svg
@@ -42,10 +43,11 @@ export const FacebookLoginButton = () => (
 );
 
 export const GoogleLoginButton = () => (
-  <form action={() => login('google')} className='space-y-4'>
+  <form action={() => login('google')}>
     <Button
       type='submit'
-      className='w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors'
+      className='w-full h-[43px] bg-white border border-[#E0E0E0] text-black hover:bg-primary transition-colors rounded-lg px-4 text-base font-normal gap-2'
+      style={{ boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.1)' }}
       variant='outline'
     >
       <svg className='size-5' viewBox='0 0 24 24'>

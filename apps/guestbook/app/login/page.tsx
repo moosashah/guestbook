@@ -1,5 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Logo, LogoText } from '@/components/svgs/logo';
+import { Chapel } from '@/components/svgs/chapel';
+import { Flower } from '@/components/svgs/flower';
 import { auth } from '../actions';
 import { redirect } from 'next/navigation';
 import {
@@ -21,7 +22,17 @@ export default async function LoginPage() {
     redirect('/');
   }
   return (
-    <div className='flex flex-col lg:flex-row relative overflow-hidden h-screen'>
+    <div className='flex flex-col bg-[#FFFAF8] lg:flex-row relative overflow-hidden h-screen'>
+      {/* Decorative Flower - Top Right */}
+      <div className='absolute top-[35%] right-0 lg:top-0 lg:right-0 z-0 opacity-30'>
+        <Flower size={600} className='text-[#B3496B]' />
+      </div>
+
+      {/* Decorative Chapel - Bottom Left */}
+      <div className='absolute bottom-0 right-0 lg:bottom-0 lg:right-0 z-0 opacity-15'>
+        <Chapel size={600} className='text-[#B3496B]' />
+      </div>
+
       {/* Mobile top image */}
       <div className='lg:hidden relative h-80 z-10'>
         <div
@@ -62,17 +73,11 @@ export default async function LoginPage() {
       </div>
 
       {/* Login form */}
-      <div className='flex-1 flex items-center justify-center p-8 bg-cream'>
-        <div className='w-full max-w-md'>
-          <Card className='border-0 shadow-lg'>
-            <CardHeader className='space-y-1 text-center'>
-              <CardTitle className='text-2xl font-semibold'>Sign In</CardTitle>
-            </CardHeader>
-            <CardContent className='space-y-4'>
-              <GoogleLoginButton />
-              <FacebookLoginButton />
-            </CardContent>
-          </Card>
+      <div className='flex-1 flex items-center justify-center p-8 relative z-10'>
+        <div className='w-full max-w-md space-y-6'>
+          <h2 className='text-2xl lg:text-6xl font-semibold mb-8'>Sign In</h2>
+          <GoogleLoginButton />
+          <FacebookLoginButton />
         </div>
       </div>
     </div>
