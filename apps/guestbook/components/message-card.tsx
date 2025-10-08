@@ -2,60 +2,24 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import type { Message } from '@/lib/types';
-import {
-  Mic,
-  Video,
-  Eye,
-  EyeOff,
-  Download,
-  Loader2,
-  AlertCircle,
-} from 'lucide-react';
+import { Mic, Video, Download, Loader2, AudioLines } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface MessageCardProps {
   message: Message;
 }
 
 export default function MessageCard({ message }: MessageCardProps) {
-  const [showPlayer, setShowPlayer] = useState(false);
   const [streamUrl, setStreamUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const handleTogglePlayer = async () => {
-    if (showPlayer) {
-      // Just hide player, keep the stream URL cached
-      setShowPlayer(false);
-      return;
-    }
-
-    // If we already have a stream URL, just show the player
-    if (streamUrl) {
-      setShowPlayer(true);
-      return;
-    }
-
-    // Only fetch stream URL if we don't have one yet
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Use streaming endpoint instead of pre-signed URL
-      const streamingUrl = `/api/media/${message.id}/stream?eventId=${message.event_id}`;
-      setStreamUrl(streamingUrl);
-      setShowPlayer(true);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to load media';
-      console.error('[MessageCard] Error setting up stream:', err);
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Initialize stream URL on component mount
+  useEffect(() => {
+    const streamingUrl = `/api/media/${message.id}/stream?eventId=${message.event_id}`;
+    setStreamUrl(streamingUrl);
+  }, [message.id, message.event_id]);
 
   const handleDownload = async () => {
     setIsDownloading(true);
@@ -87,85 +51,68 @@ export default function MessageCard({ message }: MessageCardProps) {
     <Card className='overflow-hidden'>
       <CardContent className='p-4'>
         <div className='flex items-center gap-4'>
-          <div className='shrink-0 w-12 h-12 bg-muted rounded-full flex items-center justify-center'>
-            {message.media_type === 'video' ? (
-              <Video className='h-6 w-6 text-muted-foreground' />
-            ) : (
-              <Mic className='h-6 w-6 text-muted-foreground' />
-            )}
-          </div>
-
-          <div className='grow min-w-0'>
-            <h3 className='font-semibold truncate'>{message.guest_name}</h3>
-            {!showPlayer && (
-              <p className='text-sm text-muted-foreground capitalize'>
-                {message.media_type} message
-              </p>
-            )}
-          </div>
-
-          <div className='flex gap-2 shrink-0'>
-            <Button
-              size='sm'
-              variant='outline'
-              onClick={handleTogglePlayer}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <Loader2 className='h-4 w-4 animate-spin' />
-              ) : showPlayer ? (
-                <EyeOff className='h-4 w-4' />
-              ) : (
-                <Eye className='h-4 w-4' />
-              )}
-            </Button>
-            <Button
-              size='sm'
-              variant='outline'
-              onClick={handleDownload}
-              disabled={isDownloading}
-            >
-              {isDownloading ? (
-                <Loader2 className='h-4 w-4 animate-spin' />
-              ) : (
-                <Download className='h-4 w-4' />
-              )}
-            </Button>
-          </div>
+          <h3 className='font-semibold truncate'>{message.guest_name}</h3>
         </div>
 
         {/* Error Display */}
         {error && (
-          <div className='mt-3 p-2 bg-red-50 border border-red-200 rounded-md'>
+          <div className='mb-3 p-2 bg-red-50 border border-red-200 rounded-md'>
             <p className='text-sm text-red-700'>
               Failed to load media: {error}
             </p>
           </div>
         )}
 
-        {/* Native HTML Media Elements - Streaming */}
-        {showPlayer && streamUrl && (
-          <div className='mt-4'>
+        {streamUrl && (
+          <div className='mb-4'>
             {message.media_type === 'video' ? (
               <video
                 src={streamUrl}
-                className='w-full aspect-video object-cover rounded-md'
+                className='w-full aspect-video object-cover rounded-md bg-gray-100'
                 controls
-                autoPlay
                 playsInline
-                preload='none'
+                preload='metadata'
               />
             ) : (
-              <audio
-                src={streamUrl}
-                className='w-full'
-                controls
-                autoPlay
-                preload='none'
-              />
+              <div className='relative'>
+                {/* Audio Visual Background */}
+                <div className='w-full aspect-video bg-primary rounded-md flex items-center justify-center'>
+                  <div className='bg-white/80 backdrop-blur-sm rounded-xl p-2 shadow-lg'>
+                    <AudioLines className='size-10 text-white' />
+                  </div>
+                </div>
+                {/* Audio Controls - Positioned absolutely at bottom */}
+                <audio
+                  src={streamUrl}
+                  className='absolute bottom-0 left-0 w-full rounded-b-md'
+                  controls
+                  preload='metadata'
+                />
+              </div>
             )}
           </div>
         )}
+
+        {/* Download Button */}
+        <Button
+          size='sm'
+          variant='outline'
+          onClick={handleDownload}
+          disabled={isDownloading}
+          className='w-full'
+        >
+          {isDownloading ? (
+            <>
+              <Loader2 className='h-4 w-4 animate-spin mr-2' />
+              Downloading...
+            </>
+          ) : (
+            <>
+              <Download className='h-4 w-4 mr-2' />
+              Download {message.media_type}
+            </>
+          )}
+        </Button>
       </CardContent>
     </Card>
   );

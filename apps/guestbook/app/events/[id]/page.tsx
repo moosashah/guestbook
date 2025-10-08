@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, Calendar, Edit } from 'lucide-react';
+import { ArrowLeft, AudioLines, Calendar, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,7 @@ import { auth } from '../../actions';
 import { redirect } from 'next/navigation';
 import { isAuthorizedForEvent } from '@/lib/auth.server';
 import { PACKAGE_MEDIA_OPTIONS } from '@/lib/consts';
+import { Video as VideoIcon } from '@/components/svgs/video';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -271,14 +272,21 @@ export default async function EventPage({
       {eventPaid ? (
         hasVideoSupport ? (
           <Tabs defaultValue='all' className='w-full'>
-            <TabsList className='mb-6 border'>
-              <TabsTrigger value='all'>
+            <TabsList className='mb-6 w-full grid grid-cols-3'>
+              <TabsTrigger value='all' className='w-full'>
                 All Messages ({messages.length})
               </TabsTrigger>
-              <TabsTrigger value='video'>
+              <TabsTrigger value='video' className='w-full'>
+                <div className='mr-2'>
+                  <VideoIcon />
+                </div>
                 Video ({videoMessages.length})
               </TabsTrigger>
-              <TabsTrigger value='audio'>
+              <TabsTrigger value='audio' className='w-full'>
+                <span className='bg-[#E1B6C3] rounded-md p-1 mr-2'>
+                  {' '}
+                  <AudioLines className='size-4 text-primary' />{' '}
+                </span>
                 Audio ({audioMessages.length})
               </TabsTrigger>
             </TabsList>
