@@ -60,13 +60,11 @@ export default async function Dashboard() {
       </div>
 
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-        {eventsWithBanners.length > 0 ? (
+        {eventsWithBanners.length > 0 &&
           eventsWithBanners.map(event => (
             <EventCard key={event.id} event={event} />
-          ))
-        ) : (
-          <EmptyEventCard />
-        )}
+          ))}
+        <EmptyEventCard />
       </div>
     </div>
   );
@@ -74,38 +72,36 @@ export default async function Dashboard() {
 
 function EmptyEventCard() {
   return (
-    <div className='col-span-full flex justify-center'>
-      <Card className='w-full max-w-md overflow-hidden border-[#f0f0f0] border'>
-        <div className='relative h-48 w-full bg-gradient-to-br from-pink-50 to-purple-50'>
-          <div className='absolute inset-0 flex items-center justify-center'>
-            <Image
-              src='/empty-event.png'
-              alt='No events illustration'
-              width={200}
-              height={120}
-              className='object-contain'
-            />
-          </div>
+    <Card className='h-full overflow-hidden hover:shadow-lg transition-all duration-200 border-[#f0f0f0] border relative flex flex-col'>
+      <div className='relative h-48 w-full bg-gradient-to-br from-pink-50 to-purple-50'>
+        <div className='absolute inset-0 flex items-center justify-center'>
+          <Image
+            src='/empty-event.png'
+            alt='No events illustration'
+            width={200}
+            height={120}
+            className='object-contain'
+          />
         </div>
-        <CardContent className='pt-6 pb-6 text-center'>
-          <h3 className='text-xl font-semibold mb-2 text-gray-800'>
-            Create New Event!
-          </h3>
-          <p className='text-muted-foreground mb-4 text-sm leading-relaxed'>
-            Click "Create new Event" to add new
-            <br />
-            Event in your Wedvi account.
-          </p>
-        </CardContent>
-        <CardFooter className='w-full'>
-          <Link href='/create' className='w-full'>
-            <Button className='bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg w-full'>
-              <Plus className='size-4 mr-2' />
-              Create new Event
-            </Button>
-          </Link>
-        </CardFooter>
-      </Card>
-    </div>
+      </div>
+      <CardContent className='pt-6 pb-6 text-center flex-grow'>
+        <h3 className='text-xl font-semibold mb-2 text-gray-800'>
+          Create New Event!
+        </h3>
+        <p className='text-muted-foreground mb-4 text-sm leading-relaxed'>
+          Click "Create new Event" to add new
+          <br />
+          Event in your Wedvi account.
+        </p>
+      </CardContent>
+      <CardFooter className='w-full'>
+        <Link href='/create' className='w-full'>
+          <Button className='bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg w-full'>
+            <Plus className='size-4 mr-2' />
+            Create new Event
+          </Button>
+        </Link>
+      </CardFooter>
+    </Card>
   );
 }

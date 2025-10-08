@@ -83,10 +83,9 @@ export function EditEventForm({
     startDate.setHours(0, 0, 0, 0);
     endDate.setHours(0, 0, 0, 0);
 
-    //TODO: uncomment for prod
-    // if (startDate <= now) {
-    //   return "Start date must be in the future";
-    // }
+    if (startDate <= now) {
+      return 'Start date must be in the future';
+    }
 
     if (endDate <= now) {
       return 'End date must be in the future';

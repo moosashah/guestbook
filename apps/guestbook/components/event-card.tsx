@@ -11,6 +11,7 @@ import {
   Eye,
   Edit,
   Trash2,
+  CreditCard,
 } from 'lucide-react';
 import {
   Card,
@@ -29,7 +30,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { formatDate } from '@/lib/utils';
+import { cn, formatDate } from '@/lib/utils';
 import type { Event } from '@/lib/types';
 
 interface EventCardProps {
@@ -45,13 +46,27 @@ export default function EventCard({ event }: EventCardProps) {
     new Date() >= new Date(event.submission_start_date) &&
     new Date() <= new Date(event.submission_end_date);
 
-  const isCompleted = new Date() > new Date(event.submission_end_date);
+  const isCompleted =
+    new Date() > new Date(event.submission_end_date) && event.final_video_key;
+  const isCompiling =
+    new Date() > new Date(event.submission_end_date) && !event.final_video_key;
   const isUpcoming = new Date() < new Date(event.submission_start_date);
+  const isPaymentPending = event.payment_status === 'pending';
 
   const getStatusBadge = () => {
-    if (isUpcoming) return { label: 'Upcoming', variant: 'secondary' as const };
-    if (isCompleted) return { label: 'Completed', variant: 'outline' as const };
-    return { label: 'Active', variant: 'default' as const };
+    if (isPaymentPending) {
+      return { label: 'Payment Pending', variant: 'outline' as const };
+    } else if (isUpcoming) {
+      return { label: 'Upcoming', variant: 'secondary' as const };
+    } else if (isActive) {
+      return { label: 'Active', variant: 'default' as const };
+    } else if (isCompiling) {
+      return { label: 'Compiling', variant: 'outline' as const };
+    } else if (isCompleted) {
+      return { label: 'Completed', variant: 'outline' as const };
+    } else {
+      return { label: 'Unknown Status', variant: 'default' as const };
+    }
   };
 
   const statusBadge = getStatusBadge();
@@ -109,7 +124,7 @@ export default function EventCard({ event }: EventCardProps) {
   };
 
   return (
-    <Card className='h-full overflow-hidden hover:shadow-lg transition-all duration-200 border-[#f0f0f0] border relative'>
+    <Card className='h-full overflow-hidden hover:shadow-lg transition-all duration-200 border-[#f0f0f0] border relative flex flex-col'>
       <div className='relative h-48 w-full'>
         <Image
           src={
@@ -125,13 +140,18 @@ export default function EventCard({ event }: EventCardProps) {
         <div className='absolute top-3 left-3'>
           <Badge
             variant={statusBadge.variant}
-            className={`font-medium ${
-              statusBadge.label === 'Active'
-                ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                : statusBadge.label === 'Completed'
-                  ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
-                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-            }`}
+            className={cn(
+              'font-medium',
+              statusBadge.label === 'Active' && 'bg-green-100 text-green-800 ',
+              statusBadge.label === 'Completed' && 'bg-blue-100 text-blue-800 ',
+              statusBadge.label === 'Payment Pending' &&
+                'bg-red-100 text-red-800 ',
+              statusBadge.label === 'Upcoming' && 'bg-gray-100 text-gray-800 ',
+              statusBadge.label === 'Compiling' &&
+                'bg-yellow-100 text-yellow-800 ',
+              statusBadge.label === 'Unknown Status' &&
+                'bg-gray-100 text-gray-800 '
+            )}
           >
             {statusBadge.label}
           </Badge>
@@ -141,12 +161,8 @@ export default function EventCard({ event }: EventCardProps) {
         <div className='absolute top-3 right-3 z-20'>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant='outline'
-                size='icon'
-                className='h-8 w-8 bg-white/90 backdrop-blur-sm border-gray-200 hover:bg-white shadow-sm'
-              >
-                <MoreVertical className='h-4 w-4' />
+              <Button className='size-8 rounded-full bg-white backdrop-blur-sm border-gray-200 hover:bg-primary/90 shadow-sm'>
+                <MoreVertical className='text-black size-4' />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -160,7 +176,7 @@ export default function EventCard({ event }: EventCardProps) {
                   href={`/events/${event.id}`}
                   className='flex items-center'
                 >
-                  <Eye className='mr-2 h-4 w-4' />
+                  <Eye className='mr-2 size-4' />
                   View Event
                 </Link>
               </DropdownMenuItem>
@@ -169,7 +185,7 @@ export default function EventCard({ event }: EventCardProps) {
                   href={`/events/${event.id}/edit`}
                   className='flex items-center'
                 >
-                  <Edit className='mr-2 h-4 w-4' />
+                  <Edit className='mr-2 size-4' />
                   Edit Event
                 </Link>
               </DropdownMenuItem>
@@ -179,7 +195,7 @@ export default function EventCard({ event }: EventCardProps) {
                 disabled={isDeleting}
                 className='text-red-600 focus:text-red-600 focus:bg-red-50'
               >
-                <Trash2 className='mr-2 h-4 w-4' />
+                <Trash2 className='mr-2 size-4' />
                 {isDeleting ? 'Deleting...' : 'Delete Event'}
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -194,37 +210,53 @@ export default function EventCard({ event }: EventCardProps) {
         <CardTitle>{event.name}</CardTitle>
         <CardDescription>{event.description}</CardDescription>
       </CardHeader>
-      <CardContent className='pt-4 pb-3'>
+      <CardContent className='pt-4 pb-3 flex-grow'>
         <div className='flex items-center gap-2'>
           <MessageSquare className='size-4' />
           <span>
-            {event.message_count
-              ? `${event.message_count} Messages`
-              : 'No Messages'}
+            {isActive
+              ? 'Collecting messages'
+              : event.message_count
+                ? `${event.message_count} Messages`
+                : 'No Messages'}
           </span>
         </div>
       </CardContent>
       <CardFooter className='w-full'>
-        {/* QR Download Button */}
-        <Button
-          variant='outline'
-          size='sm'
-          onClick={handleDownloadQR}
-          disabled={isDownloading}
-          className='w-full'
-        >
-          {isDownloading ? (
-            <>
-              <div className='animate-spin h-4 w-4 mr-2 border-2 border-gray-300 border-t-gray-600 rounded-full' />
-              Downloading...
-            </>
-          ) : (
-            <>
-              <QrCode className='mr-2 h-4 w-4' />
-              Download QR Code
-            </>
-          )}
-        </Button>
+        {isPaymentPending ? (
+          <Link href={`/events/${event.id}/payment`} className='w-full'>
+            <Button variant='destructive' size='sm' className='w-full'>
+              <CreditCard className='mr-2 size-4' />
+              Complete Payment
+            </Button>
+          </Link>
+        ) : isUpcoming || isActive ? (
+          <Button
+            variant='outline'
+            onClick={handleDownloadQR}
+            disabled={isDownloading}
+            className='w-full'
+          >
+            {isDownloading ? (
+              <>
+                <div className='animate-spin h-4 w-4 mr-2 border-2 border-gray-300 border-t-gray-600 rounded-full' />
+                Downloading...
+              </>
+            ) : (
+              <>
+                <QrCode className='mr-2 size-4' />
+                Download QR Code
+              </>
+            )}
+          </Button>
+        ) : (
+          <Link href={`/events/${event.id}`} className='w-full'>
+            <Button className='w-full'>
+              <Eye className='mr-2 size-4' />
+              View Album
+            </Button>
+          </Link>
+        )}
       </CardFooter>
     </Card>
   );
