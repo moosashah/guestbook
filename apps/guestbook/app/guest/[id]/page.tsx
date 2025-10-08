@@ -47,6 +47,28 @@ export default async function GuestPage({ params }: GuestPageProps) {
     );
   }
 
+  // Check if payment is still pending
+  if (eventData.payment_status === 'pending') {
+    return (
+      <div className='flex items-center justify-center bg-muted/20 p-4'>
+        <Card className='w-full max-w-md text-center bg-destructive/10 border-destructive'>
+          <CardContent className='pt-4 pb-8 px-6'>
+            <h1 className='text-2xl font-bold mb-4 text-destructive'>
+              Event Creation Not Complete
+            </h1>
+            <p className='text-destructive/80 mb-4'>
+              This event is still being set up.
+            </p>
+            <p className='text-sm text-destructive/80'>
+              Please check back later or contact the event organizer for more
+              information.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   let bannerImageUrl: string | null = null;
   if (eventData.banner_image) {
     try {
