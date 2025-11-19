@@ -4,7 +4,7 @@ import { CalendarFold, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import EventCard from '@/components/event-card';
-import { EventEntity } from '@/lib/models';
+import { EventEntity, MessageEntity } from '@/lib/models';
 import { getBannerImageUrl } from '@/lib/s3.server';
 import { auth } from './actions';
 import { redirect } from 'next/navigation';
@@ -16,6 +16,9 @@ const loadEvents = async (userId: string) =>
     .byCreator({ creator_id: userId })
     .where((attr, op) => `${op.eq(attr.deleted_at, 0)}`)
     .go();
+
+const loadMessages = async (id: string) =>
+  await MessageEntity.query.event({ event_id: id }).go();
 
 export default async function Dashboard() {
   const subject = await auth();
@@ -30,9 +33,20 @@ export default async function Dashboard() {
   const eventsWithBanners = await Promise.all(
     events.map(async event => {
       let bannerImageUrl: string | null = null;
+      let audioMessageCount = 0;
+      let videoMessageCount = 0;
       if (event.banner_image) {
         try {
           bannerImageUrl = await getBannerImageUrl(event.banner_image, 3600);
+          const { data: messages } = await loadMessages(event.id);
+          messages.forEach(m => {
+            if (m.media_type === 'audio') {
+              audioMessageCount++;
+            }
+            if (m.media_type === 'video') {
+              videoMessageCount++;
+            }
+          });
         } catch (error) {
           console.error(
             `Failed to get banner URL for event ${event.id}:`,
@@ -40,7 +54,7 @@ export default async function Dashboard() {
           );
         }
       }
-      return { ...event, bannerImageUrl };
+      return { ...event, bannerImageUrl, audioMessageCount, videoMessageCount };
     })
   );
 

@@ -12,6 +12,8 @@ import {
   Edit,
   Trash2,
   CreditCard,
+  AudioLines,
+  Video,
 } from 'lucide-react';
 import {
   Card,
@@ -34,7 +36,11 @@ import { cn, formatDate } from '@/lib/utils';
 import type { Event } from '@/lib/types';
 
 interface EventCardProps {
-  event: Event & { bannerImageUrl?: string | null };
+  event: Event & {
+    bannerImageUrl?: string | null;
+    audioMessageCount: number;
+    videoMessageCount: number;
+  };
 }
 
 export default function EventCard({ event }: EventCardProps) {
@@ -216,13 +222,17 @@ export default function EventCard({ event }: EventCardProps) {
         </CardHeader>
         <CardContent className='pt-4 pb-3 flex-grow'>
           <div className='flex items-center gap-2'>
-            <MessageSquare className='size-4' />
             <span>
-              {isActive
-                ? 'Collecting messages'
-                : event.message_count
-                  ? `${event.message_count} Messages`
-                  : 'No Messages'}
+              {isActive ? (
+                'Collecting messages'
+              ) : event.message_count ? (
+                <MessagesComponent
+                  audioMessageCount={event.audioMessageCount}
+                  videoMessageCount={event.videoMessageCount}
+                />
+              ) : (
+                'No Messages'
+              )}
             </span>
           </div>
         </CardContent>
@@ -282,3 +292,29 @@ export default function EventCard({ event }: EventCardProps) {
     </Link>
   );
 }
+
+const MessagesComponent = ({
+  audioMessageCount,
+  videoMessageCount,
+}: {
+  audioMessageCount: number;
+  videoMessageCount: number;
+}) => {
+  return (
+    <div className='flex flex-col'>
+      <div className='flex'>
+        <div className='mr-2 text-primary'>
+          <Video />
+        </div>
+        {videoMessageCount > 0 ? videoMessageCount : 'Not included'}
+      </div>
+
+      <div className='flex'>
+        <span className='bg-[#E1B6C3] rounded-md p-1 mr-2'>
+          <AudioLines className='size-4 text-primary' />{' '}
+        </span>
+        {audioMessageCount > 0 ? audioMessageCount : 'Not included'}
+      </div>
+    </div>
+  );
+};
