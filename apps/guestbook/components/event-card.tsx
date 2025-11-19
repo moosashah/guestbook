@@ -124,140 +124,161 @@ export default function EventCard({ event }: EventCardProps) {
   };
 
   return (
-    <Card className='h-full overflow-hidden hover:shadow-lg transition-all duration-200 border-[#f0f0f0] border relative flex flex-col'>
-      <div className='relative h-48 w-full'>
-        <Image
-          src={
-            event.bannerImageUrl ||
-            (event.payment_status === 'pending'
-              ? '/placeholder.svg?height=400&width=600&query=wedding event'
-              : '/wedding-ceremony.png')
-          }
-          alt={event.name}
-          fill
-          className='object-cover'
-        />
-        <div className='absolute top-3 left-3'>
-          <Badge
-            variant={statusBadge.variant}
-            className={cn(
-              'font-medium',
-              statusBadge.label === 'Active' && 'bg-green-100 text-green-800 ',
-              statusBadge.label === 'Completed' && 'bg-blue-100 text-blue-800 ',
-              statusBadge.label === 'Payment Pending' &&
-                'bg-red-100 text-red-800 ',
-              statusBadge.label === 'Upcoming' && 'bg-gray-100 text-gray-800 ',
-              statusBadge.label === 'Compiling' &&
-                'bg-yellow-100 text-yellow-800 ',
-              statusBadge.label === 'Unknown Status' &&
-                'bg-gray-100 text-gray-800 '
-            )}
-          >
-            {statusBadge.label}
-          </Badge>
-        </div>
-
-        {/* Dropdown Menu in top right */}
-        <div className='absolute top-3 right-3 z-20'>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className='size-8 rounded-full bg-white backdrop-blur-sm border-gray-200 hover:bg-primary/90 shadow-sm'>
-                <MoreVertical className='text-black size-4' />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align='end'
-              className='w-48 z-50'
-              sideOffset={5}
-              avoidCollisions={true}
+    <Link href={`/events/${event.id}`} className='block h-full cursor-pointer'>
+      <Card className='h-full overflow-hidden hover:shadow-lg transition-all duration-200 border-[#f0f0f0] border relative flex flex-col'>
+        <div className='relative h-48 w-full'>
+          <Image
+            src={
+              event.bannerImageUrl ||
+              (event.payment_status === 'pending'
+                ? '/placeholder.svg?height=400&width=600&query=wedding event'
+                : '/wedding-ceremony.png')
+            }
+            alt={event.name}
+            fill
+            className='object-cover'
+          />
+          <div className='absolute top-3 left-3'>
+            <Badge
+              variant={statusBadge.variant}
+              className={cn(
+                'font-medium',
+                statusBadge.label === 'Active' &&
+                  'bg-green-100 text-green-800 ',
+                statusBadge.label === 'Completed' &&
+                  'bg-blue-100 text-blue-800 ',
+                statusBadge.label === 'Payment Pending' &&
+                  'bg-red-100 text-red-800 ',
+                statusBadge.label === 'Upcoming' &&
+                  'bg-gray-100 text-gray-800 ',
+                statusBadge.label === 'Compiling' &&
+                  'bg-yellow-100 text-yellow-800 ',
+                statusBadge.label === 'Unknown Status' &&
+                  'bg-gray-100 text-gray-800 '
+              )}
             >
-              <DropdownMenuItem asChild>
-                <Link
-                  href={`/events/${event.id}`}
-                  className='flex items-center'
-                >
-                  <Eye className='mr-2 size-4' />
-                  View Event
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link
-                  href={`/events/${event.id}/edit`}
-                  className='flex items-center'
-                >
-                  <Edit className='mr-2 size-4' />
-                  Edit Event
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={handleDeleteEvent}
-                disabled={isDeleting}
-                className='text-red-600 focus:text-red-600 focus:bg-red-50'
-              >
-                <Trash2 className='mr-2 size-4' />
-                {isDeleting ? 'Deleting...' : 'Delete Event'}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+              {statusBadge.label}
+            </Badge>
+          </div>
 
-      <CardHeader className='pb-0'>
-        <div className='text-sm font-medium text-muted-foreground mb-1'>
-          {formatDate(event.submission_start_date)}
+          {/* Dropdown Menu in top right */}
+          <div className='absolute top-3 right-3 z-30'>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className='size-8 rounded-full bg-white backdrop-blur-sm border-gray-200 hover:bg-primary/90 shadow-sm cursor-pointer'>
+                  <MoreVertical className='text-black size-4' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align='end'
+                className='w-48 z-50'
+                sideOffset={5}
+                avoidCollisions={true}
+              >
+                <DropdownMenuItem asChild>
+                  <Link
+                    href={`/events/${event.id}`}
+                    className='flex items-center'
+                  >
+                    <Eye className='mr-2 size-4' />
+                    View Event
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href={`/events/${event.id}/edit`}
+                    className='flex items-center'
+                  >
+                    <Edit className='mr-2 size-4' />
+                    Edit Event
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleDeleteEvent}
+                  disabled={isDeleting}
+                  className='text-red-600 focus:text-red-600 focus:bg-red-50'
+                >
+                  <Trash2 className='mr-2 size-4' />
+                  {isDeleting ? 'Deleting...' : 'Delete Event'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-        <CardTitle>{event.name}</CardTitle>
-        <CardDescription>{event.description}</CardDescription>
-      </CardHeader>
-      <CardContent className='pt-4 pb-3 flex-grow'>
-        <div className='flex items-center gap-2'>
-          <MessageSquare className='size-4' />
-          <span>
-            {isActive
-              ? 'Collecting messages'
-              : event.message_count
-                ? `${event.message_count} Messages`
-                : 'No Messages'}
-          </span>
-        </div>
-      </CardContent>
-      <CardFooter className='w-full'>
-        {isPaymentPending ? (
-          <Link href={`/events/${event.id}/payment`} className='w-full'>
-            <Button variant='destructive' size='sm' className='w-full'>
+
+        <CardHeader className='pb-0'>
+          <div className='text-sm font-medium text-muted-foreground mb-1'>
+            {formatDate(event.submission_start_date)}
+          </div>
+          <CardTitle>{event.name}</CardTitle>
+          <CardDescription>{event.description}</CardDescription>
+        </CardHeader>
+        <CardContent className='pt-4 pb-3 flex-grow'>
+          <div className='flex items-center gap-2'>
+            <MessageSquare className='size-4' />
+            <span>
+              {isActive
+                ? 'Collecting messages'
+                : event.message_count
+                  ? `${event.message_count} Messages`
+                  : 'No Messages'}
+            </span>
+          </div>
+        </CardContent>
+        <CardFooter className='w-full relative z-30'>
+          {isPaymentPending ? (
+            <Button
+              variant='destructive'
+              size='sm'
+              className='w-full cursor-pointer'
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                router.push(`/events/${event.id}/payment`);
+              }}
+            >
               <CreditCard className='mr-2 size-4' />
               Complete Payment
             </Button>
-          </Link>
-        ) : isUpcoming || isActive ? (
-          <Button
-            variant='outline'
-            onClick={handleDownloadQR}
-            disabled={isDownloading}
-            className='w-full'
-          >
-            {isDownloading ? (
-              <>
-                <div className='animate-spin h-4 w-4 mr-2 border-2 border-gray-300 border-t-gray-600 rounded-full' />
-                Downloading...
-              </>
-            ) : (
-              <>
-                <QrCode className='mr-2 size-4' />
-                Download QR Code
-              </>
-            )}
-          </Button>
-        ) : (
-          <Link href={`/events/${event.id}`} className='w-full'>
-            <Button className='w-full'>
+          ) : isUpcoming || isActive ? (
+            <Button
+              variant='outline'
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleDownloadQR(e);
+              }}
+              disabled={isDownloading}
+              className='w-full cursor-pointer'
+            >
+              {isDownloading ? (
+                <>
+                  <div className='animate-spin h-4 w-4 mr-2 border-2 border-gray-300 border-t-gray-600 rounded-full' />
+                  Downloading...
+                </>
+              ) : (
+                <>
+                  <QrCode className='mr-2 size-4' />
+                  Download QR Code
+                </>
+              )}
+            </Button>
+          ) : (
+            <Button
+              className='w-full cursor-pointer'
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                router.push(`/events/${event.id}`);
+              }}
+            >
               <Eye className='mr-2 size-4' />
               View Album
             </Button>
-          </Link>
-        )}
-      </CardFooter>
-    </Card>
+          )}
+        </CardFooter>
+      </Card>
+    </Link>
   );
 }
