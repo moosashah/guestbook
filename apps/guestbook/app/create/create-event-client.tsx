@@ -254,7 +254,7 @@ export default function CreateEventClient({ user }: CreateEventClientProps) {
             size='lg'
             className='min-w-[200px]'
           >
-            {isSubmitting ? 'Creating...' : 'Continue to Payment'}
+            {isSubmitting ? 'Creating...' : 'Continue'}
           </Button>
         </div>
       </form>

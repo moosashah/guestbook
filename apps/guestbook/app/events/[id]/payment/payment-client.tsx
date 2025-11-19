@@ -237,9 +237,6 @@ export default function PaymentClient({ event }: PaymentClientProps) {
 
           <div className='mt-6 text-center text-sm text-muted-foreground'>
             <p>Secure payment powered by Stripe</p>
-            <p className='mt-1'>
-              Your event will be activated immediately after payment
-            </p>
           </div>
         </div>
       </div>
