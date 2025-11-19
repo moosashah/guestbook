@@ -80,9 +80,8 @@ export function EditEventForm({
 
     // Reset time for accurate comparison
     now.setHours(0, 0, 0, 0);
-    startDate.setHours(0, 0, 0, 0);
-    endDate.setHours(0, 0, 0, 0);
-
+    startDate.setHours(0, 0, 5, 0);
+    endDate.setHours(23, 59, 59, 999);
     if (startDate <= now) {
       return 'Start date must be in the future';
     }
@@ -109,15 +108,16 @@ export function EditEventForm({
   const onSubmit = async (data: FormValues) => {
     try {
       const formData = new FormData();
+      const endDate = new Date(data.dateRange.to!);
+      endDate.setHours(23, 59, 59, 999);
+      formData.append('submission_end_date', endDate.toISOString());
 
       // Add text fields
       formData.append('name', data.name);
       formData.append('description', data.description);
-      formData.append(
-        'submission_start_date',
-        data.dateRange.from!.toISOString()
-      );
-      formData.append('submission_end_date', data.dateRange.to!.toISOString());
+      const startDate = new Date(data.dateRange.from!);
+      startDate.setSeconds(startDate.getSeconds() + 5);
+      formData.append('submission_start_date', startDate.toISOString());
       formData.append('package', data.package);
 
       // Add banner image if selected
