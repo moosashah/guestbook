@@ -80,6 +80,17 @@ export default async function LoginPage() {
           <h2 className='text-2xl lg:text-6xl font-semibold mb-8'>Sign In</h2>
           <GoogleLoginButton />
           <FacebookLoginButton />
+          <p className='text-sm text-gray-600 text-center mt-6'>
+            By signing in you are consenting to the{' '}
+            <a
+              href='https://wedwi.com/terms'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-primary hover:underline'
+            >
+              terms and policy
+            </a>
+          </p>
         </div>
       </div>
     </div>
