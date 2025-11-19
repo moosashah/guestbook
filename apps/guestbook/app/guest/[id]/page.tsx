@@ -1,6 +1,5 @@
 import { EventEntity } from '@/lib/models';
 import { GuestForm } from '@/components/guest-form';
-import { QRPreviewButton } from '@/components/event-buttons';
 import {
   PACKAGE_LIMITS,
   PACKAGE_MEDIA_OPTIONS,
@@ -200,9 +199,6 @@ function TopSection({
         {/* TODO: Remove this for production */}
         <div className='mt-2 text-sm text-muted-foreground'>
           Messages: {event.message_count}/{PACKAGE_LIMITS[event.package]}
-        </div>
-        <div className='mt-4'>
-          <QRPreviewButton eventId={event.id} />
         </div>
       </div>
 
