@@ -31,7 +31,10 @@ export function EventVideoControls({
     <div className='flex flex-col gap-2'>
       <CompileVideoButton
         eventId={eventId}
-        hasFinalVideo={hasFinalVideo}
+        hideButton={
+          hasFinalVideo ||
+          Date.now() < new Date(event.submission_end_date).getTime()
+        }
         onCompilationComplete={handleCompilationComplete}
         disabled={event.message_count === 0}
       />

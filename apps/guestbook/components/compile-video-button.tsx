@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 
 interface CompileVideoButtonProps {
   eventId: string;
-  hasFinalVideo: boolean;
+  hideButton: boolean;
   onCompilationComplete: () => void;
   disabled: boolean;
 }
@@ -23,7 +23,7 @@ interface CompilationStatus {
 
 export function CompileVideoButton({
   eventId,
-  hasFinalVideo,
+  hideButton,
   onCompilationComplete,
   disabled,
 }: CompileVideoButtonProps) {
@@ -78,7 +78,7 @@ export function CompileVideoButton({
   };
 
   const handleCompile = async () => {
-    if (hasFinalVideo) {
+    if (hideButton) {
       toast.error('Final video already exists. Delete it first to recompile.');
       return;
     }
@@ -119,7 +119,7 @@ export function CompileVideoButton({
     }
   };
 
-  if (hasFinalVideo) {
+  if (hideButton) {
     return null;
   }
 
@@ -127,7 +127,7 @@ export function CompileVideoButton({
     <div className='flex flex-col gap-2'>
       <Button
         onClick={handleCompile}
-        disabled={isCompiling || disabled || hasFinalVideo}
+        disabled={isCompiling || disabled || hideButton}
         variant='default'
       >
         {isCompiling ? (
