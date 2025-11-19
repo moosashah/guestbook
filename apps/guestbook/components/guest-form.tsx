@@ -43,6 +43,11 @@ export function GuestForm({
       setUploadStatus('error');
       return;
     }
+    if (!guestName) {
+      setUploadError('Please add a guest name');
+      setUploadStatus('error');
+      return;
+    }
 
     setIsSubmitting(true);
     setUploadStatus('uploading');
@@ -189,11 +194,7 @@ export function GuestForm({
           />
         )}
 
-        <Button
-          type='submit'
-          className='w-full'
-          disabled={isSubmitting || !messageBlob || !guestName}
-        >
+        <Button type='submit' className='w-full' disabled={isSubmitting}>
           {isSubmitting ? 'Uploading...' : 'Submit Message'}
         </Button>
       </form>
