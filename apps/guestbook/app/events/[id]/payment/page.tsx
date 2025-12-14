@@ -31,7 +31,7 @@ export default async function PaymentPage({ params }: PaymentPageProps) {
     }
 
     // Check if user is the creator of this event
-    if (event.data.creator_id !== subject.properties.email) {
+    if (event.data.creator_id !== subject.id) {
       redirect('/');
     }
 

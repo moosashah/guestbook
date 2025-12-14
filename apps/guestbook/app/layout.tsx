@@ -4,9 +4,11 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
+import { ClerkProvider } from '@clerk/nextjs';
 
 // Type for the authenticated user subject
 interface AuthenticatedUser {
+  id: string;
   properties: {
     email: string;
     name: string;
@@ -54,26 +56,28 @@ export default async function RootLayout({
     pathname.startsWith('/guest') || pathname.startsWith('/login');
 
   return (
-    <html lang='en'>
-      <body className={cn(inter.className, 'bg-cream')}>
-        {/* Header */}
-        {subject && !shouldHideHeader ? <Header subject={subject} /> : null}
-        {children}
-        <Toaster />
-        {/* Clean up Facebook OAuth URL fragment */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
+    <ClerkProvider>
+      <html lang='en'>
+        <body className={cn(inter.className, 'bg-cream')}>
+          {/* Header */}
+          {subject && !shouldHideHeader ? <Header subject={subject} /> : null}
+          {children}
+          <Toaster />
+          {/* Clean up Facebook OAuth URL fragment */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
               // Clean up Facebook OAuth URL fragment (#_=_)
               if (window.location.hash === '#_=_') {
                 // Remove the fragment without causing a page reload
                 history.replaceState(null, null, window.location.pathname + window.location.search);
               }
             `,
-          }}
-        />
-      </body>
-    </html>
+            }}
+          />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
 

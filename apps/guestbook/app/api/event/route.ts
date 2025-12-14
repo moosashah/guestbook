@@ -10,7 +10,7 @@ import { authenticate } from '@/lib/auth.server';
 
 const eventCreateSchema = z
   .object({
-    creator_id: z.string().email(),
+    creator_id: z.string(),
     name: z.string().min(1, 'Event name is required'),
     description: z.string().optional().default('my description'),
     banner_image: z.string().optional(),
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
   console.log('[event] Incoming request');
 
   // Authenticate user
-  const user = await authenticate(req);
+  const user = await authenticate();
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

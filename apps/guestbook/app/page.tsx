@@ -27,7 +27,7 @@ export default async function Dashboard() {
     redirect('/login');
   }
 
-  const { data: events } = await loadEvents(subject.properties.email);
+  const { data: events } = await loadEvents(subject.id);
 
   // Fetch banner URLs for all events server-side
   const eventsWithBanners = await Promise.all(

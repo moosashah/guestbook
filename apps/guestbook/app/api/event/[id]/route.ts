@@ -23,10 +23,7 @@ export async function DELETE(
   }
 
   // Authenticate and authorize user
-  const { user, authorized } = await authenticateAndAuthorizeForEvent(
-    req,
-    eventId
-  );
+  const { user, authorized } = await authenticateAndAuthorizeForEvent(eventId);
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -103,10 +100,7 @@ export async function PATCH(
   }
 
   // Authenticate and authorize user
-  const { user, authorized } = await authenticateAndAuthorizeForEvent(
-    req,
-    eventId
-  );
+  const { user, authorized } = await authenticateAndAuthorizeForEvent(eventId);
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

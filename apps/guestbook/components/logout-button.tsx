@@ -1,11 +1,13 @@
 'use client';
 
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { logout } from '@/app/actions';
+import { useClerk } from '@clerk/nextjs';
 
 export function LogoutButton() {
-  const handleLogout = async () => {
-    await logout();
+  const { signOut } = useClerk();
+
+  const handleLogout = () => {
+    signOut({ redirectUrl: '/login' });
   };
 
   return (

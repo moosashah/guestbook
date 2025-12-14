@@ -40,7 +40,15 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
   }
 
   // Check authorization
-  const authorized = await isAuthorizedForEvent(subject.properties, id);
+  const authorized = await isAuthorizedForEvent(
+    {
+      id: subject.id,
+      email: subject.properties.email,
+      name: subject.properties.name,
+      picture: subject.properties.picture,
+    },
+    id
+  );
   if (!authorized) {
     return (
       <div className='container mx-auto py-8 px-4 text-center'>

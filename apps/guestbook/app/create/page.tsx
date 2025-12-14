@@ -15,5 +15,14 @@ export default async function CreateEventPage() {
     redirect('/login');
   }
 
-  return <CreateEventClient user={subject.properties} />;
+  return (
+    <CreateEventClient
+      user={{
+        id: subject.id,
+        email: subject.properties.email,
+        name: subject.properties.name,
+        picture: subject.properties.picture,
+      }}
+    />
+  );
 }

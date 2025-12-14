@@ -11,10 +11,8 @@ export async function GET(
     const { eventId } = await params;
 
     // Authenticate and authorize user
-    const { user, authorized } = await authenticateAndAuthorizeForEvent(
-      request,
-      eventId
-    );
+    const { user, authorized } =
+      await authenticateAndAuthorizeForEvent(eventId);
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

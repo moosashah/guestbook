@@ -1,12 +1,23 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { login } from '@/app/actions';
+import { useSignIn } from '@clerk/nextjs';
 
-export const FacebookLoginButton = () => (
-  <form action={() => login('facebook')}>
+export const FacebookLoginButton = () => {
+  const { signIn } = useSignIn();
+
+  const handleFacebookSignIn = () => {
+    signIn?.authenticateWithRedirect({
+      strategy: 'oauth_facebook',
+      redirectUrl: '/sso-callback',
+      redirectUrlComplete: '/',
+    });
+  };
+
+  return (
     <Button
-      type='submit'
+      type='button'
+      onClick={handleFacebookSignIn}
       className='w-full h-[43px] bg-white border border-[#E0E0E0] text-black hover:bg-primary transition-colors rounded-lg px-4 text-base font-normal gap-2'
       style={{ boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.1)' }}
       variant='outline'
@@ -39,13 +50,24 @@ export const FacebookLoginButton = () => (
       </svg>
       Sign in with Facebook
     </Button>
-  </form>
-);
+  );
+};
 
-export const GoogleLoginButton = () => (
-  <form action={() => login('google')}>
+export const GoogleLoginButton = () => {
+  const { signIn } = useSignIn();
+
+  const handleGoogleSignIn = () => {
+    signIn?.authenticateWithRedirect({
+      strategy: 'oauth_google',
+      redirectUrl: '/sso-callback',
+      redirectUrlComplete: '/',
+    });
+  };
+
+  return (
     <Button
-      type='submit'
+      type='button'
+      onClick={handleGoogleSignIn}
       className='w-full h-[43px] bg-white border border-[#E0E0E0] text-black hover:bg-primary transition-colors rounded-lg px-4 text-base font-normal gap-2'
       style={{ boxShadow: '0px 0px 2px 0px rgba(0, 0, 0, 0.1)' }}
       variant='outline'
@@ -70,5 +92,5 @@ export const GoogleLoginButton = () => (
       </svg>
       Sign in with Google
     </Button>
-  </form>
-);
+  );
+};

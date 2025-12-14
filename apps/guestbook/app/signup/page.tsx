@@ -1,18 +1,18 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { Metadata } from 'next';
-import { LoginForm } from './login-form';
+import { SignupForm } from './signup-form';
 
 export const metadata: Metadata = {
-  title: 'Login',
-  description: 'Sign in to your Wedwi account',
+  title: 'Sign Up',
+  description: 'Create your Wedwi account',
 };
 
-export default async function LoginPage() {
+export default async function SignupPage() {
   const user = await currentUser();
   if (user) {
     redirect('/');
   }
 
-  return <LoginForm />;
+  return <SignupForm />;
 }

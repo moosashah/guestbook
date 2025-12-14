@@ -14,9 +14,9 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.817.0",
     "@aws-sdk/s3-request-presigner": "^3.817.0",
+    "@clerk/nextjs": "^6.36.2",
     "@guestbook/shared": "workspace:*",
     "@hookform/resolvers": "^3.10.0",
-    "@openauthjs/openauth": "^0.4.3",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
     "@radix-ui/react-aspect-ratio": "1.1.1",
